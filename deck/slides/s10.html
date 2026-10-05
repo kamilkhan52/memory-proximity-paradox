@@ -1,0 +1,72 @@
+<section class="slide" id="s10" data-title="Implications" data-notes="Pending full texts: Kwon ISSCC'21 (PIM area, pJ/bit), d-Matrix Raptor ISCA'26 (scope of 0.37 pJ/bit).">
+  <style>
+    #s10 .s10-body { align-items: start; gap: 32px; }
+    #s10 table.t td { line-height: 1.35; padding: 9px 8px; }
+    #s10 table.t th { padding-top: 0; }
+    #s10 .s10-conf { width: 43%; }
+    #s10 .s10-conf-cell { color: var(--ink-2); }
+    #s10 .s10-cf { display: flex; align-items: baseline; gap: 8px; }
+    #s10 .s10-pill { display: inline-flex; align-items: center; gap: 5px; flex: none; width: 100px; box-sizing: border-box;
+      font-size: 12.5px; font-weight: 600; letter-spacing: .02em; color: var(--ink);
+      background: var(--panel); border: 1px solid var(--rule); border-radius: 999px;
+      padding: 1px 9px; line-height: 1.5; }
+    #s10 .s10-dots { display: inline-flex; gap: 3px; }
+    #s10 .s10-dots i { width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--ink-2); box-sizing: border-box; }
+    #s10 .s10-dots i.on { background: var(--ink-2); }
+    #s10 .s10-panel-title { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink); font-weight: 600; margin: 0 0 8px; height: 18px; line-height: 18px; }
+    #s10 .s10-claim { margin: 18px 0 0; font-size: 19px; }
+    #s10 .s10-refute td:last-child { color: var(--ink-2); width: 46%; }
+    #s10 .s10-right { border-left: 1px solid var(--rule); padding-left: 24px; }
+    #s10 .s10-rivals { margin-top: 16px; padding: 10px 14px; background: var(--panel); font-size: 14.5px; line-height: 1.4; color: var(--ink-2); }
+    #s10 .s10-rivals .s10-panel-title { margin-bottom: 4px; }
+    #s10 .s10-rivals p { margin: 0 0 4px; }
+    #s10 .s10-rivals b { color: var(--ink); font-weight: 600; }
+  </style>
+  <header class="slide-head">
+    <div class="kicker">10 · Implications</div>
+    <h2>Specify memory by frontier position, not attach point; three observations would count against this account.</h2>
+    <div class="sub">A useful spec sheet: GB/s per GB, $/GB, pJ/bit with its scope, idle and loaded latency.</div>
+  </header>
+  <div class="slide-body">
+    <div class="cols c-6-4 s10-body">
+      <div class="s10-left">
+        <div class="s10-panel-title">What to expect</div>
+        <table class="t" aria-label="Hedged predictions with evidence confidence">
+          <thead>
+            <tr><th>Hedged prediction <span class="tag">[Syn]</span></th><th class="s10-conf">Evidence confidence</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>HBM without in-stack compute, on logic base dies, persists (A1)</td><td class="s10-conf-cell"><div class="s10-cf"><span class="s10-pill"><span class="s10-dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i></span>High</span><span>deployed at scale</span></div></td></tr>
+            <tr><td>Single-host CXL expansion and compression persist (B1)</td><td class="s10-conf-cell"><div class="s10-cf"><span class="s10-pill"><span class="s10-dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i></span>High</span><span>deployed (Meta, Google, Azure)</span></div></td></tr>
+            <tr><td>A keeps creating capacity tiers and competing for wafers</td><td class="s10-conf-cell"><div class="s10-cf"><span class="s10-pill"><span class="s10-dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i></span>Medium</span><span>GB200, wafer ratio, ZeRO (slide 8)</span></div></td></tr>
+            <tr><td>Compute at the far tier grows where software is vertically integrated, as in training</td><td class="s10-conf-cell"><div class="s10-cf"><span class="s10-pill"><span class="s10-dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i></span>Medium</span><span>deployed only in training</span></div></td></tr>
+            <tr><td>PIM (A2) and pooling (B2) stay niche outside vertically integrated AI stacks</td><td class="s10-conf-cell"><div class="s10-cf"><span class="s10-pill"><span class="s10-dots" aria-hidden="true"><i class="on"></i><i></i><i></i></span>Low</span><span>economics mostly simulated or modelled</span></div></td></tr>
+          </tbody>
+        </table>
+        <p class="callout s10-claim">On server CPUs, any product between the DIMM and HBM must beat MRDIMM-12800 + a large SRAM LLC + CXL.</p>
+      </div>
+      <div class="s10-right">
+        <div class="s10-panel-title">What would count against this account</div>
+        <table class="t s10-refute" aria-label="Observations that would count against this account">
+          <thead>
+            <tr><th>Observation</th><th>Would mean</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>CXL capacity tiers keep growing after DRAM $/GB returns to trend</td><td>B is driven by something else (fault isolation, lifecycle)</td></tr>
+            <tr><td>CPU HBM returns while MRDIMM keeps scaling</td><td>A fast middle is not why CPU HBM stopped</td></tr>
+            <tr><td>PIM wins in silicon at iso-stack, iso-capacity baselines</td><td>A2 stands on its own, apart from A1's trade-offs</td></tr>
+          </tbody>
+        </table>
+        <div class="box s10-rivals">
+          <div class="s10-panel-title">Rival explanations, weighed</div>
+          <p><b>Different markets:</b> first-order, yet single workloads (LLM serving, GB200) use both, so markets differ because their binding constraint differs.</p>
+          <p><b>Vendor incentives:</b> real (escaping commodity pricing), but HMC, Gen-Z and The Machine show incentives alone don't make a direction work.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="slide-foot">
+    <div class="sources">SYNTHESIS v1.6 §8 and Confidence [Syn]. Evidence basis: A1/B1 deployed (slides 5, 7); coupling (slide 8); A2/B2 economics mostly simulated or modelled (AttAcc, CXL-PNM, Berger, Pond). Rival explanations: SYNTHESIS v1.6 §7 [Syn].</div>
+    <div class="pageno">10 / 10</div>
+  </footer>
+</section>

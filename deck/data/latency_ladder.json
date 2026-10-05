@@ -1,0 +1,679 @@
+{
+ "id": "latency_ladder",
+ "version": 1,
+ "slides": [
+  "s02"
+ ],
+ "title": "Idle load-to-use latency by access path",
+ "units": {
+  "lo_ns": "ns",
+  "hi_ns": "ns",
+  "points_ns": "ns",
+  "ns": "ns"
+ },
+ "conventions": "Idle (unloaded) latency. Platforms differ across sources; compare within a row. 'measured' rows come from hardware; 'estimate'/'modelled' rows are spec or model sums and are drawn hollow. lo_ns/hi_ns null with open_ended=true means lower bound only. Rows: sorted fastest first; points_detail lists every dot with its own source; in_brief=false marks extra values not requested in BRIEF.",
+ "sources": {
+  "polar": {
+   "cite": "Yang et al., PolarCXLMem, SIGMOD-Companion 2025",
+   "path": "fulltext/3722212.3724460.pdf",
+   "locator": "Table 1 and Table 2, PDF p.4 (proc. p.692); Intel MLC",
+   "tag": "P"
+  },
+  "fastswap": {
+   "cite": "Amaro et al., Fastswap, EuroSys 2020",
+   "path": "fulltext/12-fastswap.pdf",
+   "locator": "PDF p.13 text and footnote 7",
+   "tag": "P"
+  },
+  "bytedance": {
+   "cite": "Exploring Performance and Cost Optimization with ASIC-Based CXL Memory (ByteDance), EuroSys 2024",
+   "path": "fulltext/26913_Exploring_Performance_an.pdf",
+   "locator": "PDF pp.4-6, Sec 3.2 text",
+   "tag": "P"
+  },
+  "berger": {
+   "cite": "Berger et al., Design Tradeoffs in CXL-Based Memory Pools for Public Cloud Platforms, IEEE Micro 2023",
+   "path": "fulltext/05-cxl-pools.pdf",
+   "locator": "Fig. 3 (PDF p.5, mag. p.4)",
+   "tag": "P"
+  },
+  "pond": {
+   "cite": "Li et al., Pond, ASPLOS 2023",
+   "path": "fulltext/pond-asplos23.pdf",
+   "locator": "Fig. 2 and Sec 6.1 'Prototype setup' (PDF pp.4, 10); abstract/intro 70-90 ns (pp.1, 6)",
+   "tag": "P"
+  },
+  "tpp": {
+   "cite": "Maruf et al., TPP, ASPLOS 2023",
+   "path": "fulltext/tpp-asplos23.pdf",
+   "locator": "Fig. 2 'Latency characteristics of memory technologies', PDF p.2 (printed labels)",
+   "tag": "P"
+  },
+  "octopus": {
+   "cite": "Zhong et al., Octopus: Enhancing CXL Memory Pods via Sparse Topology (arXiv 2501.09020; NSDI'26 camera-ready not compared)",
+   "path": "fulltext/arxiv-2501.09020.pdf",
+   "locator": "Fig. 2 right (PDF p.2, P50 load-to-use, random 64 B cachelines, Xeon 6 and AMD Turin); text p.1-2 (115 ns), p.3 (switch adds at least 220 ns)",
+   "tag": "P"
+  },
+  "melody": {
+   "cite": "Liu et al., Melody, Systematic CXL Memory Characterization, ASPLOS 2025",
+   "path": "fulltext/melody-asplos25.pdf",
+   "locator": "Table 1 (PDF p.3); tail-latency text Sec 3.2 (PDF p.5)",
+   "tag": "P"
+  },
+  "vistara": {
+   "cite": "Gholkar et al., Vistara, ISCA 2026 camera-ready",
+   "path": "fulltext/vistara-isca26.pdf",
+   "locator": "Platform table (PDF p.5): Local idle ~130 ns, CXL idle ~250 ns",
+   "tag": "P"
+  },
+  "dassharma": {
+   "cite": "Das Sharma, Blankenship, Berger, An Introduction to the CXL Interconnect, arXiv 2306.11227",
+   "path": "fulltext/arxiv-2306.11227.pdf",
+   "locator": "Table 2, PDF p.26",
+   "tag": "P"
+  },
+  "cnc": {
+   "cite": "Chips and Cheese, Grace Hopper: Nvidia's Halfway APU",
+   "path": "fulltext/chipsandcheese-grace-hopper.html",
+   "locator": "body text (pointer-chase latency): LPDDR5X 'over 200 ns'; H100 330 ns; GH200 'under 300'",
+   "tag": "S"
+  },
+  "xeonmax": {
+   "cite": "Vaverka et al., Heterogeneous Memory Pool Tuning, arXiv 2505.14294",
+   "path": "fulltext/arxiv-2505.14294.pdf",
+   "locator": "Fig. 3 (PDF p.2); text 'about 20% higher latency'",
+   "tag": "P"
+  }
+ },
+ "rows": [
+  {
+   "id": "local_ddr",
+   "path": "Local DDR (DDR4/DDR5), x86",
+   "role": "mid",
+   "kind": "measured",
+   "lo_ns": 78,
+   "hi_ns": 146,
+   "points_ns": [
+    115
+   ],
+   "open_ended": false,
+   "platform": "Pond Skylake 8157M DDR4 (78); PolarCXLMem Xeon + Intel MLC (146); Octopus P50 DDR5 (115)",
+   "granularity": "64 B cache line",
+   "src": "pond+polar+octopus",
+   "loc": "Pond Sec 6.1 p.10 / Fig. 2 p.4; PolarCXLMem Table 1; Octopus p.1-2",
+   "tag": "P",
+   "unc": "exact (printed)",
+   "note": "Bar ends are Pond 78 ns and PolarCXLMem 146 ns; different platforms, compare within a row. Dot 115 is Octopus ~'typical DDR5 read about 115 ns' (Pond's AMD EPYC 7452 local is also 115 ns).",
+   "points_detail": [
+    {
+     "ns": 115,
+     "src": "octopus",
+     "loc": "p.1-2 text",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "Octopus Intel Xeon 6 / AMD Turin, DDR5",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": true
+    },
+    {
+     "ns": 78,
+     "src": "pond",
+     "loc": "Sec 6.1 p.10; Fig. 2 p.4",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "Pond Skylake 8157M, DDR4",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": true
+    },
+    {
+     "ns": 146,
+     "src": "polar",
+     "loc": "Table 1",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "PolarCXLMem host, local DRAM, Intel MLC",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": true
+    },
+    {
+     "ns": 115,
+     "src": "pond",
+     "loc": "Sec 6.1 p.10",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "Pond AMD EPYC 7452 DDR4",
+     "unc": "exact (printed)",
+     "note": "duplicate of Octopus 115",
+     "in_brief": false
+    },
+    {
+     "ns": 97,
+     "src": "bytedance",
+     "loc": "PDF p.4 Sec 3.2",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "ByteDance SPR 4th-gen Xeon DDR5-4800, MLC",
+     "unc": "approx (printed 'about')",
+     "note": "text: 'initial memory latency of about 97 ns'",
+     "in_brief": false
+    },
+    {
+     "ns": 114,
+     "src": "melody",
+     "loc": "Table 1",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "Melody SPR2S 8xDDR5, MLC",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": false
+    },
+    {
+     "ns": 111,
+     "src": "melody",
+     "loc": "Table 1",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "Melody EMR2S 8xDDR5, MLC",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": false
+    },
+    {
+     "ns": 130,
+     "src": "vistara",
+     "loc": "platform table p.5",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "Vistara AMD Turin, DDR5-6400",
+     "unc": "approx (printed '~130')",
+     "note": "",
+     "in_brief": false
+    }
+   ]
+  },
+  {
+   "id": "remote_socket_ddr",
+   "path": "Remote-socket DDR",
+   "role": "mid",
+   "kind": "measured",
+   "lo_ns": 142,
+   "hi_ns": 255,
+   "points_ns": [
+    231
+   ],
+   "open_ended": false,
+   "platform": "Pond Skylake 2S (142), Pond EPYC 7452 (255); PolarCXLMem (231)",
+   "granularity": "64 B cache line",
+   "src": "pond+polar",
+   "loc": "Pond Sec 6.1 p.10, Fig. 2 p.4; PolarCXLMem Table 1",
+   "tag": "P",
+   "unc": "exact (printed)",
+   "note": "Other measured remote-DDR values (not in brief): ByteDance ~130 ns read-only; Melody SPR2S 191, EMR2S 193, EMR2S' 212; Octopus Fig. 4 table NUMA 190 (Xeon 5), 230 (Xeon 6). All sit inside 142-255 except ByteDance 130.",
+   "points_detail": [
+    {
+     "ns": 231,
+     "src": "polar",
+     "loc": "Table 1",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "PolarCXLMem host, remote-socket DRAM, Intel MLC",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": true
+    },
+    {
+     "ns": 142,
+     "src": "pond",
+     "loc": "Sec 6.1 p.10",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "Pond Skylake 2S",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": false
+    },
+    {
+     "ns": 255,
+     "src": "pond",
+     "loc": "Sec 6.1 p.10",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "Pond AMD EPYC 7452 2S",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": false
+    },
+    {
+     "ns": 130,
+     "src": "bytedance",
+     "loc": "PDF p.5 Sec 3.2",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "ByteDance SPR remote-socket DDR5, read-only MLC",
+     "unc": "approx (printed 'approximately 130')",
+     "note": "",
+     "in_brief": false
+    },
+    {
+     "ns": 191,
+     "src": "melody",
+     "loc": "Table 1 (remote)",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "Melody SPR2S",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": false
+    },
+    {
+     "ns": 193,
+     "src": "melody",
+     "loc": "Table 1 (remote)",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "Melody EMR2S",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": false
+    },
+    {
+     "ns": 212,
+     "src": "melody",
+     "loc": "Table 1 (remote)",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "Melody EMR2S'",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": false
+    }
+   ]
+  },
+  {
+   "id": "grace_lpddr5x",
+   "path": "Grace CPU to LPDDR5X",
+   "role": "mid",
+   "kind": "measured",
+   "lo_ns": 200,
+   "hi_ns": null,
+   "points_ns": [],
+   "open_ended": true,
+   "platform": "NVIDIA Grace (GH200) CPU, pointer chase",
+   "granularity": "64 B cache line (pointer chase, 2 MB pages)",
+   "src": "cnc",
+   "loc": "article body, 'Latency at that point is over 200 ns'",
+   "tag": "S",
+   "unc": "lower bound as published ('over 200 ns'); [S] approx.",
+   "note": "Label '>200 ns [S]'. Same article: Grace CPU to H100-side HBM3 over NVLink-C2C ~800 ns (not plotted)."
+  },
+  {
+   "id": "gpu_hbm3",
+   "path": "GPU to HBM3 (H100, GH200)",
+   "role": "near",
+   "kind": "measured",
+   "lo_ns": 300,
+   "hi_ns": 330,
+   "points_ns": [],
+   "open_ended": false,
+   "platform": "H100 (330 ns) and GH200 GPU ('under 300 ns', article also says 'about 300 ns' from H100 GPU test on GH200)",
+   "granularity": "64 B cache line (pointer chase)",
+   "src": "cnc",
+   "loc": "article body: 'VRAM latency ... down from 330 ns to under 300'; 'about 300 ns of DRAM latency'",
+   "tag": "S",
+   "unc": "[S] approx.; range as published (GH200 printed as 'under 300', plotted lo=300)",
+   "note": "Includes GPU cache hierarchy; not like-for-like with CPU-to-DDR."
+  },
+  {
+   "id": "cxl_direct",
+   "path": "CXL direct-attach",
+   "role": "far",
+   "kind": "measured",
+   "lo_ns": 214,
+   "hi_ns": 394,
+   "points_ns": [
+    250,
+    265.2
+   ],
+   "open_ended": false,
+   "platform": "Melody 4 devices on SPR/EMR (MLC); Vistara Meta Turin + ASIC DDR4; PolarCXLMem host without switch",
+   "granularity": "64 B cache line",
+   "src": "melody+vistara+polar",
+   "loc": "Melody Table 1 p.3; Vistara platform table p.5; PolarCXLMem Table 1",
+   "tag": "P",
+   "unc": "exact (printed); Vistara '~250' approximate",
+   "whisker_hi_ns": 1000,
+   "whisker_label": "p99.99+ tails",
+   "note": "Bar = Melody CXL-A 214, CXL-D 239, CXL-B 271, CXL-C 394 (FPGA). Tails: p99.99 and p99.999 of CXL-A and CXL-D exceed 700 ns, CXL-B and CXL-C reach 1 us (Melody p.5), so whisker to 1,000 ns. Brief says 'tails >700 ns to ~1 us'.",
+   "points_detail": [
+    {
+     "ns": 250,
+     "src": "vistara",
+     "loc": "platform table p.5",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "Vistara 2x ASIC, AMD Turin, DDR4-2400",
+     "unc": "approx (printed '~250')",
+     "note": "",
+     "in_brief": true
+    },
+    {
+     "ns": 265.2,
+     "src": "polar",
+     "loc": "Table 1",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "PolarCXLMem, CXL without switch, Intel MLC",
+     "unc": "exact (printed)",
+     "note": "brief rounds to 265",
+     "in_brief": true
+    },
+    {
+     "ns": 214,
+     "src": "melody",
+     "loc": "Table 1",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "Melody CXL-A ASIC DDR4",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": false
+    },
+    {
+     "ns": 239,
+     "src": "melody",
+     "loc": "Table 1",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "Melody CXL-D ASIC DDR5 x16",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": false
+    },
+    {
+     "ns": 271,
+     "src": "melody",
+     "loc": "Table 1",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "Melody CXL-B ASIC DDR5",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": false
+    },
+    {
+     "ns": 394,
+     "src": "melody",
+     "loc": "Table 1",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "Melody CXL-C FPGA DDR4",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": false
+    },
+    {
+     "ns": 250.42,
+     "src": "bytedance",
+     "loc": "PDF p.5 Sec 3.2",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "ByteDance Astera A1000 ASIC on SPR; 'minimum latency of 250.42 ns'",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": false
+    },
+    {
+     "ns": 485,
+     "src": "bytedance",
+     "loc": "PDF p.6 Sec 3.2",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "ByteDance A1000 accessed from the remote socket (CXL-r), idle",
+     "unc": "exact (printed)",
+     "note": "remote-socket CXL; not plotted by default",
+     "in_brief": false
+    }
+   ]
+  },
+  {
+   "id": "cxl_mhd",
+   "path": "CXL multi-headed device (2-4 ports)",
+   "role": "far",
+   "kind": "measured",
+   "lo_ns": 260,
+   "hi_ns": 300,
+   "points_ns": [],
+   "open_ended": false,
+   "platform": "Octopus Fig. 2: 2/4-port MPD, P50, Intel Xeon 6 and AMD Turin",
+   "granularity": "64 B cache line",
+   "src": "octopus",
+   "loc": "Fig. 2 right, PDF p.2",
+   "tag": "P",
+   "unc": "range as published",
+   "note": "Octopus intro also says 'Today's MPDs ... 2-4 ports; ~270 ns access'. arXiv version read; NSDI'26 camera-ready not compared."
+  },
+  {
+   "id": "cxl_switch",
+   "path": "CXL behind a switch",
+   "role": "far",
+   "kind": "measured",
+   "lo_ns": 490,
+   "hi_ns": 600,
+   "points_ns": [
+    549,
+    651
+   ],
+   "open_ended": false,
+   "platform": "Octopus (bar); PolarCXLMem XConn XC50256 switch, local socket 549 / remote socket 651",
+   "granularity": "64 B cache line",
+   "src": "octopus+polar",
+   "loc": "Octopus Fig. 2 PDF p.2; PolarCXLMem Table 1",
+   "tag": "P",
+   "unc": "exact (printed) / range as published",
+   "note": "Switch adder: Octopus 'adds at least 220 ns' (p.3). PolarCXLMem local: 549-265.2 = 283.8 ns [D]. Ratios: 549/146 = 3.76x local; 651/231 = 2.82x remote [D].",
+   "points_detail": [
+    {
+     "ns": 549,
+     "src": "polar",
+     "loc": "Table 1 (CXL w. switch, local)",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "PolarCXLMem, XConn switch, local socket",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": true
+    },
+    {
+     "ns": 651,
+     "src": "polar",
+     "loc": "Table 1 (CXL w. switch, remote)",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "PolarCXLMem, XConn switch, remote socket",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": true
+    }
+   ]
+  },
+  {
+   "id": "rdma",
+   "path": "RDMA far memory",
+   "role": "far",
+   "kind": "measured",
+   "lo_ns": 3550,
+   "hi_ns": 4550,
+   "points_ns": [
+    3550,
+    3900,
+    4550
+   ],
+   "open_ended": false,
+   "platform": "Octopus RDMA via ToR; Fastswap ConnectX-3 40 Gb testbed; PolarCXLMem RDMA",
+   "granularity": "mixed: Octopus 64 B cache line (P50 load-to-use); Fastswap 4 KB page read; PolarCXLMem 64 B read",
+   "src": "octopus+fastswap+polar",
+   "loc": "Octopus Fig. 2 p.2; Fastswap p.13 + fn.7; PolarCXLMem Table 2 (64 B row, read)",
+   "tag": "P",
+   "unc": "exact (printed)",
+   "note": "Granularities differ per dot; label each. Extra (not in brief): PolarCXLMem 4 KB RDMA read 5.58 us, 64 B write 4.48 us. Octopus text also gives RDMA RPC round trip 3.8 us (communication latency, different metric).",
+   "points_detail": [
+    {
+     "ns": 3550,
+     "src": "octopus",
+     "loc": "Fig. 2 right p.2",
+     "tag": "P",
+     "granularity": "64 B cache line",
+     "platform": "Octopus, RDMA via ToR, P50",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": true
+    },
+    {
+     "ns": 3900,
+     "src": "fastswap",
+     "loc": "p.13, fn.7 'Average 4KB RDMA read latency measured in our testbed'",
+     "tag": "P",
+     "granularity": "4 KB page",
+     "platform": "Fastswap ConnectX-3 40 Gb",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": true
+    },
+    {
+     "ns": 4550,
+     "src": "polar",
+     "loc": "Table 2, 64B read",
+     "tag": "P",
+     "granularity": "64 B",
+     "platform": "PolarCXLMem RDMA",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": true
+    },
+    {
+     "ns": 5580,
+     "src": "polar",
+     "loc": "Table 2, 4KB read",
+     "tag": "P",
+     "granularity": "4 KB page",
+     "platform": "PolarCXLMem RDMA",
+     "unc": "exact (printed)",
+     "note": "",
+     "in_brief": false
+    }
+   ]
+  },
+  {
+   "id": "nvme",
+   "path": "NVMe SSD",
+   "role": "far",
+   "kind": "typical",
+   "lo_ns": 10000,
+   "hi_ns": 40000,
+   "points_ns": [],
+   "open_ended": false,
+   "platform": "TPP Fig. 2 'SSD' label (generic technology figure, not a measurement platform)",
+   "granularity": "block / page I/O",
+   "src": "tpp",
+   "loc": "Fig. 2, PDF p.2",
+   "tag": "P",
+   "unc": "range as published (printed labels, 10-40 us)",
+   "status": "FULL TEXT NEEDED: Micron spec for the ~50 us upper end (only a search snippet is on file; no Micron NVMe datasheet in fulltext/). Plotted range here is TPP's printed 10-40 us; brief wants 10-50 us.",
+   "note": "Brief bar 10-50 us; the 50 us end is unverified. TPP Fig. 2 also prints network-attached 2-4 us, NVM 300-400 ns, CXL 170-250 ns, main memory 80-140 ns, cache 1-40 ns. | REPORT REVIEW: TPP Fig. 2 is a generic technology-latency figure, not a measurement platform -> label \"typical (TPP Fig. 2)\", not measured."
+  },
+  {
+   "id": "est_pond_row5",
+   "target_row": "CXL multi-headed device (2-4 ports)",
+   "path": "Berger/Pond 8-16-socket MHD pool, modelled",
+   "role": "far",
+   "kind": "modelled",
+   "lo_ns": 155,
+   "hi_ns": 180,
+   "points_ns": [],
+   "open_ended": false,
+   "platform": "spec/model, no hardware",
+   "granularity": "64 B load-to-use",
+   "src": "berger",
+   "loc": "Fig. 3, MHD 2-8 socket 155 ns (182%) and 16-socket 180 ns (212%) load-to-use",
+   "tag": "P",
+   "unc": "exact (printed); lower bound",
+   "note": "Berger/IEEE Micro Fig. 3: component-sum estimate (40+25+5+25+15+45). Pond ASPLOS Fig. also labels '8-socket Pond (155ns, 182%)'; Pond text: 'add 70-90 ns over NUMA-local'. Projection, not measured."
+  },
+  {
+   "id": "est_dassharma_row5",
+   "target_row": "cxl_direct",
+   "path": "Das Sharma spec estimate",
+   "role": "far",
+   "kind": "estimate",
+   "lo_ns": 170,
+   "hi_ns": 170,
+   "points_ns": [],
+   "open_ended": false,
+   "platform": "spec/model, no hardware",
+   "granularity": "64 B load-to-use",
+   "src": "dassharma",
+   "loc": "Table 2 row 1, PDF p.26",
+   "tag": "P",
+   "unc": "exact (printed); estimate",
+   "note": "Estimate: CPU load-to-use <100 ns + CXL stack 50 ns round trip + 10 ns flight (+10 ns retimer if used)."
+  },
+  {
+   "id": "est_dassharma_row7",
+   "target_row": "cxl_switch",
+   "path": "Das Sharma spec estimate (switch)",
+   "role": "far",
+   "kind": "estimate",
+   "lo_ns": 250,
+   "hi_ns": 250,
+   "points_ns": [],
+   "open_ended": false,
+   "platform": "spec/model, no hardware",
+   "granularity": "64 B load-to-use",
+   "src": "dassharma",
+   "loc": "Table 2 row 'CPU to Type-3 through a CXL switch', PDF p.26",
+   "tag": "P",
+   "unc": "exact (printed); estimate",
+   "note": "Estimate: <100 + switch w/ flight 70 + device <80 ns."
+  },
+  {
+   "id": "est_berger_row7",
+   "target_row": "cxl_switch",
+   "path": "Berger modelled rack-scale pool",
+   "role": "far",
+   "kind": "modelled",
+   "lo_ns": 270,
+   "hi_ns": 345,
+   "points_ns": [],
+   "open_ended": false,
+   "platform": "spec/model, no hardware",
+   "granularity": "64 B load-to-use",
+   "src": "berger",
+   "loc": "Fig. 3: MHD 32-64 socket '>270 ns, 318%'; switch-only 32-64 socket '>345 ns, 405%'",
+   "tag": "P",
+   "unc": "exact (printed); lower bound",
+   "note": "Both are printed as lower bounds ('>'). Component-sum model. Brief calls this '270-345 ns rack-scale pool'."
+  }
+ ],
+ "extraction": {
+  "agent_a": "extractor A (Claude)",
+  "agent_b": "independent blind extraction (latency_ladder.b.json)",
+  "method": "Printed numbers read with pdftotext -layout from full-text PDFs in fulltext/; arXiv Octopus, Das Sharma, Xeon Max, Melody (VT), Vistara (ISCA'26 camera-ready) and Chips and Cheese HTML fetched into fulltext/. No values read from plot pixels except the Xeon Max note in caveats.",
+  "cross_check": {
+   "max_disagreement": "none on printed values",
+   "resolved": "NVMe bar = 10-40 us (TPP Fig.2, printed); 50 us end FULL TEXT NEEDED (both). Pond 155-180 = modelled (Berger Fig.3 component sum). Berger 270/345 are lower bounds. First-hop CXL adder measured +115-155 (Octopus), +120 (Vistara), +119 (PolarCXLMem), up to +280 (Melody vs 114 ns local). Switch adder derived 284-305 ns (PolarCXLMem). Xeon Max absolute ns not printed (A: Fig.3 linear read ~98 vs ~122 ns, single read -> not plotted). | ROUND-1 REVIEW (accuracy B1): first-hop adder corrected to +~100-280 ns measured (Melody CXL-A 214-114=+100; production-type controllers +100-160; +280 from an FPGA device). Switch >=220 ns is [V] XConn via Octopus."
+  }
+ },
+ "caveats": [
+  "Xeon Max (arXiv 2505.14294): absolute HBM vs DDR latency is NOT printed. Fig. 3 (linear y axis, latency vs window size) only shows curves; eyeballed plateau at 2^19 kB window is ~98 ns DDR and ~122 ns HBM (chart read, +/-4 ns, includes TLB/window effects, ~+24%). Row left out of the ladder; slide keeps the relative callout (text: 'about 20% higher'; 700 vs 200 GB/s is stated in the intro).",
+  "NVMe upper end 50 us: FULL TEXT NEEDED (Micron spec). TPP prints 10-40 us.",
+  "Pond 155-180 ns: these numbers are printed in Berger/IEEE Micro Fig. 3 (and a Pond-ASPLOS figure label for 8-socket 155 ns), computed from component latencies, not measured.",
+  "Octopus is the arXiv v (10-page) version; NSDI'26 camera-ready not compared.",
+  "Vistara 130/250 are printed as approximate ('~'). Grace and H100/GH200 are [S] (Chips and Cheese), approximate.",
+  "MemChannel 220.5 ns switched figure intentionally excluded (BRIEF FLAG G4)."
+ ]
+}

@@ -1,0 +1,96 @@
+{
+ "id": "meta_memory_share",
+ "version": 1,
+ "slides": [
+  "s04"
+ ],
+ "title": "Memory as a percentage of Meta rack TCO and power across hardware generations",
+ "units": {
+  "tco_pct": "% of rack TCO",
+  "power_pct": "% of rack power"
+ },
+ "sources": {
+  "tpp": {
+   "cite": "Maruf et al., TPP, ASPLOS 2023 (arXiv 2206.02878)",
+   "path": "fulltext/tpp-asplos23.pdf",
+   "locator": "p.2, Figure 3",
+   "tag": "P"
+  }
+ },
+ "rows": [
+  {
+   "gen": "Gen0",
+   "tco_pct": 15.6,
+   "power_pct": 14.6,
+   "src": "tpp",
+   "loc": "p.2, Fig. 3",
+   "tag": "P",
+   "unc": "exact (printed data label)",
+   "note": "non-monotonic: TCO 25.5 (Gen1) -> 21.6 -> 21.2 (Gen3) -> 37.1 (Gen5)"
+  },
+  {
+   "gen": "Gen1",
+   "tco_pct": 25.5,
+   "power_pct": 19.8,
+   "src": "tpp",
+   "loc": "p.2, Fig. 3",
+   "tag": "P",
+   "unc": "exact (printed data label)",
+   "note": ""
+  },
+  {
+   "gen": "Gen2",
+   "tco_pct": 21.6,
+   "power_pct": 19.7,
+   "src": "tpp",
+   "loc": "p.2, Fig. 3",
+   "tag": "P",
+   "unc": "exact (printed data label)",
+   "note": ""
+  },
+  {
+   "gen": "Gen3",
+   "tco_pct": 21.2,
+   "power_pct": 20.7,
+   "src": "tpp",
+   "loc": "p.2, Fig. 3",
+   "tag": "P",
+   "unc": "exact (printed data label)",
+   "note": ""
+  },
+  {
+   "gen": "Gen4",
+   "tco_pct": 31.8,
+   "power_pct": 28.8,
+   "src": "tpp",
+   "loc": "p.2, Fig. 3",
+   "tag": "P",
+   "unc": "exact (printed data label)",
+   "note": ""
+  },
+  {
+   "gen": "Gen5",
+   "tco_pct": 37.1,
+   "power_pct": 33.3,
+   "src": "tpp",
+   "loc": "p.2, Fig. 3",
+   "tag": "P",
+   "unc": "exact (printed data label)",
+   "note": ""
+  }
+ ],
+ "extraction": {
+  "agent_a": "extractor A",
+  "agent_b": "independent blind extraction (meta_memory_share.b.json)",
+  "method": "Printed data labels read from pdftotext and verified on the page 2 render at 200 dpi. Series mapping from the legend: orange triangles = Cost (TCO), black squares = Power; each Cost label sits above the orange point, each Power label below the black point.",
+  "cross_check": {
+   "max_disagreement": "0 (all 12 values identical)",
+   "resolved": "n/a"
+  }
+ },
+ "caveats": [
+  "Not monotonic: TCO falls from Gen1 (25.5) to Gen3 (21.2) before reaching 37.1 at Gen5.",
+  "Fig. 3 y-axis label is 'Percentage (%)'; caption says 'Memory as a percentage of rack TCO and power ... Meta'.",
+  "Meta's own figure; the paper gives no per-generation hardware specification."
+ ]
+}

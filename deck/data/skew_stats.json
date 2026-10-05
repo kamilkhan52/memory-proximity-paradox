@@ -1,0 +1,196 @@
+{
+ "id": "skew_stats",
+ "version": 1,
+ "slides": [
+  "s06"
+ ],
+ "title": "Concentration of activity in the hottest bytes: six published statistics restated as (share of bytes, share of activity)",
+ "units": {
+  "x_bytes_pct_lo": "% of bytes (hottest first)",
+  "x_bytes_pct_hi": "% of bytes (hottest first)",
+  "x_plot_pct": "% of bytes (marker position)",
+  "y_activity_pct": "% of activity (bandwidth, reuses or accesses, per row metric)"
+ },
+ "conventions": "x = share of bytes, hottest first; y = share of the row's own activity metric carried by those bytes. Each row restates ONE published sentence; metrics, windows and populations differ, so rows must not be compared with each other. x_plot_pct is the marker position; lo/hi are the bar ends for range rows. Bounds: x '\u2264' means 'at most' (chevron points left); y '\u2265' means 'more than' (chevron points up).",
+ "sources": {
+  "mahar": {
+   "cite": "Mahar, Wang, Shu, Dhanotia, 'Workload Behavior Driven Memory Subsystem Design for Hyperscale', arXiv 2303.08396 (preprint)",
+   "path": "fulltext/mahar-memprof-2303.08396.pdf",
+   "locator": "PDF p.9, Sec. 5.1 (Fig. 18)",
+   "tag": "P"
+  },
+  "wang": {
+   "cite": "Wang et al., 'KVCache Cache in the Wild', USENIX ATC'25, arXiv 2506.02634v5",
+   "path": "fulltext/wang-kvcache-atc25-2506.02634.pdf",
+   "locator": "PDF p.2 (Introduction, findings list)",
+   "tag": "P"
+  },
+  "hao": {
+   "cite": "Hao, Zhou, Yu, Stonebraker, 'Towards Buffer Management with Tiered Main Memory', SIGMOD'24 (PACMMOD 2(1), Art. 31)",
+   "path": "fulltext/3639286.pdf",
+   "locator": "PDF p.16 = p.31:16, Sec. 5.5 (Fig. 5b); setup Sec. 5.1 p.31:12",
+   "tag": "P"
+  },
+  "google": {
+   "cite": "Lagar-Cavilla et al., 'Software-Defined Far Memory in Warehouse-Scale Computers', ASPLOS'19",
+   "path": "fulltext/lagar-cavilla-asplos19.pdf",
+   "locator": "PDF p.3 (Sec. 2, Fig. 1: 32% at T=120 s); PDF p.2 (Introduction: 1%-61% across clusters)",
+   "tag": "P"
+  },
+  "tpp": {
+   "cite": "Maruf et al., 'TPP: Transparent Page Placement for CXL-Enabled Tiered-Memory', ASPLOS'23, arXiv 2206.02878",
+   "path": "fulltext/tpp-asplos23.pdf",
+   "locator": "PDF p.3 (Introduction; characterised in Sec. 3.2, Fig. 7)",
+   "tag": "P"
+  },
+  "mooncake": {
+   "cite": "Qin et al., 'Mooncake: A KVCache-centric Disaggregated Architecture for LLM Serving', arXiv 2407.00079v4 (FAST'25)",
+   "path": "fulltext/mooncake-2407.00079.pdf",
+   "locator": "PDF p.8, Sec. 4.2 (Fig. 6)",
+   "tag": "P"
+  }
+ },
+ "rows": [
+  {
+   "label": "Meta services",
+   "source": "Mahar et al., arXiv 2303.08396 (preprint)",
+   "metric": "bandwidth",
+   "window": "30 s",
+   "population": "9 production services (Meta)",
+   "x_bytes_pct_lo": 0,
+   "x_bytes_pct_hi": 10,
+   "x_plot_pct": 10,
+   "x_bound": "\u2264",
+   "y_activity_pct": 90,
+   "y_bound": "\u2248",
+   "measured_or_emulated": "measured (MemProf on live production services)",
+   "restatement": "'90%-tile bandwidth is contributed by less than 10% of the memory capacity' read as: less than 10% of capacity (x <= 10) contributes ~90% of bandwidth (y ~ 90). Held for 30, 60 and 120 s windows per the paper; plotted window is 30 s.",
+   "src": "mahar",
+   "loc": "PDF p.9, Sec. 5.1 (Fig. 18)",
+   "tag": "D",
+   "unc": "derived restatement; source sentence quoted",
+   "note": "Quote: \"Across the nine workloads, we observe that over 30 seconds, the active memory footprint is less than 25% of the total memory capacity, while the 90%-tile bandwidth is contributed by less than 10% of the memory capacity.\" Wording per notes/r2d M10: say '~90% of bandwidth from <10% of capacity', not 'P90 of bandwidth demand'. Paper's own bandwidth-percentile phrasing is retained as 'less than 10%'; the 10% is an upper bound, the 90% is a percentile level, not a measured point."
+  },
+  {
+   "label": "Alibaba KV$",
+   "source": "Wang et al., USENIX ATC'25 (arXiv 2506.02634)",
+   "metric": "reuses",
+   "window": "production trace (whole trace)",
+   "population": "KV$ blocks in a large cloud provider's LLM serving traces",
+   "x_bytes_pct_lo": 10,
+   "x_bytes_pct_hi": 10,
+   "x_plot_pct": 10,
+   "x_bound": "=",
+   "y_activity_pct": 77,
+   "y_bound": "=",
+   "measured_or_emulated": "measured (production trace)",
+   "restatement": "'10% of KV$ blocks contribute to 77% of the reuses' gives x = 10 (share of blocks, treated as share of bytes: blocks are fixed-size), y = 77.",
+   "src": "wang",
+   "loc": "PDF p.2, Introduction findings",
+   "tag": "D",
+   "unc": "derived restatement; source sentence quoted",
+   "note": "Quote: \"The reuses follow a skewed distribution: 10 % of KV$ blocks contribute to 77 % of the reuses.\" Same paper notes the skew varies across traces. Block share equals byte share only if blocks are equal size (assumed; not verified in the paper text read)."
+  },
+  {
+   "label": "Hao et al.",
+   "source": "Hao et al., SIGMOD'24 Sec. 5.5",
+   "metric": "accesses",
+   "window": "steady-state benchmark run (no fixed time window)",
+   "population": "YCSB-like benchmark, 23 GB workload, 10 threads, tiered buffer manager",
+   "x_bytes_pct_lo": 13.0,
+   "x_bytes_pct_hi": 16.7,
+   "x_plot_pct": 14.3,
+   "x_bound": "=",
+   "y_activity_pct": 50,
+   "y_bound": "\u2265",
+   "measured_or_emulated": "emulated (remote memory emulated on CloudLab; zipfian skew 0.9)",
+   "restatement": "'local memory size is only one sixth of remote memory' (3 GB local, 18 GB remote, Sec. 5.1) so local is 3/(3+18) = 1/7 = 14.3% of memory bytes; 'local memory serves more than half of the tuple accesses' gives y > 50 (dot at 50, upward chevron).",
+   "src": "hao",
+   "loc": "PDF p.16 = p.31:16, Sec. 5.5, Fig. 5b; sizes Sec. 5.1 p.31:12",
+   "tag": "D",
+   "unc": "derived: x = 3/(3+18) = 14.3%; alternatives 3/23 = 13.0% (share of the 23 GB workload) and 3/18 = 16.7% (local/remote); y is a lower bound only (exact rate is in Fig. 5b, not read)",
+   "note": "Quote: \"even though local memory size is only one sixth of remote memory, local memory serves more than half of the tuple accesses (Figure 5b).\" Setup quote: \"The default workload size is 23 GB and the default local and remote memory sizes are 3 GB and 18 GB, respectively.\" Zipf 0.9 is the default benchmark skew (Sec. 5.1), so the skew is an input of the emulation, not a measured production property. The sentence refers to the large-memory setup; designs with a cache-replacement path (not 2T-MergedMem)."
+  },
+  {
+   "label": "Google fleet",
+   "source": "Lagar-Cavilla et al., ASPLOS'19",
+   "metric": "accesses",
+   "window": "120 s (cold = not accessed in T = 120 s)",
+   "population": "Google WSC fleet; range across clusters",
+   "x_bytes_pct_lo": 39,
+   "x_bytes_pct_hi": 99,
+   "x_plot_pct": 68,
+   "x_bound": "range",
+   "y_activity_pct": 100,
+   "y_bound": "=",
+   "measured_or_emulated": "measured (production fleet)",
+   "restatement": "Cold = not accessed within 120 s, so all accesses in the window fall on the non-cold bytes. Fleet average 32% cold gives hot x = 100-32 = 68; across clusters 1%-61% cold gives hot x = 100-61 = 39 to 100-1 = 99; y = 100 by definition of cold.",
+   "src": "google",
+   "loc": "PDF p.3 (Fig. 1 text) and PDF p.2 (Intro)",
+   "tag": "D",
+   "unc": "derived: x = 100 - cold%; range as published (cold 1-61% across clusters)",
+   "note": "Quotes: \"At the most aggressive setting of T = 120 s, we observe that 32% of memory usage is cold\" and \"cold memory ranges from 1% to 61% across different clusters and from 1% to 52% even within the same cluster\". Cold percent is a fraction of memory usage per job/machine averaged fleet-wide. y = 100 is definitional, not a measured bandwidth share."
+  },
+  {
+   "label": "Meta TPP",
+   "source": "Maruf et al., TPP, ASPLOS'23",
+   "metric": "accesses",
+   "window": "2 min (any two-minute interval)",
+   "population": "4 production applications at Meta (Web, Cache, Data Warehouse families; TPP Sec. 3)",
+   "x_bytes_pct_lo": 20,
+   "x_bytes_pct_hi": 45,
+   "x_plot_pct": 32.5,
+   "x_bound": "range",
+   "y_activity_pct": 100,
+   "y_bound": "=",
+   "measured_or_emulated": "measured (Chameleon on production servers)",
+   "restatement": "'55-80% of an application's allocated memory remains idle within any two minutes interval': idle share 55-80% gives accessed share 100-80 = 20 to 100-55 = 45; all accesses in the window fall on the accessed pages, y = 100.",
+   "src": "tpp",
+   "loc": "PDF p.3 (Introduction); Sec. 3.2, Fig. 7",
+   "tag": "D",
+   "unc": "derived: x = 100 - idle%, idle 55-80% as published; y definitional",
+   "note": "Quote: \"We characterize four popular applications in our production server fleet and find that 55-80% of an application's allocated memory remains idle within any two minutes interval (Sec. 3.2).\" Marker position (32.5) is the midpoint of the bar and carries no extra information."
+  },
+  {
+   "label": "Mooncake",
+   "source": "Qin et al., Mooncake, FAST'25 (arXiv v4)",
+   "metric": "reuses",
+   "window": "sampled request trace (Kimi)",
+   "population": "KV cache blocks in a sampled production-like trace",
+   "x_bytes_pct_lo": 0,
+   "x_bytes_pct_hi": 50,
+   "x_plot_pct": 50,
+   "x_bound": "\u2264",
+   "y_activity_pct": 100,
+   "y_bound": "=",
+   "measured_or_emulated": "measured (trace from Kimi service; cache policy analysis is simulated)",
+   "restatement": "'over 50% of cache blocks remaining unused' means the blocks that receive any hit are under 50% of blocks (x <= 50), and they receive all hits (y = 100). Blocks assumed equal size.",
+   "src": "mooncake",
+   "loc": "PDF p.8, Sec. 4.2, Fig. 6 (CDF of block hit count)",
+   "tag": "D",
+   "unc": "derived: x = 100 - (>50)% unused, so x < 50; y definitional",
+   "note": "Quote: \"we observed a notable imbalance in cache block popularity, with over 50% of cache blocks remaining unused while certain blocks are accessed tens of thousands of times, as shown in Figure 6.\" The paper cautions the sample trace is a subset of real workloads. Fig. 6 not read for values; only the printed sentence is used."
+  }
+ ],
+ "reference": {
+  "diagonal": "uniform access: no skew (y = x)",
+  "label": "uniform access: no skew (e.g., dense weights, read every decode step)"
+ },
+ "extraction": {
+  "agent_a": "extractor A (Claude)",
+  "agent_b": "independent blind extraction (skew_stats.b.json)",
+  "method": "Full texts rendered with pdftotext -layout; every quoted sentence located by grep and its PDF page confirmed by per-page search. Mahar, Wang, Mooncake and Lagar-Cavilla PDFs fetched to fulltext/ (arXiv versions v-latest as served 2026-10-03). No chart reads.",
+  "cross_check": {
+   "max_disagreement": "none on values; both note Hao denominator ambiguity (13-16.7%), Google per-cluster 1-61% vs per-machine 1-52%, and definitional y=100 for Google/TPP/Mooncake",
+   "resolved": "A kept as canonical"
+  }
+ },
+ "caveats": [
+  "Each point is a restatement of one published sentence; metrics (bandwidth, reuses, accesses), windows and populations differ, so points must not be compared with each other.",
+  "Rows 4-6 (Google, TPP, Mooncake) have y = 100 by definition of the cold/idle/unused statistic, not from a measured bandwidth share.",
+  "Mahar et al. is an arXiv preprint; the 10% is an upper bound ('less than') and 90% is the percentile level.",
+  "Hao et al. is emulated with a zipf 0.9 benchmark; x depends on denominator (13.0, 14.3 or 16.7%); 14.3% used.",
+  "Alibaba and Mooncake treat KV blocks as equal-size so block share equals byte share.",
+  "Mooncake sentence is from arXiv v4 (Sep 2025); wording not checked against the FAST'25 camera-ready."
+ ]
+}

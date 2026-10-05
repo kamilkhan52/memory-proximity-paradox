@@ -1,0 +1,200 @@
+<title>Memory: Closer and Farther</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap">
+<style>
+/* Deck design system: 1280x720 slides on white; technical, quiet; one accent per meaning.
+   Colour encodes the argument everywhere:
+     --near  (A, closer / tighter coupling)   blue
+     --far   (B, farther / disaggregation)    orange
+     --mid   (the DDR baseline / middle)      slate
+     --conv  (convergence / 3D / both)        green
+   Never use these for anything else. */
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --ink: #111418;
+  --ink-2: #4a5059;
+  --ink-3: #5f6570;
+  --rule: #e3e6ea;
+  --panel: #f6f7f9;
+  --near: #2a78d6;
+  --near-soft: #e6f0fb;
+  --far: #eb6834;
+  --far-soft: #fdeee7;
+  --mid: #3c4a5c;
+  --mid-soft: #eceff3;
+  --conv: #1baf7a;
+  --conv-soft: #e4f6ef;
+  --warn: #b42318;
+  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --slide-w: 1280px;
+  --slide-h: 720px;
+}
+html, body { background: var(--bg); color: var(--ink); }
+body { margin: 0; font-family: var(--font-body); }
+
+/* ---------- slide frame ---------- */
+.deck { display: flex; flex-direction: column; align-items: center; gap: 28px; padding-block: 28px; }
+.slide {
+  position: relative; box-sizing: border-box;
+  width: var(--slide-w); height: var(--slide-h);
+  padding: 44px 60px 0 60px;
+  background: var(--bg); color: var(--ink);
+  border: 1px solid var(--rule);
+  display: grid; grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+  font-size: 18px; line-height: 1.45;
+}
+.slide-head { margin-bottom: 18px; }
+.kicker { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
+.slide h2 { font-family: var(--font-display); font-weight: 600; font-size: 34px; line-height: 1.15; margin: 0; max-width: 1100px; text-wrap: balance; }
+.slide .sub { font-size: 18px; color: var(--ink-2); margin-top: 8px; max-width: 1050px; }
+.slide-body { min-height: 0; position: relative; }
+.slide-foot {
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 24px;
+  border-top: 1px solid var(--rule); padding: 8px 0 12px; margin-top: 10px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); line-height: 1.4;
+}
+.slide-foot .sources { max-width: 1060px; min-height: 4.2em; display: flex; flex-direction: column; justify-content: flex-end; }
+.slide-foot .pageno { white-space: nowrap; }
+
+/* ---------- common building blocks ---------- */
+.cols { display: grid; gap: 28px; height: 100%; }
+.cols.c2 { grid-template-columns: 1fr 1fr; }
+.cols.c-6-4 { grid-template-columns: 6fr 4fr; }
+.cols.c-4-6 { grid-template-columns: 4fr 6fr; }
+.cols > * { min-width: 0; }
+.slide p { margin: 0 0 10px; }
+.slide ul { margin: 0 0 10px; padding-left: 20px; }
+.slide li { margin-bottom: 6px; }
+.small { font-size: 15px; color: var(--ink-2); }
+.tiny { font-size: 12.5px; color: var(--ink-3); }
+.tag { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+.num { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--font-mono); }
+.callout { border-left: 3px solid var(--ink); padding: 4px 0 4px 14px; font-family: var(--font-display); font-size: 21px; line-height: 1.3; }
+.box { border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; }
+.box.near { border-color: var(--near); background: var(--near-soft); }
+.box.far { border-color: var(--far); background: var(--far-soft); }
+.box.mid { border-color: var(--mid); background: var(--mid-soft); }
+.box.conv { border-color: var(--conv); background: var(--conv-soft); }
+.label-near { color: var(--near); font-weight: 600; }
+.label-far { color: var(--far); font-weight: 600; }
+.label-mid { color: var(--mid); font-weight: 600; }
+.label-conv { color: var(--conv); font-weight: 600; }
+table.t { border-collapse: collapse; width: 100%; font-size: 15px; }
+table.t th, table.t td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+table.t th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-2); font-weight: 600; }
+table.t td.n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ---------- charts (SVG) ---------- */
+.slide svg { display: block; max-width: 100%; height: auto; }
+.slide svg text { font-family: var(--font-body); fill: var(--ink); }
+.slide svg .axis { fill: var(--ink-2); font-family: var(--font-mono); font-size: 12px; }
+.slide svg .lbl { fill: var(--ink-2); font-size: 13px; }
+.slide svg .muted { fill: var(--ink-2); }
+.slide svg .faint { fill: var(--ink-3); }
+.slide svg .halo { paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
+
+/* ---------- deck chrome (assembled deck only) ---------- */
+.deck-bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; width: 100%; background: rgba(255,255,255,.94); border-bottom: 1px solid var(--rule); font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); display: flex; justify-content: space-between; align-items: center; padding: 8px 20px; box-sizing: border-box; }
+.deck-bar button { font: inherit; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); border-radius: 4px; padding: 3px 9px; cursor: pointer; }
+.deck-bar button:focus-visible { outline: 2px solid var(--near); outline-offset: 2px; }
+.scaler { transform-origin: top center; }
+body.present { overflow: hidden; height: 100%; }
+body.present .deck { gap: 0; padding: 0; }
+body.present .slide { display: none; border: none; }
+body.present .slide.active { display: grid; }
+#tip { position: fixed; pointer-events: none; background: var(--ink); color: #fff; font-family: var(--font-body); font-size: 12.5px; padding: 6px 8px; border-radius: 4px; line-height: 1.35; max-width: 300px; z-index: 20; }
+
+</style>
+
+
+<div id="tip" hidden></div>
+<script>
+window.DeckTip = (function(){
+  const tip = document.getElementById('tip');
+  function move(e){ const x=Math.min(e.clientX+14, window.innerWidth-310); tip.style.left=x+'px'; tip.style.top=(e.clientY+14)+'px'; }
+  return {
+    attach(el, html){ el.addEventListener('mouseenter', e=>{tip.innerHTML=html; tip.hidden=false; move(e);});
+                      el.addEventListener('mousemove', move); el.addEventListener('mouseleave', ()=>{tip.hidden=true;}); }
+  };
+})();
+</script>
+
+<div class="deck">
+<section class="slide" id="s10" data-title="Implications" data-notes="Pending full texts: Kwon ISSCC'21 (PIM area, pJ/bit), d-Matrix Raptor ISCA'26 (scope of 0.37 pJ/bit).">
+  <style>
+    #s10 .s10-body { align-items: start; gap: 32px; }
+    #s10 table.t td { line-height: 1.35; padding: 9px 8px; }
+    #s10 table.t th { padding-top: 0; }
+    #s10 .s10-conf { width: 43%; }
+    #s10 .s10-conf-cell { color: var(--ink-2); }
+    #s10 .s10-cf { display: flex; align-items: baseline; gap: 8px; }
+    #s10 .s10-pill { display: inline-flex; align-items: center; gap: 5px; flex: none; width: 100px; box-sizing: border-box;
+      font-size: 12.5px; font-weight: 600; letter-spacing: .02em; color: var(--ink);
+      background: var(--panel); border: 1px solid var(--rule); border-radius: 999px;
+      padding: 1px 9px; line-height: 1.5; }
+    #s10 .s10-dots { display: inline-flex; gap: 3px; }
+    #s10 .s10-dots i { width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--ink-2); box-sizing: border-box; }
+    #s10 .s10-dots i.on { background: var(--ink-2); }
+    #s10 .s10-panel-title { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink); font-weight: 600; margin: 0 0 8px; height: 18px; line-height: 18px; }
+    #s10 .s10-claim { margin: 18px 0 0; font-size: 19px; }
+    #s10 .s10-refute td:last-child { color: var(--ink-2); width: 46%; }
+    #s10 .s10-right { border-left: 1px solid var(--rule); padding-left: 24px; }
+    #s10 .s10-rivals { margin-top: 16px; padding: 10px 14px; background: var(--panel); font-size: 14.5px; line-height: 1.4; color: var(--ink-2); }
+    #s10 .s10-rivals .s10-panel-title { margin-bottom: 4px; }
+    #s10 .s10-rivals p { margin: 0 0 4px; }
+    #s10 .s10-rivals b { color: var(--ink); font-weight: 600; }
+  </style>
+  <header class="slide-head">
+    <div class="kicker">10 · Implications</div>
+    <h2>Specify memory by frontier position, not attach point; three observations would count against this account.</h2>
+    <div class="sub">A useful spec sheet: GB/s per GB, $/GB, pJ/bit with its scope, idle and loaded latency.</div>
+  </header>
+  <div class="slide-body">
+    <div class="cols c-6-4 s10-body">
+      <div class="s10-left">
+        <div class="s10-panel-title">What to expect</div>
+        <table class="t" aria-label="Hedged predictions with evidence confidence">
+          <thead>
+            <tr><th>Hedged prediction <span class="tag">[Syn]</span></th><th class="s10-conf">Evidence confidence</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>HBM without in-stack compute, on logic base dies, persists (A1)</td><td class="s10-conf-cell"><div class="s10-cf"><span class="s10-pill"><span class="s10-dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i></span>High</span><span>deployed at scale</span></div></td></tr>
+            <tr><td>Single-host CXL expansion and compression persist (B1)</td><td class="s10-conf-cell"><div class="s10-cf"><span class="s10-pill"><span class="s10-dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i></span>High</span><span>deployed (Meta, Google, Azure)</span></div></td></tr>
+            <tr><td>A keeps creating capacity tiers and competing for wafers</td><td class="s10-conf-cell"><div class="s10-cf"><span class="s10-pill"><span class="s10-dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i></span>Medium</span><span>GB200, wafer ratio, ZeRO (slide 8)</span></div></td></tr>
+            <tr><td>Compute at the far tier grows where software is vertically integrated, as in training</td><td class="s10-conf-cell"><div class="s10-cf"><span class="s10-pill"><span class="s10-dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i></span>Medium</span><span>deployed only in training</span></div></td></tr>
+            <tr><td>PIM (A2) and pooling (B2) stay niche outside vertically integrated AI stacks</td><td class="s10-conf-cell"><div class="s10-cf"><span class="s10-pill"><span class="s10-dots" aria-hidden="true"><i class="on"></i><i></i><i></i></span>Low</span><span>economics mostly simulated or modelled</span></div></td></tr>
+          </tbody>
+        </table>
+        <p class="callout s10-claim">On server CPUs, any product between the DIMM and HBM must beat MRDIMM-12800 + a large SRAM LLC + CXL.</p>
+      </div>
+      <div class="s10-right">
+        <div class="s10-panel-title">What would count against this account</div>
+        <table class="t s10-refute" aria-label="Observations that would count against this account">
+          <thead>
+            <tr><th>Observation</th><th>Would mean</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>CXL capacity tiers keep growing after DRAM $/GB returns to trend</td><td>B is driven by something else (fault isolation, lifecycle)</td></tr>
+            <tr><td>CPU HBM returns while MRDIMM keeps scaling</td><td>A fast middle is not why CPU HBM stopped</td></tr>
+            <tr><td>PIM wins in silicon at iso-stack, iso-capacity baselines</td><td>A2 stands on its own, apart from A1's trade-offs</td></tr>
+          </tbody>
+        </table>
+        <div class="box s10-rivals">
+          <div class="s10-panel-title">Rival explanations, weighed</div>
+          <p><b>Different markets:</b> first-order, yet single workloads (LLM serving, GB200) use both, so markets differ because their binding constraint differs.</p>
+          <p><b>Vendor incentives:</b> real (escaping commodity pricing), but HMC, Gen-Z and The Machine show incentives alone don't make a direction work.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="slide-foot">
+    <div class="sources">SYNTHESIS v1.6 §8 and Confidence [Syn]. Evidence basis: A1/B1 deployed (slides 5, 7); coupling (slide 8); A2/B2 economics mostly simulated or modelled (AttAcc, CXL-PNM, Berger, Pond). Rival explanations: SYNTHESIS v1.6 §7 [Syn].</div>
+    <div class="pageno">10 / 10</div>
+  </footer>
+</section>
+
+</div>

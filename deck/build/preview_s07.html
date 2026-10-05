@@ -1,0 +1,238 @@
+<title>Memory: Closer and Farther</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap">
+<style>
+/* Deck design system: 1280x720 slides on white; technical, quiet; one accent per meaning.
+   Colour encodes the argument everywhere:
+     --near  (A, closer / tighter coupling)   blue
+     --far   (B, farther / disaggregation)    orange
+     --mid   (the DDR baseline / middle)      slate
+     --conv  (convergence / 3D / both)        green
+   Never use these for anything else. */
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --ink: #111418;
+  --ink-2: #4a5059;
+  --ink-3: #5f6570;
+  --rule: #e3e6ea;
+  --panel: #f6f7f9;
+  --near: #2a78d6;
+  --near-soft: #e6f0fb;
+  --far: #eb6834;
+  --far-soft: #fdeee7;
+  --mid: #3c4a5c;
+  --mid-soft: #eceff3;
+  --conv: #1baf7a;
+  --conv-soft: #e4f6ef;
+  --warn: #b42318;
+  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --slide-w: 1280px;
+  --slide-h: 720px;
+}
+html, body { background: var(--bg); color: var(--ink); }
+body { margin: 0; font-family: var(--font-body); }
+
+/* ---------- slide frame ---------- */
+.deck { display: flex; flex-direction: column; align-items: center; gap: 28px; padding-block: 28px; }
+.slide {
+  position: relative; box-sizing: border-box;
+  width: var(--slide-w); height: var(--slide-h);
+  padding: 44px 60px 0 60px;
+  background: var(--bg); color: var(--ink);
+  border: 1px solid var(--rule);
+  display: grid; grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+  font-size: 18px; line-height: 1.45;
+}
+.slide-head { margin-bottom: 18px; }
+.kicker { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
+.slide h2 { font-family: var(--font-display); font-weight: 600; font-size: 34px; line-height: 1.15; margin: 0; max-width: 1100px; text-wrap: balance; }
+.slide .sub { font-size: 18px; color: var(--ink-2); margin-top: 8px; max-width: 1050px; }
+.slide-body { min-height: 0; position: relative; }
+.slide-foot {
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 24px;
+  border-top: 1px solid var(--rule); padding: 8px 0 12px; margin-top: 10px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); line-height: 1.4;
+}
+.slide-foot .sources { max-width: 1060px; min-height: 4.2em; display: flex; flex-direction: column; justify-content: flex-end; }
+.slide-foot .pageno { white-space: nowrap; }
+
+/* ---------- common building blocks ---------- */
+.cols { display: grid; gap: 28px; height: 100%; }
+.cols.c2 { grid-template-columns: 1fr 1fr; }
+.cols.c-6-4 { grid-template-columns: 6fr 4fr; }
+.cols.c-4-6 { grid-template-columns: 4fr 6fr; }
+.cols > * { min-width: 0; }
+.slide p { margin: 0 0 10px; }
+.slide ul { margin: 0 0 10px; padding-left: 20px; }
+.slide li { margin-bottom: 6px; }
+.small { font-size: 15px; color: var(--ink-2); }
+.tiny { font-size: 12.5px; color: var(--ink-3); }
+.tag { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+.num { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--font-mono); }
+.callout { border-left: 3px solid var(--ink); padding: 4px 0 4px 14px; font-family: var(--font-display); font-size: 21px; line-height: 1.3; }
+.box { border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; }
+.box.near { border-color: var(--near); background: var(--near-soft); }
+.box.far { border-color: var(--far); background: var(--far-soft); }
+.box.mid { border-color: var(--mid); background: var(--mid-soft); }
+.box.conv { border-color: var(--conv); background: var(--conv-soft); }
+.label-near { color: var(--near); font-weight: 600; }
+.label-far { color: var(--far); font-weight: 600; }
+.label-mid { color: var(--mid); font-weight: 600; }
+.label-conv { color: var(--conv); font-weight: 600; }
+table.t { border-collapse: collapse; width: 100%; font-size: 15px; }
+table.t th, table.t td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+table.t th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-2); font-weight: 600; }
+table.t td.n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ---------- charts (SVG) ---------- */
+.slide svg { display: block; max-width: 100%; height: auto; }
+.slide svg text { font-family: var(--font-body); fill: var(--ink); }
+.slide svg .axis { fill: var(--ink-2); font-family: var(--font-mono); font-size: 12px; }
+.slide svg .lbl { fill: var(--ink-2); font-size: 13px; }
+.slide svg .muted { fill: var(--ink-2); }
+.slide svg .faint { fill: var(--ink-3); }
+.slide svg .halo { paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
+
+/* ---------- deck chrome (assembled deck only) ---------- */
+.deck-bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; width: 100%; background: rgba(255,255,255,.94); border-bottom: 1px solid var(--rule); font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); display: flex; justify-content: space-between; align-items: center; padding: 8px 20px; box-sizing: border-box; }
+.deck-bar button { font: inherit; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); border-radius: 4px; padding: 3px 9px; cursor: pointer; }
+.deck-bar button:focus-visible { outline: 2px solid var(--near); outline-offset: 2px; }
+.scaler { transform-origin: top center; }
+body.present { overflow: hidden; height: 100%; }
+body.present .deck { gap: 0; padding: 0; }
+body.present .slide { display: none; border: none; }
+body.present .slide.active { display: grid; }
+#tip { position: fixed; pointer-events: none; background: var(--ink); color: #fff; font-family: var(--font-body); font-size: 12.5px; padding: 6px 8px; border-radius: 4px; line-height: 1.35; max-width: 300px; z-index: 20; }
+
+</style>
+
+
+<div id="tip" hidden></div>
+<script>
+window.DeckTip = (function(){
+  const tip = document.getElementById('tip');
+  function move(e){ const x=Math.min(e.clientX+14, window.innerWidth-310); tip.style.left=x+'px'; tip.style.top=(e.clientY+14)+'px'; }
+  return {
+    attach(el, html){ el.addEventListener('mouseenter', e=>{tip.innerHTML=html; tip.hidden=false; move(e);});
+                      el.addEventListener('mousemove', move); el.addEventListener('mouseleave', ()=>{tip.hidden=true;}); }
+  };
+})();
+</script>
+
+<div class="deck">
+<section class="slide" id="s07" data-title="Deployed vs ambitious">
+<style>
+#s07 .s07-wrap { display: grid; grid-template-columns: 22px 1fr 1fr; grid-template-rows: auto auto auto 1fr; column-gap: 14px; row-gap: 6px; height: 100%; }
+#s07 .s07-colhead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; align-self: end; padding: 0 2px; }
+#s07 .s07-colhead > b { font-family: var(--font-mono); font-size: 12.5px; letter-spacing: .08em; text-transform: uppercase; }
+#s07 .s07-key { font-size: 11.5px; color: var(--ink-3); white-space: nowrap; }
+#s07 .s07-rowlab { writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; font-family: var(--font-mono); font-size: 12px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); border-left: 1px solid var(--rule); padding-left: 6px; }
+#s07 .s07-cell { padding: 6px 14px 5px; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+#s07 .s07-cell.amb { border-style: dashed; border-width: 1.5px; background: var(--bg); }
+#s07 .s07-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+#s07 .s07-title { font-size: 17px; font-weight: 600; line-height: 1.2; white-space: nowrap; }
+#s07 .s07-forms { font-size: 13.5px; color: var(--ink-2); line-height: 1.2; margin-top: -2px; }
+#s07 .s07-pill { font-family: var(--font-mono); font-size: 11px; line-height: 1; padding: 4px 9px; border-radius: 999px; border: 1px solid; white-space: nowrap; color: var(--ink); }
+#s07 .s07-pill.near { background: var(--near-soft); border-color: var(--near); }
+#s07 .s07-pill.far { background: var(--far-soft); border-color: var(--far); }
+#s07 dl { display: grid; grid-template-columns: 82px 1fr; column-gap: 10px; row-gap: 2px; margin: 2px 0 0; font-size: 14px; line-height: 1.3; }
+#s07 dt { font-size: 12px; font-weight: 500; color: var(--ink-3); padding-top: 1px; white-space: nowrap; }
+#s07 dd { margin: 0; }
+#s07 .q { display: inline-block; font-family: var(--font-mono); font-size: 10.5px; line-height: 1; color: var(--ink-2); background: var(--bg); border: 1px solid #c9ced5; border-radius: 3px; padding: 1px 3px 2px; margin-left: 3px; vertical-align: 2px; white-space: nowrap; }
+#s07 .s07-foot { grid-column: 2 / 4; align-self: start; display: flex; gap: 24px; align-items: flex-start; justify-content: space-between; padding: 6px 0 0; }
+#s07 .s07-foot .callout { font-size: 17px; line-height: 1.3; }
+#s07 .s07-next { font-size: 12.5px; color: var(--ink-3); white-space: nowrap; padding-bottom: 2px; }
+</style>
+<header class="slide-head">
+  <div class="kicker">07 · Deployed vs ambitious</div>
+  <h2>The deployed forms need no new programming model; the ambitious forms remain niche.</h2>
+  <div class="sub">Split each direction in two: proximity vs compute at memory (A); cheaper, extended or shared GB, on one host or across hosts (B).</div>
+</header>
+<div class="slide-body">
+  <div class="s07-wrap">
+    <div></div>
+    <div class="s07-colhead"><b class="label-near">A · closer</b><span class="s07-key">dashed border = not at volume · P/V = primary, interested seller</span></div>
+    <div class="s07-colhead"><b class="label-far">B · farther</b><span class="s07-key">V = vendor · D = our arithmetic · spec = product spec</span></div>
+
+    <div class="s07-rowlab">Deployed</div>
+    <div class="box near s07-cell" id="s07-a1">
+      <div class="s07-top"><span class="s07-title">A1 · Proximity for bandwidth</span><span class="s07-pill near">Deployed at scale (accelerators)</span></div>
+      <div class="s07-forms">HBM, on-package, stacked</div>
+      <dl>
+        <dt>Driver</dt><dd>bandwidth per GB; pJ/bit caps bandwidth under a power budget</dd>
+        <dt>Best evidence</dt><dd id="s07-a1-ev">HBM3E/HBM4 at <span class="num">~33–73</span> GB/s per GB<span class="q">D</span></dd>
+        <dt>Main cost</dt><dd id="s07-a1-co"><span class="num">~3×</span><span class="q">P/V</span> the wafer per bit; capacity per $ and per mm²</dd>
+        <dt>Software</dt><dd id="s07-a1-sw">no change (transparent memory)</dd>
+      </dl>
+    </div>
+    <div class="box far s07-cell" id="s07-b1">
+      <div class="s07-top"><span class="s07-title">B1 · Cheaper or extended bytes</span><span class="s07-pill far" title="Meta: Vistara ISCA'26 [P]; Google: zswap (Lagar-Cavilla ASPLOS'19), TMTS ASPLOS'23 [P]; Azure: CXL deployment described in Octopus arXiv 2501.09020 [P] and the Azure M-series announcement [Pr]">Deployed (Meta, Google, Azure)</span></div>
+      <div class="s07-forms">compression, recycled DDR4, single-host CXL</div>
+      <dl>
+        <dt>Driver</dt><dd>$/GB; capacity per core</dd>
+        <dt>Best evidence</dt><dd id="s07-b1-ev">Vistara: <span class="num">0.13×</span> $/GB nominal; up to <span class="num">25%</span><span class="q">meas.</span> fewer servers for ML parameter serving</dd>
+        <dt>Main cost</dt><dd id="s07-b1-co"><span class="num">+100–160</span> ns<span class="q">meas.</span>; <span class="num">~3.2–3.6×</span><span class="q">D</span> less bandwidth per GB than local DDR; Optane: a cheaper tier must be cheaper to make</dd>
+        <dt>Software</dt><dd id="s07-b1-sw">transparent (OS tiering, zswap) or NUMA node</dd>
+      </dl>
+    </div>
+
+    <div class="s07-rowlab">Ambitious</div>
+    <div class="box near s07-cell amb" id="s07-a2">
+      <div class="s07-top"><span class="s07-title">A2 · Compute at memory</span><span class="s07-pill near">Demos and niche</span></div>
+      <div class="s07-forms">PIM / NDP</div>
+      <dl>
+        <dt>Driver</dt><dd id="s07-a2-dr">internal bandwidth <span class="num">4–16×</span><span class="q">V</span> the pins; in-die energy</dd>
+        <dt>Best evidence</dt><dd id="s07-a2-ev">AttAcc up to <span class="num">1.72×</span> vs 2×DGX at equal stacks<span class="q">sim.</span>; Aquabolt-XL <span class="num">&gt;2×</span> perf, <span class="num">&gt;70%</span> less energy<span class="q">V</span>; gains shrink vs strong baselines (Newton <span class="num">54×</span> vs GPU, <span class="num">10×</span> vs ideal<span class="q">sim.</span>)</dd>
+        <dt>Main cost</dt><dd id="s07-a2-co">HBM2-PIM <span class="num">6</span> GB<span class="q">spec</span> vs <span class="num">8</span> GB std<span class="q">D</span>; DRAM-process logic; heat</dd>
+        <dt>Software</dt><dd id="s07-a2-sw">new programming model, no VM/coherence</dd>
+      </dl>
+    </div>
+    <div class="box far s07-cell amb" id="s07-b2">
+      <div class="s07-top"><span class="s07-title">B2 · Sharing across hosts</span><span class="s07-pill far">Niche (KV pools, prototypes)</span></div>
+      <div class="s07-forms">pooling, RDMA far memory</div>
+      <dl>
+        <dt>Driver</dt><dd>statistical multiplexing</dd>
+        <dt>Best evidence</dt><dd id="s07-b2-ev">Mooncake RDMA KV pool in production (<span class="num">+75%</span> requests<span class="q">trace replay</span>); Pond <span class="num">−7–9%</span> DRAM<span class="q">sim.</span></dd>
+        <dt>Main cost</dt><dd id="s07-b2-co">switched CXL pooling of VM memory mostly ROI-negative<span class="q">modelled</span>; switch <span class="num">≥220</span> ns<span class="q">V</span></dd>
+        <dt>Software</dt><dd id="s07-b2-sw">pool management, failure domains, often app changes</dd>
+      </dl>
+    </div>
+
+    <div class="s07-foot">
+      <div class="callout">Pattern: ambitious forms find use only inside vendor-controlled stacks (PIM demos) or on bulk, predictable data (KV pools). The critiques mirror each other: A2 is limited by process, heat and capacity; B2 by latency and switch cost.</div>
+    </div>
+  </div>
+</div>
+<footer class="slide-foot"><div class="sources">SYNTHESIS v1.6 §4 [Syn]. A1: AMD, NVIDIA HC'26 [V]; Micron FQ2-25 p.6 [P/V]. A2: AttAcc ASPLOS'24 §7.6 [P, sim.]; Newton MICRO'20 §6 [P, sim.]; AiM ISSCC'22 Fig. 11.1.6 table [P]; Aquabolt-XL HC33, LPDDR5X-PIM HC'26, AiM SC23, UPMEM HC31 [V]. B1: Vistara ISCA'26 [P]; Lagar-Cavilla ASPLOS'19 [P]; latency adder as s02 [P]. B2: Mooncake FAST'25 [P]; Pond ASPLOS'23 [P, sim.]; Berger IEEE Micro'23 p.7 [P, modelled]; switch: XConn via Octopus arXiv 2501.09020 (NSDI'26) [V].</div><div class="pageno">07 / 10</div></footer>
+<script>
+(function(){
+  const root = document.getElementById('s07');
+  if (!root || !window.DeckTip) return;
+  const tips = {
+    's07-a1-ev': 'Derived [D] from vendor peak specs [V]: HBM3E ~33–43 GB/s per GB (GH200 144 GB / ~4.8 TB/s [S] → 33; B200 192 GB / 8 TB/s → 41.7; GB200 NVL72 576 TB/s / 13.4 TB → 43); HBM4 ~54–73 (MI455X 432 GB / 23.3 TB/s; Helios; Rubin). AMD, NVIDIA HC’26 slide text.',
+    's07-a1-co': 'Micron FQ2-25 prepared remarks p.6 [P/V]: “HBM3E consumes three times the amount of silicon compared to D5 to produce the same number of bits”; the same page expects the ratio to “exceed 4 to 1” with HBM4E (Micron Mar-2025 p.6).',
+    's07-a1-sw': 'HBM is ordinary device memory to the accelerator: no programming-model change. SYNTHESIS v1.6 §4 Pattern [Syn].',
+    's07-b1-ev': 'Vistara (Meta) ISCA’26 [P]: CXL tier of recycled DDR4, Cost/GB 0.13× vs local DDR5 (Table V, nominal, spec-based; all-in incl. two controllers per 256 GB and DDR4 resale value ~0.4–0.9× [D]). “Up to 25% reduction in server count for disaggregated ML inference”, in production; the 25% comes from capacity, not price.',
+    's07-b1-co': 'First-hop CXL adder over local DDR, measured [P]: Octopus +115–155, PolarCXLMem +119, Vistara +120, Melody +100–280 ns (280 = FPGA device; ASIC controllers +100–160). Bandwidth per GB [D]: local 614 GB/s / 768 GB = 0.8 vs CXL ≤0.25 (2× PCIe Gen5 x8 links cap reads at 64 GB/s / 256 GB) down to 0.225 (Table V, 57.6 GB/s) → ~3.2–3.6×. Measured (Table III, all reads): 497 / 768 = 0.65 vs 48 / 256 = 0.19 → ~3.4×. Optane: wound down in 2022 ($559M impairment) [P]; a B1 tier must be cheaper to make, not just to sell (SYNTHESIS v1.6 §4 B1).',
+    's07-b1-sw': 'Linux TPP tiering and zswap are kernel mechanisms [P]; a CXL expander appears as a CPU-less NUMA node. Applications are unchanged.',
+    's07-a2-dr': 'Vendor peak internal vs external bandwidth [V]: Aquabolt-XL HBM2-PIM 4× (HC33), LPDDR5X-PIM 8× (HC’26), GDDR6-AiM 16× (SK hynix SC23).',
+    's07-a2-ev': 'AttAcc ASPLOS’24 §7.6, Fig. 17 [P]: simulated (Ramulator-based). DGX+AttAcc (40+40 HBM stacks) up to 1.72× throughput vs 2×DGX (80 stacks). Aquabolt-XL HC33 slides [V]: “over 2X system performance while reducing energy consumption by more than 70%”. Newton MICRO’20 §6 [P, simulated: GPGPU-Sim, DRAMSim2]: 54× vs a Titan V-like GPU, 10× vs an ideal non-PIM design.',
+    's07-a2-co': 'AiM ISSCC’22 Fig. 11.1.6 table [P]: HBM2-PIM 6 GB/cube = 4H 4 Gb PIM dies + 4H 8 Gb dies, vs 8 GB for a normal 8-Hi stack (−25%). UPMEM HC31 [V]: DRAM process has 3× slower transistors, 3 metal layers.',
+    's07-a2-sw': 'PIM needs new kernels/runtime and data partitioning; no virtual memory or coherence inside the device (PrIM, UPMEM). SYNTHESIS v1.6 §4.',
+    's07-b2-ev': 'Mooncake FAST’25 [P]: ~75% more requests under SLOs, from a load test replaying real Kimi traces (10P+10D vs vLLM-[20M]). Pond ASPLOS’23 [P]: DRAM needs −9% / −7% at 182% / 222% of local latency (16-socket pool, simulated, Fig. 21).',
+    's07-b2-co': 'Berger et al. IEEE Micro’23 p.7 [P, modelled]: “most switch-based configurations are ROI negative”. Switch ≥220 ns is XConn’s figure [V], cited by Octopus (arXiv 2501.09020, NSDI’26); PolarCXLMem implies +284–305 ns [D from P].',
+    's07-b2-sw': 'Pooling needs a fabric/pool manager, has a larger failure blast radius, and RDMA far memory or KV pools usually need application or runtime changes. SYNTHESIS v1.6 §4.'
+  };
+  Object.keys(tips).forEach(function(id){
+    const el = root.querySelector('#' + id);
+    if (el) window.DeckTip.attach(el, tips[id]);
+  });
+})();
+</script>
+</section>
+
+</div>

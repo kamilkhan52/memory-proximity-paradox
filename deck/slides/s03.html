@@ -1,0 +1,170 @@
+<section class="slide" id="s03" data-title="Pressure 1: bandwidth">
+  <style>
+    #s03 .s03-body { grid-template-columns: 400px 1fr; gap: 30px; }
+    #s03 .s03-lab { font-size: 12.5px; line-height: 1.3; color: var(--ink); margin: 0 0 3px; }
+    #s03 .s03-cap { margin: 2px 0 0; font-size: 11.5px; line-height: 1.3; }
+    #s03 .s03-take { font-size: 15px; line-height: 1.35; margin: 6px 0 0; color: var(--ink); }
+    #s03 .s03-left > div + div { margin-top: 8px; }
+  </style>
+  <script type="application/json" id="s03-data">
+{"series":[{"name":"compute","rate_per_2yr":3.0,"total_20yr_stated":60000},{"name":"dram_bw","rate_per_2yr":1.6,"total_20yr_stated":100},{"name":"interconnect","rate_per_2yr":1.4,"total_20yr_stated":30}],
+"die_geometry":{"reticle_mm":[26,33],"stack_mm":[11,12.8],"stacks_per_long_edge":3,"phy_mm":[8,4],"phy_inset_mm":1,"px_per_mm":6},
+"points":[{"name":"DDR3-1600","pj_per_bit":38,"tbps":0.011,"kind":"ddr"},{"name":"DDR4-3200","pj_per_bit":31,"tbps":0.026,"kind":"ddr"},{"name":"DDR5-6400","pj_per_bit":26,"tbps":0.055,"kind":"ddr"},{"name":"LPDDR5-6400","pj_per_bit":8.0,"tbps":0.052,"kind":"ddr"},{"name":"GDDR6 (384-bit)","pj_per_bit":14,"tbps":1.1,"kind":"ddr"},{"name":"HBM1","pj_per_bit":6.8,"tbps":1.0,"kind":"hbm"},{"name":"HBM2","pj_per_bit":5.6,"tbps":2.4,"kind":"hbm"},{"name":"HBM3","pj_per_bit":4.2,"tbps":6.5,"kind":"hbm"},{"name":"HBM3E","pj_per_bit":3.7,"tbps":9.8,"kind":"hbm"},{"name":"HBM4 (proj.)","pj_per_bit":2.4,"tbps":18,"kind":"hbm"},{"name":"Raptor 3D (I/O only)","pj_per_bit":0.37,"tbps":100,"kind":"d3","src":"d-Matrix HC'26 s23 [V]; measured I/O only"},{"name":"zHBM 3D (Samsung proj.)","pj_per_bit":0.49,"tbps":31.8,"kind":"d3","src":"derived from Samsung HC'26 s23 chart (31.8 TB/s, 124 W) [D from V]"}],
+"extrapolations":[{"label":"100 TB/s at HBM4's 2.4 pJ/bit","pj_per_bit":2.4,"tbps":100,"watts":1920},{"label":"100 TB/s on HBM trend","pj_per_bit":1.44,"pj_per_bit_hi":1.54,"tbps":100,"watts":1152,"watts_hi":1232}],
+"iso_power_w":[100,300,1000,2000]}
+  </script>
+  <header class="slide-head">
+    <div class="kicker">03 · Pressure 1: bandwidth → A</div>
+    <h2>Bandwidth must cross a boundary; each step closer adds wires, cuts pJ/bit, until another limit binds.</h2>
+    <div class="sub">Bandwidth = wires crossing a boundary × rate per wire. Memory power = bandwidth × energy per bit.</div>
+  </header>
+  <div class="slide-body">
+    <div class="cols s03-body">
+      <div class="s03-left">
+        <div>
+          <p class="s03-lab" style="white-space:nowrap;margin-bottom:8px">Compute outgrows DRAM bandwidth ~1.9× per 2 years [D: 3.0/1.6].</p>
+          <svg id="s03-a" viewBox="0 0 400 144" width="400" role="img" aria-label="Log-scale line chart over a 20-year window of fitted growth from 1x: compute reaches 60,000x, DRAM bandwidth 100x, interconnect 30x."></svg>
+          <p class="tiny s03-cap">Fitted rates as stated by Gholami et al.; lines, not data points.</p>
+        </div>
+        <div>
+          <p class="s03-lab">At most ~6 HBM4 stacks fit a reticle die's two long edges.</p>
+          <svg id="s03-b" viewBox="0 0 400 170" width="400" role="img" aria-label="To-scale top view of a 26 by 33 millimetre host die with three HBM4 stacks of 11 by 12.8 millimetres on each long edge, six stacks in total."></svg>
+          <p class="tiny s03-cap">To scale, after Samsung HC'26 s9–s11. More dies → bigger interposer (size, warpage limits).</p>
+        </div>
+      </div>
+      <div>
+        <svg id="s03-c" viewBox="0 0 730 296" width="730" role="img" aria-label="Log-log chart of peak bandwidth against energy per bit with constant-power lines at 100 W, 300 W, 1 kW and 2 kW. HBM1 to HBM4 move from 1 to 18 terabytes per second as energy falls from 6.8 to 2.4 picojoules per bit; DDR points sit at low bandwidth and 8 to 38 picojoules per bit; 3D points reach 31.8 and 100 terabytes per second below 0.5 picojoules per bit. Extrapolating HBM to 100 terabytes per second implies about 1.2 to 1.9 kilowatts."></svg>
+        <p class="tiny s03-cap">Replotted from d-Matrix HC'26 s6 (±5% read). HBM = 8-stack package; DDR/LPDDR ≈ one 64-bit channel; GDDR6 = 384-bit bus.<br>d-Matrix labels HBM4's 2–3 pJ/bit "I/O", "data-movement" and "system" on different slides; its HBM2 point (≈5.6 pJ/bit) uses its own, different scope. Raptor 0.37 = measured I/O only; zHBM = Samsung 4-stack projection (HBM points 8-stack): 0.49 = total DRAM power ÷ peak BW, utilisation unstated, so a lower bound; Samsung's HBM4E baseline ≈2.0.</p>
+        <p class="small s03-take">After the interposer, most energy sits in the DRAM core (O'Connor's HBM2 model: 3.45 of 3.92 pJ/bit, full access, modelled; newer generations lower it). 3D stacking removes the edge limit, but HBM2 I/O is already 0.3–0.8 pJ/bit by toggle rate (interposer-wire term only), vs Raptor's 0.37: core energy binds next (→ PIM, slide 7).</p>
+      </div>
+    </div>
+  </div>
+  <footer class="slide-foot">
+    <div class="sources">(a) Gholami et al., IEEE Micro'24 / arXiv 2403.14123, stated fitted rates [P]. (b) Samsung HC'26 s9–s11 [V], drawn to scale [D]. (c) d-Matrix HC'26 s6 replot [V], Raptor s23 [V]; zHBM from Samsung s23 [D from V]; extrapolations [D]. HBM2 energy split: O'Connor MICRO'17 §1, Fig. 1 [P]; HBM2 I/O 0.3 (real toggle) / 0.80 (50% toggle): O'Connor §1, Table 3 [P]; Raptor 0.37 measured I/O [V].</div>
+    <div class="pageno">03 / 10</div>
+  </footer>
+  <script>
+  (function () {
+    var root = document.getElementById('s03');
+    var D = JSON.parse(root.querySelector('#s03-data').textContent);
+    var NS = 'http://www.w3.org/2000/svg';
+    function mk(svg) { return function (n, a, t) { var e = document.createElementNS(NS, n); for (var k in a) e.setAttribute(k, a[k]); if (t != null) e.textContent = t; svg.appendChild(e); return e; }; }
+    function tip(e, h) { if (window.DeckTip) window.DeckTip.attach(e, h); }
+    function fmt(v) { return v < 10 ? v.toFixed(1) : String(Math.round(v)); }
+
+    /* ---------- (a) growth ---------- */
+    (function () {
+      var el = mk(root.querySelector('#s03-a'));
+      var L = 52, R = 252, T = 10, B = 110, ymaxd = 5;
+      function X(t) { return L + t / 20 * (R - L); }
+      function Y(v) { return B - Math.log10(v) / ymaxd * (B - T); }
+      [[1, '1'], [10, '10'], [100, '100'], [1000, '1k'], [10000, '10k'], [100000, '100k']].forEach(function (g) {
+        el('line', { x1: L, x2: R, y1: Y(g[0]), y2: Y(g[0]), style: 'stroke:var(--rule)', 'stroke-width': 1 });
+        el('text', { x: L - 6, y: Y(g[0]) + 4, 'text-anchor': 'end', class: 'axis', style: 'font-size:12px' }, g[1]);
+      });
+      [0, 5, 10, 15, 20].forEach(function (t) {
+        el('text', { x: X(t), y: B + 14, 'text-anchor': 'middle', class: 'axis', style: 'font-size:12px' }, t);
+      });
+      el('text', { x: (L + R) / 2, y: B + 29, 'text-anchor': 'middle', class: 'lbl', style: 'font-size:12px' }, "Years (Gholami's 20-year window)");
+      el('text', { x: 9, y: (T + B) / 2, 'text-anchor': 'middle', class: 'lbl', style: 'font-size:12px', transform: 'rotate(-90 9 ' + ((T + B) / 2) + ')' }, 'Growth (×, log scale)');
+      var sty = { compute: ['var(--ink)', 2, null, 'compute 3.0×/2 yr', 0], dram_bw: ['var(--ink-2)', 1.5, null, 'DRAM BW 1.6×/2 yr', -3], interconnect: ['var(--ink-3)', 1.5, '5 3', 'interconnect 1.4×/2 yr', 5] };
+      D.series.forEach(function (s) {
+        var c = sty[s.name], a = { x1: X(0), y1: Y(1), x2: X(20), y2: Y(s.total_20yr_stated), style: 'stroke:' + c[0], 'stroke-width': c[1] };
+        if (c[2]) a['stroke-dasharray'] = c[2];
+        var ln = el('line', a);
+        el('circle', { cx: X(20), cy: Y(s.total_20yr_stated), r: 2.5, style: 'fill:' + c[0] });
+        el('text', { x: X(20) + 6, y: Y(s.total_20yr_stated) + 4 + c[4], class: 'halo', style: 'font-size:12px;font-weight:600;fill:' + c[0] }, c[3]);
+        tip(ln, '<b>' + c[3] + '</b><br>' + s.rate_per_2yr + '× per 2 yr; ' + s.total_20yr_stated.toLocaleString('en-US') + '× over 20 yr (stated fit). Gholami et al., Fig. 1 legend [P].');
+      });
+    })();
+
+    /* ---------- (b) die edge, to scale ---------- */
+    (function () {
+      var el = mk(root.querySelector('#s03-b'));
+      var g = D.die_geometry, s = 5, gap = 1.5;
+      var stW = g.stack_mm[1], stH = g.stack_mm[0], dW = g.reticle_mm[0], dH = g.reticle_mm[1];
+      var x0 = 0, y0 = 2;
+      var dieX = x0 + (stW + gap) * s;
+      var die = el('rect', { x: dieX, y: y0, width: dW * s, height: dH * s, style: 'fill:var(--mid)' });
+      ['host die', '(SoC or base die)', '26 × 33 mm', 'reticle'].forEach(function (a, k) {
+        el('text', { x: dieX + dW * s / 2, y: y0 + dH * s / 2 - 22 + k * 15, 'text-anchor': 'middle', style: 'font-size:12px;fill:#fff' + (k === 0 ? ';font-weight:600' : '') }, a);
+      });
+      el('line', { x1: dieX, x2: dieX, y1: y0, y2: y0 + dH * s, style: 'stroke:var(--near)', 'stroke-width': 3 });
+      el('line', { x1: dieX + dW * s, x2: dieX + dW * s, y1: y0, y2: y0 + dH * s, style: 'stroke:var(--near)', 'stroke-width': 3 });
+      tip(die, 'Host die 26 × 33 mm, reticle-limited. Samsung HC\'26 s9 [V]; drawn to scale [D].');
+      for (var side = 0; side < 2; side++) for (var i = 0; i < g.stacks_per_long_edge; i++) {
+        var sx = side === 0 ? x0 : dieX + dW * s + gap * s, sy = y0 + i * stH * s;
+        var r = el('rect', { x: sx, y: sy + 1, width: stW * s, height: stH * s - 2, style: 'fill:var(--near)' });
+        var px = side === 0 ? sx + (stW - g.phy_mm[1] - g.phy_inset_mm) * s : sx + g.phy_inset_mm * s;
+        el('rect', { x: px, y: sy + 1.5 * s, width: g.phy_mm[1] * s, height: g.phy_mm[0] * s, style: 'fill:var(--near-soft);stroke:var(--near)', 'stroke-width': 1 });
+        tip(r, 'HBM4 stack 11 × 12.8 mm; PHY 8 × 4 mm inset 1 mm from the host-facing edge. Samsung HC\'26 s10–s11 [V]. The die-to-stack gap is illustrative.');
+      }
+      var tx = x0 + (2 * stW + 2 * gap + dW) * s + 12;
+      [['HBM4 stack', 'lbl'], ['11 × 12.8 mm (blue)', 'lbl'], ['PHY 8 × 4 mm (pale)', 'lbl'], ['', ''], ['3 × 11 mm = 33 mm', 'lbl'], ['per edge', 'lbl']].forEach(function (a, k) {
+        if (a[0]) el('text', { x: tx, y: 22 + k * 15, class: a[1], style: 'font-size:12px' }, a[0]);
+      });
+      el('text', { x: tx, y: 22 + 7 * 15 + 4 + 16, style: 'font-size:12px;font-weight:600;fill:var(--near)' }, 'die edge = the limit');
+      el('text', { x: tx, y: 22 + 7 * 15 + 4, style: 'font-size:14px;font-weight:700;fill:var(--near)' }, '6 stacks per die');
+    })();
+
+    /* ---------- (c) bandwidth vs energy ---------- */
+    (function () {
+      var svg = root.querySelector('#s03-c'), el = mk(svg);
+      var M = { l: 62, r: 50, t: 8, b: 46 }, W = 730, H = 296, pw = W - M.l - M.r, ph = H - M.t - M.b;
+      var x0 = Math.log10(0.2), x1 = Math.log10(50), y0 = Math.log10(0.005), y1 = Math.log10(300);
+      function X(v) { return M.l + (Math.log10(v) - x0) / (x1 - x0) * pw; }
+      function Y(v) { return M.t + (1 - (Math.log10(v) - y0) / (y1 - y0)) * ph; }
+      var cl = el('clipPath', { id: 's03-clip' }); var cr = document.createElementNS(NS, 'rect');
+      [['x', M.l], ['y', M.t], ['width', pw], ['height', ph]].forEach(function (a) { cr.setAttribute(a[0], a[1]); }); cl.appendChild(cr);
+      [0.2, 0.5, 1, 2, 5, 10, 20, 50].forEach(function (v) {
+        el('line', { x1: X(v), x2: X(v), y1: M.t, y2: M.t + ph, style: 'stroke:var(--rule)' });
+        el('text', { x: X(v), y: M.t + ph + 16, 'text-anchor': 'middle', class: 'axis', style: 'font-size:12px' }, v);
+      });
+      [0.01, 0.1, 1, 10, 100].forEach(function (v) {
+        el('line', { x1: M.l, x2: M.l + pw, y1: Y(v), y2: Y(v), style: 'stroke:var(--rule)' });
+        el('text', { x: M.l - 7, y: Y(v) + 4, 'text-anchor': 'end', class: 'axis', style: 'font-size:12px' }, v);
+      });
+      el('text', { x: M.l + pw / 2, y: H - 6, 'text-anchor': 'middle', class: 'lbl', style: 'font-size:12px' }, 'Energy per bit (pJ/bit, log scale; scope differs by point, see caption)');
+      el('text', { x: 14, y: M.t + ph / 2, 'text-anchor': 'middle', class: 'lbl', style: 'font-size:12px', transform: 'rotate(-90 14 ' + (M.t + ph / 2) + ')' }, 'Peak bandwidth (TB/s, log scale)');
+      el('rect', { x: M.l, y: M.t, width: pw, height: ph, fill: 'none', style: 'stroke:var(--ink-3)', 'stroke-width': 0.8 });
+      var gl = el('g', { 'clip-path': 'url(#s03-clip)' });
+      function gline(a) { var e = document.createElementNS(NS, 'line'); for (var k in a) e.setAttribute(k, a[k]); gl.appendChild(e); }
+      D.iso_power_w.forEach(function (P) {
+        gline({ x1: X(0.2), y1: Y(P / (8 * 0.2)), x2: X(50), y2: Y(P / (8 * 50)), style: 'stroke:var(--ink-3)', 'stroke-width': 1, 'stroke-dasharray': '2 4' });
+        el('text', { x: M.l + pw + 5, y: Y(P / (8 * 50)) + 4, class: 'faint', style: 'font-size:12px' }, P >= 1000 ? (P / 1000) + ' kW' : P + ' W');
+      });
+      var pts = D.points, hb = pts.filter(function (p) { return p.kind === 'hbm'; });
+      var colr = { ddr: 'var(--mid)', hbm: 'var(--near)', d3: 'var(--conv)' };
+      el('polyline', { points: hb.map(function (p) { return X(p.pj_per_bit) + ',' + Y(p.tbps); }).join(' '), fill: 'none', style: 'stroke:var(--near);opacity:.5', 'stroke-width': 2 });
+      var ex = D.extrapolations;
+      el('line', { x1: X(2.4), y1: Y(18), x2: X(2.4), y2: Y(100), style: 'stroke:var(--near)', 'stroke-width': 1.5, 'stroke-dasharray': '4 3' });
+      el('line', { x1: X(2.4), y1: Y(18), x2: X(1.44), y2: Y(100), style: 'stroke:var(--near)', 'stroke-width': 1.5, 'stroke-dasharray': '1 3' });
+      function hol(e, lab, dx, dy, anchor, html) {
+        el('circle', { cx: X(e.pj_per_bit), cy: Y(e.tbps), r: 5, style: 'fill:var(--bg);stroke:var(--near)', 'stroke-width': 2 });
+        el('text', { x: X(e.pj_per_bit) + dx, y: Y(e.tbps) + dy, 'text-anchor': anchor, class: 'halo', style: 'stroke-width:5px;font-size:12px;font-weight:600;fill:var(--near)' }, lab);
+        tip(el('circle', { cx: X(e.pj_per_bit), cy: Y(e.tbps), r: 13, fill: 'transparent' }), html);
+      }
+      hol(ex[0], '2.4 pJ/bit → 1.92 kW', 9, 16, 'start', '<b>100 TB/s at HBM4\'s 2.4 pJ/bit</b><br>1.92 kW for memory alone, excluding fabric power. d-Matrix s6 [V]');
+      hol(ex[1], 'trend ~1.4–1.5 pJ/bit → ~1.2 kW', -9, -9, 'end', '<b>100 TB/s if the HBM trend continues</b><br>log-log fit of HBM1–HBM4: ~1.44–1.54 pJ/bit, ~1.15–1.25 kW [D]');
+      var LB = { 'HBM1': [10, 4], 'HBM2': [10, 4], 'HBM3': [10, 12], 'HBM3E': [10, 2], 'HBM4 (proj.)': [-10, 16, 'end'], 'DDR5-6400': [-8, -10, 'end'], 'DDR3-1600': [-8, 4, 'end'], 'DDR4-3200': [-8, 4, 'end'], 'GDDR6 (384-bit)': [10, 4], 'LPDDR5-6400': [-9, 4, 'end'], 'Raptor 3D (I/O only)': [12, 4], 'zHBM 3D (Samsung proj.)': [0, 24, 'middle'] };
+      pts.forEach(function (p) {
+        var cx = X(p.pj_per_bit), cy = Y(p.tbps), c = colr[p.kind];
+        if (p.kind === 'ddr') el('rect', { x: cx - 5, y: cy - 5, width: 10, height: 10, style: 'fill:' + c + ';stroke:var(--bg)', 'stroke-width': 2 });
+        else if (p.kind === 'd3') el('path', { d: 'M' + cx + ' ' + (cy - 7) + ' L' + (cx + 7) + ' ' + cy + ' L' + cx + ' ' + (cy + 7) + ' L' + (cx - 7) + ' ' + cy + ' Z', style: 'fill:' + c + ';stroke:var(--bg)', 'stroke-width': 2 });
+        else el('circle', { cx: cx, cy: cy, r: 6, style: 'fill:' + c + ';stroke:var(--bg)', 'stroke-width': 2 });
+        var w = p.tbps * 8 * p.pj_per_bit;
+        tip(el('circle', { cx: cx, cy: cy, r: 14, fill: 'transparent' }), '<b>' + p.name + '</b><br>' + p.pj_per_bit + ' pJ/bit · ' + p.tbps + ' TB/s<br>' + (/Raptor/.test(p.name) ? 'implied I/O power only' : 'implied memory power') + ' ≈ ' + fmt(w) + ' W [D]<br>' + (p.src || 'read from d-Matrix HC\'26 s6 [V, ±5%]'));
+        var lb = LB[p.name];
+        if (lb) el('text', { x: cx + lb[0], y: cy + lb[1], 'text-anchor': lb[2] || 'start', class: 'muted halo', style: 'stroke-width:5px;font-size:12px' + (p.kind === 'd3' ? ';fill:var(--conv);font-weight:600' : '') }, p.name);
+      });
+      var kx = M.l + 12, ky = M.t + ph - 96;
+      function row(k, draw, txt) { draw(ky + k * 17); el('text', { x: kx + 24, y: ky + k * 17 + 4, class: 'muted', style: 'font-size:12px' }, txt); }
+      row(0, function (y) { el('line', { x1: kx, x2: kx + 18, y1: y, y2: y, style: 'stroke:var(--ink-3)', 'stroke-width': 1, 'stroke-dasharray': '2 4' }); }, 'constant power: W = TB/s × 8 × pJ/bit');
+      row(1, function (y) { el('line', { x1: kx, x2: kx + 18, y1: y, y2: y, style: 'stroke:var(--near);opacity:.5', 'stroke-width': 2 }); }, 'HBM generation trend (solid)');
+      row(2, function (y) { el('line', { x1: kx, x2: kx + 18, y1: y, y2: y, style: 'stroke:var(--near)', 'stroke-width': 1.5, 'stroke-dasharray': '4 3' }); }, 'to 100 TB/s at HBM4 energy (dashed) [D]');
+      row(3, function (y) { el('line', { x1: kx, x2: kx + 18, y1: y, y2: y, style: 'stroke:var(--near)', 'stroke-width': 1.5, 'stroke-dasharray': '1 3' }); }, 'to 100 TB/s on HBM energy trend (dotted) [D]');
+      row(4, function (y) { el('circle', { cx: kx + 9, cy: y, r: 4.5, style: 'fill:var(--bg);stroke:var(--near)', 'stroke-width': 2 }); }, 'hollow: extrapolated point');
+    })();
+  })();
+  </script>
+</section>

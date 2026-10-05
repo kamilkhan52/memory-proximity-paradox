@@ -1,0 +1,201 @@
+<title>Memory: Closer and Farther</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap">
+<style>
+/* Deck design system: 1280x720 slides on white; technical, quiet; one accent per meaning.
+   Colour encodes the argument everywhere:
+     --near  (A, closer / tighter coupling)   blue
+     --far   (B, farther / disaggregation)    orange
+     --mid   (the DDR baseline / middle)      slate
+     --conv  (convergence / 3D / both)        green
+   Never use these for anything else. */
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --ink: #111418;
+  --ink-2: #4a5059;
+  --ink-3: #5f6570;
+  --rule: #e3e6ea;
+  --panel: #f6f7f9;
+  --near: #2a78d6;
+  --near-soft: #e6f0fb;
+  --far: #eb6834;
+  --far-soft: #fdeee7;
+  --mid: #3c4a5c;
+  --mid-soft: #eceff3;
+  --conv: #1baf7a;
+  --conv-soft: #e4f6ef;
+  --warn: #b42318;
+  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --slide-w: 1280px;
+  --slide-h: 720px;
+}
+html, body { background: var(--bg); color: var(--ink); }
+body { margin: 0; font-family: var(--font-body); }
+
+/* ---------- slide frame ---------- */
+.deck { display: flex; flex-direction: column; align-items: center; gap: 28px; padding-block: 28px; }
+.slide {
+  position: relative; box-sizing: border-box;
+  width: var(--slide-w); height: var(--slide-h);
+  padding: 44px 60px 0 60px;
+  background: var(--bg); color: var(--ink);
+  border: 1px solid var(--rule);
+  display: grid; grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+  font-size: 18px; line-height: 1.45;
+}
+.slide-head { margin-bottom: 18px; }
+.kicker { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
+.slide h2 { font-family: var(--font-display); font-weight: 600; font-size: 34px; line-height: 1.15; margin: 0; max-width: 1100px; text-wrap: balance; }
+.slide .sub { font-size: 18px; color: var(--ink-2); margin-top: 8px; max-width: 1050px; }
+.slide-body { min-height: 0; position: relative; }
+.slide-foot {
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 24px;
+  border-top: 1px solid var(--rule); padding: 8px 0 12px; margin-top: 10px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); line-height: 1.4;
+}
+.slide-foot .sources { max-width: 1060px; min-height: 4.2em; display: flex; flex-direction: column; justify-content: flex-end; }
+.slide-foot .pageno { white-space: nowrap; }
+
+/* ---------- common building blocks ---------- */
+.cols { display: grid; gap: 28px; height: 100%; }
+.cols.c2 { grid-template-columns: 1fr 1fr; }
+.cols.c-6-4 { grid-template-columns: 6fr 4fr; }
+.cols.c-4-6 { grid-template-columns: 4fr 6fr; }
+.cols > * { min-width: 0; }
+.slide p { margin: 0 0 10px; }
+.slide ul { margin: 0 0 10px; padding-left: 20px; }
+.slide li { margin-bottom: 6px; }
+.small { font-size: 15px; color: var(--ink-2); }
+.tiny { font-size: 12.5px; color: var(--ink-3); }
+.tag { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+.num { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--font-mono); }
+.callout { border-left: 3px solid var(--ink); padding: 4px 0 4px 14px; font-family: var(--font-display); font-size: 21px; line-height: 1.3; }
+.box { border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; }
+.box.near { border-color: var(--near); background: var(--near-soft); }
+.box.far { border-color: var(--far); background: var(--far-soft); }
+.box.mid { border-color: var(--mid); background: var(--mid-soft); }
+.box.conv { border-color: var(--conv); background: var(--conv-soft); }
+.label-near { color: var(--near); font-weight: 600; }
+.label-far { color: var(--far); font-weight: 600; }
+.label-mid { color: var(--mid); font-weight: 600; }
+.label-conv { color: var(--conv); font-weight: 600; }
+table.t { border-collapse: collapse; width: 100%; font-size: 15px; }
+table.t th, table.t td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+table.t th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-2); font-weight: 600; }
+table.t td.n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ---------- charts (SVG) ---------- */
+.slide svg { display: block; max-width: 100%; height: auto; }
+.slide svg text { font-family: var(--font-body); fill: var(--ink); }
+.slide svg .axis { fill: var(--ink-2); font-family: var(--font-mono); font-size: 12px; }
+.slide svg .lbl { fill: var(--ink-2); font-size: 13px; }
+.slide svg .muted { fill: var(--ink-2); }
+.slide svg .faint { fill: var(--ink-3); }
+.slide svg .halo { paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
+
+/* ---------- deck chrome (assembled deck only) ---------- */
+.deck-bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; width: 100%; background: rgba(255,255,255,.94); border-bottom: 1px solid var(--rule); font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); display: flex; justify-content: space-between; align-items: center; padding: 8px 20px; box-sizing: border-box; }
+.deck-bar button { font: inherit; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); border-radius: 4px; padding: 3px 9px; cursor: pointer; }
+.deck-bar button:focus-visible { outline: 2px solid var(--near); outline-offset: 2px; }
+.scaler { transform-origin: top center; }
+body.present { overflow: hidden; height: 100%; }
+body.present .deck { gap: 0; padding: 0; }
+body.present .slide { display: none; border: none; }
+body.present .slide.active { display: grid; }
+#tip { position: fixed; pointer-events: none; background: var(--ink); color: #fff; font-family: var(--font-body); font-size: 12.5px; padding: 6px 8px; border-radius: 4px; line-height: 1.35; max-width: 300px; z-index: 20; }
+
+</style>
+
+
+<div id="tip" hidden></div>
+<script>
+window.DeckTip = (function(){
+  const tip = document.getElementById('tip');
+  function move(e){ const x=Math.min(e.clientX+14, window.innerWidth-310); tip.style.left=x+'px'; tip.style.top=(e.clientY+14)+'px'; }
+  return {
+    attach(el, html){ el.addEventListener('mouseenter', e=>{tip.innerHTML=html; tip.hidden=false; move(e);});
+                      el.addEventListener('mousemove', move); el.addEventListener('mouseleave', ()=>{tip.hidden=true;}); }
+  };
+})();
+</script>
+
+<div class="deck">
+<section class="slide" id="s04" data-title="Pressure 2: capacity cost">
+  <style>
+    #s04 .s04-body { gap: 36px; }
+    #s04 .s04-right { display: flex; flex-direction: column; gap: 10px; font-size: 16px; line-height: 1.4; height: 400px; }
+    #s04 .s04-right .box { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    #s04 .s04-right .box span { display: block; }
+    #s04 .s04-right .box { padding: 10px 14px; }
+    #s04 .s04-right b { display: block; margin-bottom: 2px; }
+    #s04 .s04-cap { margin: 6px 0 0; }
+  </style>
+  <script type="application/json" id="s04-data">
+{"rows":[{"gen":"Gen0","tco_pct":15.6,"power_pct":14.6},{"gen":"Gen1","tco_pct":25.5,"power_pct":19.8},{"gen":"Gen2","tco_pct":21.6,"power_pct":19.7},{"gen":"Gen3","tco_pct":21.2,"power_pct":20.7},{"gen":"Gen4","tco_pct":31.8,"power_pct":28.8},{"gen":"Gen5","tco_pct":37.1,"power_pct":33.3}]}
+  </script>
+  <header class="slide-head">
+    <div class="kicker">04 · Pressure 2: capacity cost → B</div>
+    <h2>Capacity cost now bites: $/bit declines slowed <span style="white-space:nowrap">~2.5–3×</span> and memory reached 37% of Meta's rack TCO.</h2>
+    <div class="sub">Bits stopped getting cheap fast while core counts kept growing, and much of the memory bought sits idle.</div>
+  </header>
+  <div class="slide-body">
+    <div class="cols c-6-4 s04-body">
+      <div>
+        <svg id="s04-chart" viewBox="0 0 680 400" width="680" role="img" aria-label="Grouped bar chart of memory as a percentage of Meta rack TCO and rack power for hardware generations Gen0 to Gen5. TCO share runs 15.6, 25.5, 21.6, 21.2, 31.8, 37.1 percent; power share runs 14.6, 19.8, 19.7, 20.7, 28.8, 33.3 percent."></svg>
+        <p class="tiny s04-cap">Memory share of rack TCO and power across six Meta generations (data labels as printed). TPP, ASPLOS'23, Fig. 3.</p>
+      </div>
+      <div class="s04-right">
+        <div class="box"><b>$/bit decline:</b><span><strong>~33–37%/yr</strong> before ~2010; <strong>~12–15%/yr</strong> since (chart: slide 9).</span></div>
+        <div class="box"><b>Capacity per unit of CPU performance:</b><span>fell ~60–70% in 10 years.</span></div>
+        <div class="box far"><b>Idle bytes:</b><span><strong>32%</strong> of Google fleet memory is cold at 120 s; <strong>55–80%</strong> of Meta app memory is idle per 2 min.</span></div>
+        <div class="box"><b>Idle bytes become cheaper bytes:</b><span>production tiering is on slide 6.</span></div>
+      </div>
+    </div>
+  </div>
+  <footer class="slide-foot">
+    <div class="sources">Chart: Maruf et al., TPP, ASPLOS'23, Fig. 3, p.2, printed data labels [P]. $/bit: AI Impacts 2020 series averages [S]; our nominal 1990–2010 fit [D]; slowdown ratio 2.4–3.1× from the published AI Impacts rate pairs, depending on % vs log-rate [D]. Capacity per performance: Berger et al., IEEE TC'26 [P]. Cold/idle: Lagar-Cavilla ASPLOS'19 [P]; TPP §3 [P].</div>
+    <div class="pageno">04 / 10</div>
+  </footer>
+  <script>
+  (function () {
+    var root = document.getElementById('s04');
+    var svg = root.querySelector('#s04-chart');
+    var rows = JSON.parse(root.querySelector('#s04-data').textContent).rows;
+    var NS = 'http://www.w3.org/2000/svg';
+    function el(n, a, t) { var e = document.createElementNS(NS, n); for (var k in a) e.setAttribute(k, a[k]); if (t != null) e.textContent = t; svg.appendChild(e); return e; }
+    var L = 54, R = 672, T = 44, B = 337, ymax = 40;
+    function y(v) { return B - (v / ymax) * (B - T); }
+    [0, 10, 20, 30, 40].forEach(function (v) {
+      el('line', { x1: L, x2: R, y1: y(v), y2: y(v), style: 'stroke:var(--rule);stroke-width:' + (v === 0 ? 1.2 : 1), 'stroke-width': 1 });
+      el('text', { x: L - 8, y: y(v) + 4, 'text-anchor': 'end', class: 'axis' }, v);
+    });
+    el('text', { x: 12, y: (T + B) / 2, class: 'lbl', 'text-anchor': 'middle', transform: 'rotate(-90 12 ' + ((T + B) / 2) + ')' }, 'Share of rack (%)');
+    // legend
+    el('rect', { x: L, y: 2, width: 14, height: 14, style: 'fill:var(--mid)' });
+    el('text', { x: L + 20, y: 14, class: 'lbl' }, 'Memory share of rack TCO');
+    el('rect', { x: L + 230, y: 2, width: 14, height: 14, style: 'fill:var(--mid-soft);stroke:var(--mid);stroke-width:1.2' });
+    el('text', { x: L + 250, y: 14, class: 'lbl' }, 'Memory share of rack power');
+    var gw = (R - L) / rows.length, bw = 36, gap = 2;
+    rows.forEach(function (r, i) {
+      var cx = L + gw * (i + .5);
+      var x1 = cx - gap / 2 - bw, x2 = cx + gap / 2;
+      var t = el('rect', { x: x1, y: y(r.tco_pct), width: bw, height: B - y(r.tco_pct), style: 'fill:var(--mid)' });
+      var p = el('rect', { x: x2, y: y(r.power_pct), width: bw, height: B - y(r.power_pct), style: 'fill:var(--mid-soft);stroke:var(--mid);stroke-width:1.2' });
+      el('text', { x: x1 + bw / 2, y: y(r.tco_pct) - 5, 'text-anchor': 'middle', class: 'axis', style: 'fill:var(--ink)' }, r.tco_pct.toFixed(1));
+      el('text', { x: x2 + bw / 2, y: y(r.power_pct) - 5, 'text-anchor': 'middle', class: 'axis' }, r.power_pct.toFixed(1));
+      el('text', { x: cx, y: B + 20, 'text-anchor': 'middle', class: 'axis' }, r.gen);
+      if (window.DeckTip) {
+        window.DeckTip.attach(t, r.gen + ': memory = ' + r.tco_pct + '% of rack TCO. TPP, ASPLOS\'23, Fig. 3, p.2, printed label [P]. Share is non-monotonic and may reflect provisioning (GB per rack) as well as price.');
+        window.DeckTip.attach(p, r.gen + ': memory = ' + r.power_pct + '% of rack power. TPP, ASPLOS\'23, Fig. 3, p.2, printed label [P].');
+      }
+    });
+    el('text', { x: (L + R) / 2, y: B + 44, class: 'lbl', 'text-anchor': 'middle' }, 'Meta hardware generation');
+  })();
+  </script>
+</section>
+
+</div>

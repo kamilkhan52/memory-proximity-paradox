@@ -1,0 +1,13 @@
+# Copyrighted source full texts (papers, vendor decks, articles) are not redistributed.
+# The bibliography of what was read is in fulltext/MANIFEST.md.
+fulltext/*
+!fulltext/MANIFEST.md
+
+# Review-loop crops and oversized renders (intermediate artefacts)
+deck/shots/*/
+deck/shots/report_vis_*.png
+explainers/shots/*
+!explainers/shots/explainer_full.png
+
+.DS_Store
+__pycache__/

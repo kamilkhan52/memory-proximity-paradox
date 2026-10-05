@@ -1,0 +1,1422 @@
+<title>Memory: Closer and Farther</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap">
+<style>
+/* Deck design system: 1280x720 slides on white; technical, quiet; one accent per meaning.
+   Colour encodes the argument everywhere:
+     --near  (A, closer / tighter coupling)   blue
+     --far   (B, farther / disaggregation)    orange
+     --mid   (the DDR baseline / middle)      slate
+     --conv  (convergence / 3D / both)        green
+   Never use these for anything else. */
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --ink: #111418;
+  --ink-2: #4a5059;
+  --ink-3: #5f6570;
+  --rule: #e3e6ea;
+  --panel: #f6f7f9;
+  --near: #2a78d6;
+  --near-soft: #e6f0fb;
+  --far: #eb6834;
+  --far-soft: #fdeee7;
+  --mid: #3c4a5c;
+  --mid-soft: #eceff3;
+  --conv: #1baf7a;
+  --conv-soft: #e4f6ef;
+  --warn: #b42318;
+  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --slide-w: 1280px;
+  --slide-h: 720px;
+}
+html, body { background: var(--bg); color: var(--ink); }
+body { margin: 0; font-family: var(--font-body); }
+
+/* ---------- slide frame ---------- */
+.deck { display: flex; flex-direction: column; align-items: center; gap: 28px; padding-block: 28px; }
+.slide {
+  position: relative; box-sizing: border-box;
+  width: var(--slide-w); height: var(--slide-h);
+  padding: 44px 60px 0 60px;
+  background: var(--bg); color: var(--ink);
+  border: 1px solid var(--rule);
+  display: grid; grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+  font-size: 18px; line-height: 1.45;
+}
+.slide-head { margin-bottom: 18px; }
+.kicker { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
+.slide h2 { font-family: var(--font-display); font-weight: 600; font-size: 34px; line-height: 1.15; margin: 0; max-width: 1100px; text-wrap: balance; }
+.slide .sub { font-size: 18px; color: var(--ink-2); margin-top: 8px; max-width: 1050px; }
+.slide-body { min-height: 0; position: relative; }
+.slide-foot {
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 24px;
+  border-top: 1px solid var(--rule); padding: 8px 0 12px; margin-top: 10px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); line-height: 1.4;
+}
+.slide-foot .sources { max-width: 1060px; min-height: 4.2em; display: flex; flex-direction: column; justify-content: flex-end; }
+.slide-foot .pageno { white-space: nowrap; }
+
+/* ---------- common building blocks ---------- */
+.cols { display: grid; gap: 28px; height: 100%; }
+.cols.c2 { grid-template-columns: 1fr 1fr; }
+.cols.c-6-4 { grid-template-columns: 6fr 4fr; }
+.cols.c-4-6 { grid-template-columns: 4fr 6fr; }
+.cols > * { min-width: 0; }
+.slide p { margin: 0 0 10px; }
+.slide ul { margin: 0 0 10px; padding-left: 20px; }
+.slide li { margin-bottom: 6px; }
+.small { font-size: 15px; color: var(--ink-2); }
+.tiny { font-size: 12.5px; color: var(--ink-3); }
+.tag { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+.num { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--font-mono); }
+.callout { border-left: 3px solid var(--ink); padding: 4px 0 4px 14px; font-family: var(--font-display); font-size: 21px; line-height: 1.3; }
+.box { border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; }
+.box.near { border-color: var(--near); background: var(--near-soft); }
+.box.far { border-color: var(--far); background: var(--far-soft); }
+.box.mid { border-color: var(--mid); background: var(--mid-soft); }
+.box.conv { border-color: var(--conv); background: var(--conv-soft); }
+.label-near { color: var(--near); font-weight: 600; }
+.label-far { color: var(--far); font-weight: 600; }
+.label-mid { color: var(--mid); font-weight: 600; }
+.label-conv { color: var(--conv); font-weight: 600; }
+table.t { border-collapse: collapse; width: 100%; font-size: 15px; }
+table.t th, table.t td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+table.t th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-2); font-weight: 600; }
+table.t td.n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ---------- charts (SVG) ---------- */
+.slide svg { display: block; max-width: 100%; height: auto; }
+.slide svg text { font-family: var(--font-body); fill: var(--ink); }
+.slide svg .axis { fill: var(--ink-2); font-family: var(--font-mono); font-size: 12px; }
+.slide svg .lbl { fill: var(--ink-2); font-size: 13px; }
+.slide svg .muted { fill: var(--ink-2); }
+.slide svg .faint { fill: var(--ink-3); }
+.slide svg .halo { paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
+
+/* ---------- deck chrome (assembled deck only) ---------- */
+.deck-bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; width: 100%; background: rgba(255,255,255,.94); border-bottom: 1px solid var(--rule); font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); display: flex; justify-content: space-between; align-items: center; padding: 8px 20px; box-sizing: border-box; }
+.deck-bar button { font: inherit; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); border-radius: 4px; padding: 3px 9px; cursor: pointer; }
+.deck-bar button:focus-visible { outline: 2px solid var(--near); outline-offset: 2px; }
+.scaler { transform-origin: top center; }
+body.present { overflow: hidden; height: 100%; }
+body.present .deck { gap: 0; padding: 0; }
+body.present .slide { display: none; border: none; }
+body.present .slide.active { display: grid; }
+#tip { position: fixed; pointer-events: none; background: var(--ink); color: #fff; font-family: var(--font-body); font-size: 12.5px; padding: 6px 8px; border-radius: 4px; line-height: 1.35; max-width: 300px; z-index: 20; }
+
+</style>
+<div class="deck-bar"><span id="pos"></span><span><button id="prev" aria-label="Previous slide">←</button> <button id="next" aria-label="Next slide">→</button> <button id="mode">Present (P)</button></span></div>
+
+<div id="tip" hidden></div>
+<script>
+window.DeckTip = (function(){
+  const tip = document.getElementById('tip');
+  function move(e){ const x=Math.min(e.clientX+14, window.innerWidth-310); tip.style.left=x+'px'; tip.style.top=(e.clientY+14)+'px'; }
+  return {
+    attach(el, html){ el.addEventListener('mouseenter', e=>{tip.innerHTML=html; tip.hidden=false; move(e);});
+                      el.addEventListener('mousemove', move); el.addEventListener('mouseleave', ()=>{tip.hidden=true;}); }
+  };
+})();
+</script>
+
+<div class="deck">
+<section class="slide" id="s01" data-title="Question and answer">
+  <style>
+    #s01 .s01-answer { display: flex; flex-direction: column; gap: 22px; padding-top: 2px; }
+    #s01 .s01-answer .kicker { margin-bottom: 0; }
+    #s01 .s01-pt { display: grid; grid-template-columns: 22px 1fr; column-gap: 8px; align-items: start; }
+    #s01 .s01-n { font-family: var(--font-mono); font-size: 13px; color: var(--ink-3); padding-top: 4px; }
+    #s01 .s01-pt p { margin: 0; font-size: 18px; line-height: 1.42; color: var(--ink); text-wrap: pretty; }
+    #s01 .s01-pt .callout { margin: 0; font-size: 21px; line-height: 1.3; }
+    #s01 .s01-ab { display: flex; flex-direction: column; gap: 8px; }
+    #s01 .s01-fig { display: flex; flex-direction: column; }
+    #s01 .s01-figtitle { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 4px 52px; }
+    #s01 .s01-fig .tiny { margin: 0 0 0 52px; }
+  </style>
+  <header class="slide-head">
+    <div class="kicker">01 · Question and answer</div>
+    <h2>Closer and farther are not opposites: both leave DDR's narrow spot on one cost frontier.</h2>
+    <div class="sub">Why are tighter memory–compute coupling (A) and memory disaggregation / far memory (B) both attractive?</div>
+  </header>
+  <div class="slide-body">
+    <div class="cols c-4-6">
+      <div class="s01-answer">
+        <div class="kicker">Answer</div>
+        <div class="s01-pt">
+          <span class="s01-n">1</span>
+          <p class="callout">Distance is not what is optimized.</p>
+        </div>
+        <div class="s01-pt">
+          <span class="s01-n">2</span>
+          <div class="s01-ab">
+            <p><span class="label-near">A</span> answers the bandwidth pressure: more GB/s per GB, fewer pJ/bit (HBM, 3D DRAM–logic stacking, PIM).</p>
+            <p><span class="label-far">B</span> answers capacity cost: cheaper, extended or shared GB (compression, CXL, RDMA pools).</p>
+          </div>
+        </div>
+        <div class="s01-pt">
+          <span class="s01-n">3</span>
+          <p>Skew is within each workload, so mixed tiers win; the <span class="label-mid">DDR middle</span> persists.</p>
+        </div>
+        <div class="s01-pt">
+          <span class="s01-n">4</span>
+          <p>The directions are coupled, and since ~2010 slower $/bit declines no longer let the middle outrun both.</p>
+        </div>
+      </div>
+
+      <div class="s01-fig">
+        <div class="s01-figtitle">The frontier, schematically</div>
+        <svg id="s01-frontier" viewBox="0 0 680 380" role="img"
+             aria-label="Schematic, not to scale. Horizontal axis: GB/s per GB stored. Vertical axis: dollars per GB. A slate box, the DDR DIMM, sits left of centre. A blue arrow labelled A runs up and to the right toward HBM, PIM and 3D DRAM–logic stacking. An orange arrow labelled B runs straight down toward compression and recycled DDR4 behind CXL; a thinner orange arrow runs down and to the left toward RDMA pools and SSD.">
+          <defs>
+            <marker id="s01-head-near" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+              <path d="M0,0.8 L10,5 L0,9.2 Z" style="fill:var(--near)"/>
+            </marker>
+            <marker id="s01-head-far" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+              <path d="M0,0.8 L10,5 L0,9.2 Z" style="fill:var(--far)"/>
+            </marker>
+            <marker id="s01-head-far-s" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto">
+              <path d="M0,0.8 L10,5 L0,9.2 Z" style="fill:var(--far)"/>
+            </marker>
+          </defs>
+
+          <!-- axes (no ticks: schematic) -->
+          <g style="stroke:var(--ink-3)" stroke-width="1" fill="none">
+            <path d="M52,10 V352 H672"/>
+          </g>
+          <text class="lbl" x="672" y="374" text-anchor="end" font-size="14" style="font-size:14px">GB/s per GB stored →</text>
+          <text class="lbl" transform="translate(38,10) rotate(-90)" text-anchor="end" style="font-size:14px">$/GB →</text>
+
+          <!-- A: tighter coupling, up and to the right -->
+          <line x1="352" y1="160" x2="484" y2="84" style="stroke:var(--near)" stroke-width="3" stroke-linecap="round" marker-end="url(#s01-head-near)"/>
+          <text x="400" y="110" text-anchor="end" font-size="13" font-weight="600" style="fill:var(--near)"><tspan font-size="16">A</tspan>  tighter coupling</text>
+          <text x="498" y="66" font-size="14" font-weight="500" style="fill:var(--near)">HBM</text>
+          <text x="498" y="92" font-size="14" font-weight="500" style="fill:var(--near)">PIM (compute in the stack)</text>
+          <text x="498" y="118" font-size="14" font-weight="500" style="fill:var(--conv)">3D DRAM–logic stacking</text>
+
+          <!-- the DDR DIMM: the middle -->
+          <rect x="180" y="164" width="172" height="58" rx="10" style="fill:var(--mid-soft);stroke:var(--mid)" stroke-width="1.5"/>
+          <text x="266" y="190" text-anchor="middle" font-size="15" font-weight="600" style="fill:var(--mid)">DDR DIMM</text>
+          <text x="266" y="209" text-anchor="middle" font-size="12.5" class="muted">(the middle)</text>
+
+          <!-- B: farther, straight down (and a thinner branch down-left) -->
+          <line x1="282" y1="226" x2="282" y2="302" style="stroke:var(--far)" stroke-width="3" stroke-linecap="round" marker-end="url(#s01-head-far)"/>
+          <text x="296" y="262" font-size="13" font-weight="600" style="fill:var(--far)"><tspan font-size="16">B</tspan>  disaggregation / far memory</text>
+          <text x="296" y="302" font-size="14" font-weight="500" style="fill:var(--far)">compression · recycled DDR4 behind CXL</text>
+          <line x1="212" y1="226" x2="150" y2="290" style="stroke:var(--far)" stroke-width="1.75" stroke-linecap="round" marker-end="url(#s01-head-far-s)"/>
+          <text x="142" y="314" text-anchor="middle" font-size="14" font-weight="500" style="fill:var(--far)">RDMA pools · SSD</text>
+
+          <!-- schematic note -->
+          <text x="668" y="340" text-anchor="end" font-size="12.5" class="faint">Schematic, not to scale. Spec-derived positions: slide 5.</text>
+        </svg>
+        <p class="tiny">Latency is a separate constraint (slide 2); skew decides the mix (slide 6).</p>
+      </div>
+    </div>
+  </div>
+  <footer class="slide-foot">
+    <div class="sources">Answer: SYNTHESIS v1.6, executive summary [Syn]; frontier framing after review r2d F2 [Syn]. Schematic only; values on slides 2–5. Tags: [P] primary, read in full · [P/V] primary, interested seller · [V] vendor · [Pr] press · [S] secondary · [D] our arithmetic · [Syn] our synthesis · [pend] awaiting full text · [unverified].</div>
+    <div class="pageno">01 / 10</div>
+  </footer>
+</section>
+
+<section class="slide" id="s02" data-title="Distance is a proxy">
+  <style>
+    #s02 .s02-body { grid-template-columns: 7fr 3fr; gap: 28px; }
+    #s02 .s02-right { display: flex; flex-direction: column; gap: 12px; }
+    #s02 .s02-right .box { font-size: 15.5px; line-height: 1.4; padding: 12px 15px; }
+    #s02 .s02-cap { margin: 2px 0 0; font-size: 12px; line-height: 1.35; }
+  </style>
+  <script type="application/json" id="s02-data">{"sources":{"polar":{"cite":"Yang et al., PolarCXLMem, SIGMOD-Companion 2025","locator":"Table 1 and Table 2, PDF p.4 (proc. p.692); Intel MLC","tag":"P"},"fastswap":{"cite":"Amaro et al., Fastswap, EuroSys 2020","locator":"PDF p.13 text and footnote 7","tag":"P"},"berger":{"cite":"Berger et al., Design Tradeoffs in CXL-Based Memory Pools for Public Cloud Platforms, IEEE Micro 2023","locator":"Fig. 3 (PDF p.5, mag. p.4)","tag":"P"},"pond":{"cite":"Li et al., Pond, ASPLOS 2023","locator":"Fig. 2 and Sec 6.1 'Prototype setup' (PDF pp.4, 10); abstract/intro 70-90 ns (pp.1, 6)","tag":"P"},"tpp":{"cite":"Maruf et al., TPP, ASPLOS 2023","locator":"Fig. 2 'Latency characteristics of memory technologies', PDF p.2 (printed labels)","tag":"P"},"octopus":{"cite":"Zhong et al., Octopus: Enhancing CXL Memory Pods via Sparse Topology (arXiv 2501.09020; NSDI'26 camera-ready not compared)","locator":"Fig. 2 right (PDF p.2, P50 load-to-use, random 64 B cachelines, Xeon 6 and AMD Turin); text p.1-2 (115 ns), p.3 (switch adds at least 220 ns)","tag":"P"},"melody":{"cite":"Liu et al., Melody, Systematic CXL Memory Characterization, ASPLOS 2025","locator":"Table 1 (PDF p.3); tail-latency text Sec 3.2 (PDF p.5)","tag":"P"},"vistara":{"cite":"Gholkar et al., Vistara, ISCA 2026 camera-ready","locator":"Platform table (PDF p.5): Local idle ~130 ns, CXL idle ~250 ns","tag":"P"},"dassharma":{"cite":"Das Sharma, Blankenship, Berger, An Introduction to the CXL Interconnect, arXiv 2306.11227","locator":"Table 2, PDF p.26","tag":"P"},"cnc":{"cite":"Chips and Cheese, Grace Hopper: Nvidia's Halfway APU","locator":"body text (pointer-chase latency): LPDDR5X 'over 200 ns'; H100 330 ns; GH200 'under 300'","tag":"S"}},"rows":[{"id":"local_ddr","path":"Local DDR (DDR4/DDR5), x86","role":"mid","kind":"measured","lo_ns":78,"hi_ns":146,"open_ended":false,"src":"pond+polar+octopus","loc":"Pond Sec 6.1 p.10 / Fig. 2 p.4; PolarCXLMem Table 1; Octopus p.1-2","tag":"P","unc":"exact (printed)","granularity":"64 B cache line","points":[{"ns":115,"src":"octopus","loc":"p.1-2 text","tag":"P","granularity":"64 B cache line","platform":"Octopus Intel Xeon 6 / AMD Turin, DDR5","unc":"exact (printed)"},{"ns":78,"src":"pond","loc":"Sec 6.1 p.10; Fig. 2 p.4","tag":"P","granularity":"64 B cache line","platform":"Pond Skylake 8157M, DDR4","unc":"exact (printed)"},{"ns":146,"src":"polar","loc":"Table 1","tag":"P","granularity":"64 B cache line","platform":"PolarCXLMem host, local DRAM, Intel MLC","unc":"exact (printed)"}]},{"id":"remote_socket_ddr","path":"Remote-socket DDR","role":"mid","kind":"measured","lo_ns":142,"hi_ns":255,"open_ended":false,"src":"pond+polar","loc":"Pond Sec 6.1 p.10, Fig. 2 p.4; PolarCXLMem Table 1","tag":"P","unc":"exact (printed)","granularity":"64 B cache line","points":[{"ns":231,"src":"polar","loc":"Table 1","tag":"P","granularity":"64 B cache line","platform":"PolarCXLMem host, remote-socket DRAM, Intel MLC","unc":"exact (printed)"}]},{"id":"grace_lpddr5x","path":"Grace CPU to LPDDR5X","role":"mid","kind":"measured","lo_ns":200,"open_ended":true,"src":"cnc","loc":"article body, 'Latency at that point is over 200 ns'","tag":"S","unc":"lower bound as published ('over 200 ns'); [S] approx.","granularity":"64 B cache line (pointer chase, 2 MB pages)"},{"id":"gpu_hbm3","path":"GPU to HBM (H100 PCIe, GH200)","role":"near","kind":"measured","lo_ns":300,"hi_ns":330,"open_ended":false,"src":"cnc","loc":"article body: 'VRAM latency ... down from 330 ns to under 300'; 'about 300 ns of DRAM latency'","tag":"S","unc":"[S] approx.; range as published (GH200 printed as 'under 300', plotted lo=300)","granularity":"64 B cache line (pointer chase)"},{"id":"cxl_direct","path":"CXL direct-attach","role":"far","kind":"measured","lo_ns":214,"hi_ns":394,"open_ended":false,"src":"melody+vistara+polar","loc":"Melody Table 1 p.3; Vistara platform table p.5; PolarCXLMem Table 1","tag":"P","unc":"exact (printed); Vistara '~250' approximate","granularity":"64 B cache line","whisker_hi_ns":1000,"whisker_label":"p99.99+ tails","points":[{"ns":250,"src":"vistara","loc":"platform table p.5","tag":"P","granularity":"64 B cache line","platform":"Vistara 2x ASIC, AMD Turin, DDR4-2400","unc":"approx (printed '~250')"},{"ns":265.2,"src":"polar","loc":"Table 1","tag":"P","granularity":"64 B cache line","platform":"PolarCXLMem, CXL without switch, Intel MLC","unc":"exact (printed)"}]},{"id":"cxl_mhd","path":"CXL multi-headed device (2-4 ports)","role":"far","kind":"measured","lo_ns":260,"hi_ns":300,"open_ended":false,"src":"octopus","loc":"Fig. 2 right, PDF p.2","tag":"P","unc":"range as published","granularity":"64 B cache line"},{"id":"cxl_switch","path":"CXL behind a switch","role":"far","kind":"measured","lo_ns":490,"hi_ns":600,"open_ended":false,"src":"octopus+polar","loc":"Octopus Fig. 2 PDF p.2; PolarCXLMem Table 1","tag":"P","unc":"exact (printed) / range as published","granularity":"64 B cache line","points":[{"ns":549,"src":"polar","loc":"Table 1 (CXL w. switch, local)","tag":"P","granularity":"64 B cache line","platform":"PolarCXLMem, XConn switch, local socket","unc":"exact (printed)"},{"ns":651,"src":"polar","loc":"Table 1 (CXL w. switch, remote)","tag":"P","granularity":"64 B cache line","platform":"PolarCXLMem, XConn switch, remote socket","unc":"exact (printed)"}]},{"id":"rdma","path":"RDMA far memory","role":"far","kind":"measured","lo_ns":3550,"hi_ns":4550,"open_ended":false,"src":"octopus+fastswap+polar","loc":"Octopus Fig. 2 p.2; Fastswap p.13 + fn.7; PolarCXLMem Table 2 (64 B row, read)","tag":"P","unc":"exact (printed)","granularity":"mixed: Octopus 64 B cache line (P50 load-to-use); Fastswap 4 KB page read; PolarCXLMem 64 B read","points":[{"ns":3550,"src":"octopus","loc":"Fig. 2 right p.2","tag":"P","granularity":"64 B cache line","platform":"Octopus, RDMA via ToR, P50","unc":"exact (printed)"},{"ns":3900,"src":"fastswap","loc":"p.13, fn.7 'Average 4KB RDMA read latency measured in our testbed'","tag":"P","granularity":"4 KB page","platform":"Fastswap ConnectX-3 40 Gb","unc":"exact (printed)"},{"ns":4550,"src":"polar","loc":"Table 2, 64B read","tag":"P","granularity":"64 B","platform":"PolarCXLMem RDMA","unc":"exact (printed)"},{"ns":5580,"src":"polar","loc":"Table 2, 4KB read","tag":"P","granularity":"4 KB page","platform":"PolarCXLMem RDMA","unc":"exact (printed)"}]},{"id":"nvme","path":"NVMe SSD","role":"far","kind":"typical","lo_ns":10000,"hi_ns":40000,"open_ended":false,"src":"tpp","loc":"Fig. 2, PDF p.2","tag":"P","unc":"range as published (printed labels, 10-40 us)","granularity":"block / page I/O"},{"id":"est_pond_row5","path":"Berger/Pond 8–16-socket MHD pool, modelled","role":"far","kind":"modelled","lo_ns":155,"hi_ns":180,"open_ended":false,"src":"berger","loc":"Fig. 3, MHD 2-8 socket 155 ns (182%) and 16-socket 180 ns (212%) load-to-use","tag":"P","unc":"exact (printed); lower bound","granularity":"64 B load-to-use","target_row":"cxl_mhd"},{"id":"est_dassharma_row5","path":"Das Sharma spec estimate","role":"far","kind":"estimate","lo_ns":170,"hi_ns":170,"open_ended":false,"src":"dassharma","loc":"Table 2 row 1, PDF p.26","tag":"P","unc":"exact (printed); estimate","granularity":"64 B load-to-use","target_row":"cxl_direct"},{"id":"est_dassharma_row7","path":"Das Sharma spec estimate (switch)","role":"far","kind":"estimate","lo_ns":250,"hi_ns":250,"open_ended":false,"src":"dassharma","loc":"Table 2 row 'CPU to Type-3 through a CXL switch', PDF p.26","tag":"P","unc":"exact (printed); estimate","granularity":"64 B load-to-use","target_row":"cxl_switch"},{"id":"est_berger_row7","path":"Berger modelled rack-scale pool","role":"far","kind":"modelled","lo_ns":270,"hi_ns":345,"open_ended":false,"src":"berger","loc":"Fig. 3: MHD 32-64 socket '>270 ns, 318%'; switch-only 32-64 socket '>345 ns, 405%'","tag":"P","unc":"exact (printed); lower bound","granularity":"64 B load-to-use","target_row":"cxl_switch"}]}</script>
+  <header class="slide-head">
+    <div class="kicker">02 · Distance is a proxy</div>
+    <h2>Distance is a proxy: closer is not lower‑latency, and farther costs hops, not metres.</h2>
+    <div class="sub">A 6 ft (~2 m) cable adds ~12 ns each way. Latency lives in device timing, controllers, SerDes, switches and queues.</div>
+  </header>
+  <div class="slide-body">
+    <div class="cols s02-body">
+      <div>
+        <svg id="s02-chart" viewBox="0 0 780 402" width="780" role="img" aria-label="Log-scale range chart of idle access latency by path, 50 nanoseconds to 100 microseconds; load-to-use for memory tiers, page or block read for RDMA 4 KB and NVMe. Local DDR 78 to 146 nanoseconds; remote-socket DDR 142 to 255; Grace to LPDDR5X over 200; GPU to HBM about 300 to 330; CXL direct-attach 214 to 394 (394 is an FPGA device) with tails to 1 microsecond; multi-headed CXL 260 to 300 measured, with a modelled 155 to 180 estimate for 8 to 16 socket pools; CXL behind a switch 490 to 600; RDMA 64 byte reads 3.55 and 4.55 microseconds and 4 KB page reads 3.9 and 5.58 microseconds; NVMe SSD typical 10 to 40 microseconds (TPP Fig. 2). Hollow dashed marks are spec, modelled or typical values."></svg>
+        <p class="s02-cap tiny">Measured idle latency (filled) vs spec or modelled estimates (hollow). Platforms differ; compare within a row. NVMe is a typical value. Grace and GPU rows are [S] approximations, confounded by each host's cache hierarchy.</p>
+      </div>
+      <div class="s02-right">
+        <div class="box near"><span class="label-near">Closer ≠ faster.</span> On Xeon Max, the same cores see ~20% higher pointer-chase latency from HBM2e than from DDR5, yet stream ~700 vs ~200 GB/s.</div>
+        <div class="box far"><span class="label-far">Farther = hops.</span> One CXL hop adds ~100–280 ns (measured); a switch adds ≥220 ns more<sup class="tag">V</sup>.</div>
+        <div class="box mid"><span class="label-mid">"Far" is a role.</span> GB200's capacity tier (LPDDR5X) sits beside the Grace CPU, not out on a far network.</div>
+      </div>
+    </div>
+  </div>
+  <footer class="slide-foot">
+    <div class="sources">Octopus arXiv 2501.09020 (NSDI'26) P50 [P]; Melody ASPLOS'25 [P]; Vistara ISCA'26 [P]; PolarCXLMem SIGMOD'25 Tables 1–2, p.4 [P]; Fastswap EuroSys'20 p.13 fn.7 [P]; Pond ASPLOS'23 [P]; Xeon Max: arXiv 2505.14294 [P]; H100/GH200/Grace: Chips and Cheese [S]; NVMe: TPP Fig. 2 [P]; switch ≥220 ns: XConn via Octopus ref. [50] [V]; cable: Levis HotNets'23 [P]; GB200 [V]. Hollow: Pond, Das Sharma arXiv 2306.11227, Berger IEEE Micro'23 pp.5–6 (modelled).</div>
+    <div class="pageno">02 / 10</div>
+  </footer>
+  <script>
+  (function () {
+    var root = document.getElementById('s02');
+    var D = JSON.parse(root.querySelector('#s02-data').textContent);
+    var NS = 'http://www.w3.org/2000/svg';
+    var svg = root.querySelector('#s02-chart');
+    function el(n, a, t) { var e = document.createElementNS(NS, n); for (var k in a) e.setAttribute(k, a[k]); if (t != null) e.textContent = t; svg.appendChild(e); return e; }
+    function tip(e, h) { if (window.DeckTip) window.DeckTip.attach(e, h); }
+    function fmtNs(v) { return v >= 1000 ? (+(v / 1000).toFixed(2)) + ' µs' : v + ' ns'; }
+    var byId = {}; D.rows.forEach(function (r) { byId[r.id] = r; });
+    function srcTxt(s) { return s.split('+').map(function (k) { var o = D.sources[k]; return o ? o.cite + ' (' + o.locator + ') [' + o.tag + ']' : k; }).join('<br>'); }
+
+    var L = 196, R = 752, T = 22, XMIN = 50, XMAX = 100000;
+    var dec = Math.log10(XMAX / XMIN);
+    function X(v) { return L + Math.log10(v / XMIN) / dec * (R - L); }
+    var order = ['local_ddr','remote_socket_ddr','grace_lpddr5x','gpu_hbm3','cxl_direct','cxl_mhd','cxl_switch','rdma','nvme'];
+    var H = { cxl_direct: 46, cxl_mhd: 40, cxl_switch: 55, rdma: 40 };
+    var names = {
+      local_ddr: ['Local DDR, x86', '(DDR4 / DDR5)'],
+      remote_socket_ddr: ['Remote-socket DDR', ''],
+      grace_lpddr5x: ['Grace CPU → LPDDR5X', '[S] approx.; host-dependent'],
+      gpu_hbm3: ['GPU → HBM3 (H100, GH200)', 'includes GPU cache hierarchy'],
+      cxl_direct: ['CXL direct-attach', 'dots 250, 265 ns'],
+      cxl_mhd: ['CXL multi-headed device', '(2–4 ports)'],
+      cxl_switch: ['CXL behind a switch', 'dots 549 local, 651 remote'],
+      rdma: ['RDMA far memory', ''],
+      nvme: ['NVMe SSD', 'typical (TPP Fig. 2)']
+    };
+    var col = { mid: 'var(--mid)', near: 'var(--near)', far: 'var(--far)' };
+
+    var y = T, Y = {}, ROWH = {};
+    order.forEach(function (id) { var h = H[id] || 33; ROWH[id] = h; Y[id] = y + h / 2; y += h; });
+    var PB = y;
+    var CM = {}, TOP = {}; order.forEach(function (id) { TOP[id] = Y[id] - ROWH[id] / 2; CM[id] = TOP[id] + (id === 'rdma' ? 18 : 14); });
+
+    /* row bands: each band encloses its title and sublabel */
+    order.forEach(function (id, i) {
+      if (i % 2 === 0) el('rect', { x: 0, y: TOP[id] + 1, width: R + 6, height: ROWH[id] - 2, style: 'fill:var(--panel)', rx: 3 });
+    });
+    /* grid, ticks */
+    [[50,'50 ns'],[100,'100'],[200,'200'],[500,'500 ns'],[1000,'1 µs'],[2000,'2 µs'],[5000,'5 µs'],[10000,'10 µs'],[20000,'20 µs'],[50000,'50 µs'],[100000,'100 µs']].forEach(function (t) {
+      el('line', { x1: X(t[0]), x2: X(t[0]), y1: T, y2: PB, style: 'stroke:var(--rule)', 'stroke-width': 1 });
+      el('text', { x: X(t[0]), y: PB + 16, 'text-anchor': 'middle', class: 'axis', style: 'font-size:12px' }, t[1]);
+    });
+    el('text', { x: (L + R) / 2, y: PB + 29, 'text-anchor': 'middle', class: 'lbl', style: 'font-size:12px' }, 'Idle access latency (log scale): load-to-use for memory tiers; page/block read for RDMA 4 KB and NVMe');
+    /* row labels */
+    order.forEach(function (id) {
+      var n = names[id], cm = CM[id];
+      el('text', { x: 6, y: cm - 1, style: 'font-size:13px;font-weight:600;fill:' + col[byId[id].role] }, n[0]);
+      if (n[1]) el('text', { x: 6, y: cm + 12, class: 'faint', style: 'font-size:12px' }, n[1]);
+    });
+
+    function bar(id) {
+      var r = byId[id], c = col[r.role], cy = CM[id], tag = '<b>' + r.path + '</b><br>' + fmtNs(r.lo_ns) + (r.hi_ns ? '–' + fmtNs(r.hi_ns) : ' and above') + ' · ' + r.kind + '<br>' + srcTxt(r.src) + '<br><i>' + r.unc + '</i>' + (id === 'cxl_direct' ? '<br>394 ns = Melody CXL-C (FPGA device); ASIC devices 214–271 ns.' : '') + (id === 'nvme' ? '<br>Upper end up to ~50 µs [unverified]; plotted only to the printed 40 µs. Typical value from a generic technology figure, not a measurement.' : '');
+      var b;
+      if (r.open_ended) {
+        var x0 = X(r.lo_ns), x1 = x0 + 44;
+        b = el('rect', { x: x0, y: cy - 4.5, width: 44, height: 9, style: 'fill:' + c, rx: 1 });
+        el('path', { d: 'M' + x1 + ' ' + (cy - 8) + ' L' + (x1 + 9) + ' ' + cy + ' L' + x1 + ' ' + (cy + 8) + ' Z', style: 'fill:' + c });
+        el('text', { x: x1 + 15, y: cy + 4, class: 'muted halo', style: 'font-size:12px' }, '>200 ns [S]');
+        tip(el('rect', { x: x0, y: cy - 10, width: 54, height: 20, fill: 'transparent' }), tag);
+        return;
+      }
+      var w = Math.max(X(r.hi_ns) - X(r.lo_ns), 3);
+      if (r.kind === 'typical') {
+        el('rect', { x: X(r.lo_ns), y: cy - 4.5, width: w, height: 9, style: 'fill:var(--far-soft);stroke:var(--far)', 'stroke-width': 1.3, 'stroke-dasharray': '3 3', rx: 1 });
+        tip(el('rect', { x: X(r.lo_ns), y: cy - 10, width: w, height: 20, fill: 'transparent' }), tag);
+        return;
+      }
+      b = el('rect', { x: X(r.lo_ns), y: cy - (id === 'rdma' ? 6 : 4.5), width: w, height: (id === 'rdma' ? 12 : 9), style: 'fill:' + c, rx: 1 });
+      tip(el('rect', { x: X(r.lo_ns), y: cy - 10, width: w, height: 20, fill: 'transparent' }), tag);
+    }
+    var JIT = { cxl_direct: [[-10, 0], [9, 0]], rdma: [[-12, -5], [12, 0], [-12, 5], [12, 0]] };
+    function dots(id) {
+      var r = byId[id], cy0 = CM[id];
+      (r.points || []).forEach(function (p, i) {
+        var jj = JIT[id] ? JIT[id][i] : [0, 0], j = jj[0], cy = cy0 + j;
+        if (j) el('line', { x1: X(p.ns), x2: X(p.ns) + jj[1], y1: cy0, y2: cy, style: 'stroke:var(--ink)', 'stroke-width': 0.8 });
+        var cx = X(p.ns) + jj[1], sq = /page/.test(p.granularity);
+        var e = sq ? el('rect', { x: cx - 3.5, y: cy - 3.5, width: 7, height: 7, style: 'fill:var(--ink);stroke:var(--bg)', 'stroke-width': 1.2 })
+                   : el('circle', { cx: cx, cy: cy, r: 3.2, style: 'fill:var(--ink);stroke:var(--bg)', 'stroke-width': 1.2 });
+        tip(el('circle', { cx: cx, cy: cy, r: 8, fill: 'transparent' }), '<b>' + fmtNs(p.ns) + '</b> · ' + p.granularity + '<br>' + p.platform + '<br>' + srcTxt(p.src) + '<br><i>' + p.unc + '</i>');
+      });
+    }
+    order.forEach(function (id) { bar(id); dots(id); });
+
+    function lbl(x, y, t, anchor, extra) { el('text', { x: x, y: y, 'text-anchor': anchor || 'start', class: 'muted halo', style: 'font-size:12px' + (extra || '') }, t); }
+    var r1 = byId.local_ddr, r2 = byId.remote_socket_ddr;
+    lbl(X(146) + 8, CM.local_ddr + 4, '78–146 ns');
+    lbl(X(255) + 8, CM.remote_socket_ddr + 4, '142–255 ns');
+    lbl(X(330) + 8, CM.gpu_hbm3 + 4, '~300–330 ns [S]');
+    lbl(X(300) + 8, CM.cxl_mhd + 4, '260–300 ns');
+    lbl(X(214) - 6, CM.cxl_direct + 4, '214–394 ns (394 = FPGA)', 'end');
+    lbl(X(651) + 8, CM.cxl_switch + 4, '490–600 ns · dots 549, 651');
+    lbl(X(5580) + 12, CM.rdma - 2, '● 64 B: 3.55, 4.55 µs');
+    lbl(X(5580) + 12, CM.rdma + 12, '■ 4 KB page: 3.9, 5.58 µs');
+    lbl(X(40000) + 8, CM.nvme + 4, '10–40 µs');
+
+    /* whisker */
+    var cd = byId.cxl_direct, wy = CM.cxl_direct;
+    var wk = el('line', { x1: X(cd.hi_ns), x2: X(cd.whisker_hi_ns), y1: wy, y2: wy, style: 'stroke:var(--far)', 'stroke-width': 1.3, 'stroke-dasharray': '1.5 2.5' });
+    el('line', { x1: X(cd.whisker_hi_ns), x2: X(cd.whisker_hi_ns), y1: wy - 5, y2: wy + 5, style: 'stroke:var(--far)', 'stroke-width': 1.3 });
+    lbl(X(cd.whisker_hi_ns) + 7, wy + 4, cd.whisker_label + ', to ~1 µs');
+    tip(el('rect', { x: X(cd.hi_ns), y: wy - 8, width: X(cd.whisker_hi_ns) - X(cd.hi_ns), height: 16, fill: 'transparent' }), '<b>Tail latency</b><br>p99.99 and p99.999 of Melody CXL-A and CXL-D exceed 700 ns; CXL-B and CXL-C reach 1 µs.<br>Melody ASPLOS\'25, Sec 3.2 p.5 [P]');
+
+    /* hollow estimates */
+    var estStyle = 'fill:none;stroke:var(--ink-3)';
+    var est = [
+      { id: 'est_pond_row5', row: 'cxl_mhd', off: 17, t: 'Berger/Pond 8–16-socket MHD pool, modelled', tt: 'Berger IEEE Micro\'23 p.6, Fig. 3: 8- and 16-socket MHD pools, 155 ns (182%) and 180 ns (212%) load-to-use; also labelled in Pond ASPLOS\'23 Fig. 2. Component sum (40+25+5+25+15+45); projection, not measured.' },
+      { id: 'est_dassharma_row5', row: 'cxl_direct', off: 26, t: 'Das Sharma 170 ns (estimate)', tt: 'Das Sharma et al., arXiv 2306.11227 Table 2, p.26 [P]. <100 + 50 CXL stack + 10 flight (+10 retimer). Spec estimate.' },
+      { id: 'est_dassharma_row7', row: 'cxl_switch', off: 20, t: 'Das Sharma 250 ns (estimate)', tt: 'Das Sharma et al., arXiv 2306.11227 Table 2, p.26 [P]. <100 + switch w/ flight 70 + device <80. Spec estimate.' },
+      { id: 'est_berger_row7', row: 'cxl_switch', off: 34, t: 'Berger >270 to >345 ns (modelled)', tt: 'Berger IEEE Micro\'23 Fig. 3: printed as lower bounds (MHD 32–64 socket >270 ns; switch-only >345 ns). Component-sum model, no hardware.', open: true }
+    ];
+    est.forEach(function (e) {
+      var r = byId[e.id], cy = CM[e.row] + e.off, x0 = X(r.lo_ns), x1 = X(r.hi_ns), xe;
+      var g;
+      if (r.lo_ns === r.hi_ns) {
+        g = el('path', { d: 'M' + x0 + ' ' + (cy - 5) + ' L' + (x0 + 5) + ' ' + cy + ' L' + x0 + ' ' + (cy + 5) + ' L' + (x0 - 5) + ' ' + cy + ' Z', style: estStyle, 'stroke-width': 1.3, 'stroke-dasharray': '3 2' });
+        xe = x0 + 5;
+      } else {
+        g = el('rect', { x: x0, y: cy - 4, width: x1 - x0, height: 8, style: estStyle, 'stroke-width': 1.3, 'stroke-dasharray': '3 3' });
+        xe = x1;
+        if (e.open) { el('path', { d: 'M' + x1 + ' ' + (cy - 5) + ' L' + (x1 + 7) + ' ' + cy + ' L' + x1 + ' ' + (cy + 5), style: 'fill:none;stroke:var(--ink-3)', 'stroke-width': 1.3 }); xe = x1 + 7; }
+      }
+      lbl(xe + 8, cy + 4, e.t, 'start', ';fill:var(--ink-3)');
+      tip(el('rect', { x: x0 - 6, y: cy - 8, width: Math.max(x1 - x0, 0) + 12 + (e.open ? 8 : 0), height: 16, fill: 'transparent' }), '<b>' + e.t + '</b><br>' + e.tt + '<br>' + srcTxt(r.src));
+    });
+
+    /* brackets */
+    var BX = 560;
+    function bracket(ya, yb, l1, l2, tt, vtag) {
+      el('path', { d: 'M' + (BX - 5) + ' ' + ya + ' L' + BX + ' ' + ya + ' L' + BX + ' ' + yb + ' L' + (BX - 5) + ' ' + yb, style: 'fill:none;stroke:var(--ink-2)', 'stroke-width': 1.2 });
+      var m = (ya + yb) / 2;
+      el('text', { x: BX + 8, y: m - 2, class: 'halo', style: 'font-size:12px;font-weight:600;fill:var(--ink)' }, l1);
+      var t2 = el('text', { x: BX + 8, y: m + 12, class: 'halo', style: 'font-size:12px;fill:var(--ink)' }, l2);
+      if (vtag) { var ts = document.createElementNS(NS, 'tspan'); ts.setAttribute('dy', '-4'); ts.setAttribute('dx', '2'); ts.setAttribute('style', 'font-size:11px;font-family:var(--font-mono);fill:var(--ink-3)'); ts.textContent = 'V'; t2.appendChild(ts); }
+      tip(el('rect', { x: BX - 6, y: ya, width: 180, height: yb - ya, fill: 'transparent' }), tt);
+    }
+    bracket(CM.local_ddr, CM.cxl_direct - 3, '+1 hop (DDR → CXL direct):', '+~100–280 ns measured',
+      '<b>First-hop CXL adder, measured</b><br>Melody +100 (CXL-A) to +280 (CXL-C, FPGA) vs 114 ns local; Octopus +115–155; Vistara +120; PolarCXLMem +119 [P]. ASIC devices add ~100–160 ns; +280 is an FPGA prototype.');
+    bracket(CM.cxl_direct + 3, CM.cxl_switch, '+switch:', '≥220 ns more',
+      '<b>Switch adder: ≥220 ns [V]</b><br>XConn figure cited by Octopus ("adds at least 220 ns", ref. [50]) [V]. Derived from PolarCXLMem: +284–305 ns (549 − 265.2 = 283.8) [D from P].', true);
+
+    /* legend */
+    var ly = 12, lx = 0;
+    el('rect', { x: lx, y: ly - 5, width: 20, height: 8, style: 'fill:var(--ink-2)', rx: 1 });
+    el('text', { x: lx + 26, y: ly + 3, class: 'muted', style: 'font-size:11px' }, 'measured');
+    el('circle', { cx: lx + 100, cy: ly - 1, r: 3.2, style: 'fill:var(--ink);stroke:var(--bg)' });
+    el('text', { x: lx + 108, y: ly + 3, class: 'muted', style: 'font-size:11px' }, 'single value');
+    el('rect', { x: lx + 190, y: ly - 5, width: 20, height: 8, style: estStyle, 'stroke-width': 1.3, 'stroke-dasharray': '3 3' });
+    el('text', { x: lx + 216, y: ly + 3, class: 'muted', style: 'font-size:11px' }, 'spec / modelled / typical range');
+    el('path', { d: 'M' + (lx + 394) + ' ' + (ly - 5) + ' L' + (lx + 399) + ' ' + (ly - 1) + ' L' + (lx + 394) + ' ' + (ly + 3) + ' L' + (lx + 389) + ' ' + (ly - 1) + ' Z', style: estStyle, 'stroke-width': 1.3, 'stroke-dasharray': '3 2' });
+    el('text', { x: lx + 406, y: ly + 3, class: 'muted', style: 'font-size:11px' }, 'spec point');
+    el('path', { d: 'M' + (lx + 490) + ' ' + (ly - 5) + ' L' + (lx + 497) + ' ' + (ly - 1) + ' L' + (lx + 490) + ' ' + (ly + 3), style: 'fill:none;stroke:var(--ink-3)', 'stroke-width': 1.3 });
+    el('text', { x: lx + 503, y: ly + 3, class: 'muted', style: 'font-size:11px' }, 'lower bound (>)');
+  })();
+  </script>
+</section>
+
+<section class="slide" id="s03" data-title="Pressure 1: bandwidth">
+  <style>
+    #s03 .s03-body { grid-template-columns: 400px 1fr; gap: 30px; }
+    #s03 .s03-lab { font-size: 12.5px; line-height: 1.3; color: var(--ink); margin: 0 0 3px; }
+    #s03 .s03-cap { margin: 2px 0 0; font-size: 11.5px; line-height: 1.3; }
+    #s03 .s03-take { font-size: 15px; line-height: 1.35; margin: 6px 0 0; color: var(--ink); }
+    #s03 .s03-left > div + div { margin-top: 8px; }
+  </style>
+  <script type="application/json" id="s03-data">
+{"series":[{"name":"compute","rate_per_2yr":3.0,"total_20yr_stated":60000},{"name":"dram_bw","rate_per_2yr":1.6,"total_20yr_stated":100},{"name":"interconnect","rate_per_2yr":1.4,"total_20yr_stated":30}],
+"die_geometry":{"reticle_mm":[26,33],"stack_mm":[11,12.8],"stacks_per_long_edge":3,"phy_mm":[8,4],"phy_inset_mm":1,"px_per_mm":6},
+"points":[{"name":"DDR3-1600","pj_per_bit":38,"tbps":0.011,"kind":"ddr"},{"name":"DDR4-3200","pj_per_bit":31,"tbps":0.026,"kind":"ddr"},{"name":"DDR5-6400","pj_per_bit":26,"tbps":0.055,"kind":"ddr"},{"name":"LPDDR5-6400","pj_per_bit":8.0,"tbps":0.052,"kind":"ddr"},{"name":"GDDR6 (384-bit)","pj_per_bit":14,"tbps":1.1,"kind":"ddr"},{"name":"HBM1","pj_per_bit":6.8,"tbps":1.0,"kind":"hbm"},{"name":"HBM2","pj_per_bit":5.6,"tbps":2.4,"kind":"hbm"},{"name":"HBM3","pj_per_bit":4.2,"tbps":6.5,"kind":"hbm"},{"name":"HBM3E","pj_per_bit":3.7,"tbps":9.8,"kind":"hbm"},{"name":"HBM4 (proj.)","pj_per_bit":2.4,"tbps":18,"kind":"hbm"},{"name":"Raptor 3D (I/O only)","pj_per_bit":0.37,"tbps":100,"kind":"d3","src":"d-Matrix HC'26 s23 [V]; measured I/O only"},{"name":"zHBM 3D (Samsung proj.)","pj_per_bit":0.49,"tbps":31.8,"kind":"d3","src":"derived from Samsung HC'26 s23 chart (31.8 TB/s, 124 W) [D from V]"}],
+"extrapolations":[{"label":"100 TB/s at HBM4's 2.4 pJ/bit","pj_per_bit":2.4,"tbps":100,"watts":1920},{"label":"100 TB/s on HBM trend","pj_per_bit":1.44,"pj_per_bit_hi":1.54,"tbps":100,"watts":1152,"watts_hi":1232}],
+"iso_power_w":[100,300,1000,2000]}
+  </script>
+  <header class="slide-head">
+    <div class="kicker">03 · Pressure 1: bandwidth → A</div>
+    <h2>Bandwidth must cross a boundary; each step closer adds wires, cuts pJ/bit, until another limit binds.</h2>
+    <div class="sub">Bandwidth = wires crossing a boundary × rate per wire. Memory power = bandwidth × energy per bit.</div>
+  </header>
+  <div class="slide-body">
+    <div class="cols s03-body">
+      <div class="s03-left">
+        <div>
+          <p class="s03-lab" style="white-space:nowrap;margin-bottom:8px">Compute outgrows DRAM bandwidth ~1.9× per 2 years [D: 3.0/1.6].</p>
+          <svg id="s03-a" viewBox="0 0 400 144" width="400" role="img" aria-label="Log-scale line chart over a 20-year window of fitted growth from 1x: compute reaches 60,000x, DRAM bandwidth 100x, interconnect 30x."></svg>
+          <p class="tiny s03-cap">Fitted rates as stated by Gholami et al.; lines, not data points.</p>
+        </div>
+        <div>
+          <p class="s03-lab">At most ~6 HBM4 stacks fit a reticle die's two long edges.</p>
+          <svg id="s03-b" viewBox="0 0 400 170" width="400" role="img" aria-label="To-scale top view of a 26 by 33 millimetre host die with three HBM4 stacks of 11 by 12.8 millimetres on each long edge, six stacks in total."></svg>
+          <p class="tiny s03-cap">To scale, after Samsung HC'26 s9–s11. More dies → bigger interposer (size, warpage limits).</p>
+        </div>
+      </div>
+      <div>
+        <svg id="s03-c" viewBox="0 0 730 296" width="730" role="img" aria-label="Log-log chart of peak bandwidth against energy per bit with constant-power lines at 100 W, 300 W, 1 kW and 2 kW. HBM1 to HBM4 move from 1 to 18 terabytes per second as energy falls from 6.8 to 2.4 picojoules per bit; DDR points sit at low bandwidth and 8 to 38 picojoules per bit; 3D points reach 31.8 and 100 terabytes per second below 0.5 picojoules per bit. Extrapolating HBM to 100 terabytes per second implies about 1.2 to 1.9 kilowatts."></svg>
+        <p class="tiny s03-cap">Replotted from d-Matrix HC'26 s6 (±5% read). HBM = 8-stack package; DDR/LPDDR ≈ one 64-bit channel; GDDR6 = 384-bit bus.<br>d-Matrix labels HBM4's 2–3 pJ/bit "I/O", "data-movement" and "system" on different slides; its HBM2 point (≈5.6 pJ/bit) uses its own, different scope. Raptor 0.37 = measured I/O only; zHBM = Samsung 4-stack projection (HBM points 8-stack): 0.49 = total DRAM power ÷ peak BW, utilisation unstated, so a lower bound; Samsung's HBM4E baseline ≈2.0.</p>
+        <p class="small s03-take">After the interposer, most energy sits in the DRAM core (O'Connor's HBM2 model: 3.45 of 3.92 pJ/bit, full access, modelled; newer generations lower it). 3D stacking removes the edge limit, but HBM2 I/O is already 0.3–0.8 pJ/bit by toggle rate (interposer-wire term only), vs Raptor's 0.37: core energy binds next (→ PIM, slide 7).</p>
+      </div>
+    </div>
+  </div>
+  <footer class="slide-foot">
+    <div class="sources">(a) Gholami et al., IEEE Micro'24 / arXiv 2403.14123, stated fitted rates [P]. (b) Samsung HC'26 s9–s11 [V], drawn to scale [D]. (c) d-Matrix HC'26 s6 replot [V], Raptor s23 [V]; zHBM from Samsung s23 [D from V]; extrapolations [D]. HBM2 energy split: O'Connor MICRO'17 §1, Fig. 1 [P]; HBM2 I/O 0.3 (real toggle) / 0.80 (50% toggle): O'Connor §1, Table 3 [P]; Raptor 0.37 measured I/O [V].</div>
+    <div class="pageno">03 / 10</div>
+  </footer>
+  <script>
+  (function () {
+    var root = document.getElementById('s03');
+    var D = JSON.parse(root.querySelector('#s03-data').textContent);
+    var NS = 'http://www.w3.org/2000/svg';
+    function mk(svg) { return function (n, a, t) { var e = document.createElementNS(NS, n); for (var k in a) e.setAttribute(k, a[k]); if (t != null) e.textContent = t; svg.appendChild(e); return e; }; }
+    function tip(e, h) { if (window.DeckTip) window.DeckTip.attach(e, h); }
+    function fmt(v) { return v < 10 ? v.toFixed(1) : String(Math.round(v)); }
+
+    /* ---------- (a) growth ---------- */
+    (function () {
+      var el = mk(root.querySelector('#s03-a'));
+      var L = 52, R = 252, T = 10, B = 110, ymaxd = 5;
+      function X(t) { return L + t / 20 * (R - L); }
+      function Y(v) { return B - Math.log10(v) / ymaxd * (B - T); }
+      [[1, '1'], [10, '10'], [100, '100'], [1000, '1k'], [10000, '10k'], [100000, '100k']].forEach(function (g) {
+        el('line', { x1: L, x2: R, y1: Y(g[0]), y2: Y(g[0]), style: 'stroke:var(--rule)', 'stroke-width': 1 });
+        el('text', { x: L - 6, y: Y(g[0]) + 4, 'text-anchor': 'end', class: 'axis', style: 'font-size:12px' }, g[1]);
+      });
+      [0, 5, 10, 15, 20].forEach(function (t) {
+        el('text', { x: X(t), y: B + 14, 'text-anchor': 'middle', class: 'axis', style: 'font-size:12px' }, t);
+      });
+      el('text', { x: (L + R) / 2, y: B + 29, 'text-anchor': 'middle', class: 'lbl', style: 'font-size:12px' }, "Years (Gholami's 20-year window)");
+      el('text', { x: 9, y: (T + B) / 2, 'text-anchor': 'middle', class: 'lbl', style: 'font-size:12px', transform: 'rotate(-90 9 ' + ((T + B) / 2) + ')' }, 'Growth (×, log scale)');
+      var sty = { compute: ['var(--ink)', 2, null, 'compute 3.0×/2 yr', 0], dram_bw: ['var(--ink-2)', 1.5, null, 'DRAM BW 1.6×/2 yr', -3], interconnect: ['var(--ink-3)', 1.5, '5 3', 'interconnect 1.4×/2 yr', 5] };
+      D.series.forEach(function (s) {
+        var c = sty[s.name], a = { x1: X(0), y1: Y(1), x2: X(20), y2: Y(s.total_20yr_stated), style: 'stroke:' + c[0], 'stroke-width': c[1] };
+        if (c[2]) a['stroke-dasharray'] = c[2];
+        var ln = el('line', a);
+        el('circle', { cx: X(20), cy: Y(s.total_20yr_stated), r: 2.5, style: 'fill:' + c[0] });
+        el('text', { x: X(20) + 6, y: Y(s.total_20yr_stated) + 4 + c[4], class: 'halo', style: 'font-size:12px;font-weight:600;fill:' + c[0] }, c[3]);
+        tip(ln, '<b>' + c[3] + '</b><br>' + s.rate_per_2yr + '× per 2 yr; ' + s.total_20yr_stated.toLocaleString('en-US') + '× over 20 yr (stated fit). Gholami et al., Fig. 1 legend [P].');
+      });
+    })();
+
+    /* ---------- (b) die edge, to scale ---------- */
+    (function () {
+      var el = mk(root.querySelector('#s03-b'));
+      var g = D.die_geometry, s = 5, gap = 1.5;
+      var stW = g.stack_mm[1], stH = g.stack_mm[0], dW = g.reticle_mm[0], dH = g.reticle_mm[1];
+      var x0 = 0, y0 = 2;
+      var dieX = x0 + (stW + gap) * s;
+      var die = el('rect', { x: dieX, y: y0, width: dW * s, height: dH * s, style: 'fill:var(--mid)' });
+      ['host die', '(SoC or base die)', '26 × 33 mm', 'reticle'].forEach(function (a, k) {
+        el('text', { x: dieX + dW * s / 2, y: y0 + dH * s / 2 - 22 + k * 15, 'text-anchor': 'middle', style: 'font-size:12px;fill:#fff' + (k === 0 ? ';font-weight:600' : '') }, a);
+      });
+      el('line', { x1: dieX, x2: dieX, y1: y0, y2: y0 + dH * s, style: 'stroke:var(--near)', 'stroke-width': 3 });
+      el('line', { x1: dieX + dW * s, x2: dieX + dW * s, y1: y0, y2: y0 + dH * s, style: 'stroke:var(--near)', 'stroke-width': 3 });
+      tip(die, 'Host die 26 × 33 mm, reticle-limited. Samsung HC\'26 s9 [V]; drawn to scale [D].');
+      for (var side = 0; side < 2; side++) for (var i = 0; i < g.stacks_per_long_edge; i++) {
+        var sx = side === 0 ? x0 : dieX + dW * s + gap * s, sy = y0 + i * stH * s;
+        var r = el('rect', { x: sx, y: sy + 1, width: stW * s, height: stH * s - 2, style: 'fill:var(--near)' });
+        var px = side === 0 ? sx + (stW - g.phy_mm[1] - g.phy_inset_mm) * s : sx + g.phy_inset_mm * s;
+        el('rect', { x: px, y: sy + 1.5 * s, width: g.phy_mm[1] * s, height: g.phy_mm[0] * s, style: 'fill:var(--near-soft);stroke:var(--near)', 'stroke-width': 1 });
+        tip(r, 'HBM4 stack 11 × 12.8 mm; PHY 8 × 4 mm inset 1 mm from the host-facing edge. Samsung HC\'26 s10–s11 [V]. The die-to-stack gap is illustrative.');
+      }
+      var tx = x0 + (2 * stW + 2 * gap + dW) * s + 12;
+      [['HBM4 stack', 'lbl'], ['11 × 12.8 mm (blue)', 'lbl'], ['PHY 8 × 4 mm (pale)', 'lbl'], ['', ''], ['3 × 11 mm = 33 mm', 'lbl'], ['per edge', 'lbl']].forEach(function (a, k) {
+        if (a[0]) el('text', { x: tx, y: 22 + k * 15, class: a[1], style: 'font-size:12px' }, a[0]);
+      });
+      el('text', { x: tx, y: 22 + 7 * 15 + 4 + 16, style: 'font-size:12px;font-weight:600;fill:var(--near)' }, 'die edge = the limit');
+      el('text', { x: tx, y: 22 + 7 * 15 + 4, style: 'font-size:14px;font-weight:700;fill:var(--near)' }, '6 stacks per die');
+    })();
+
+    /* ---------- (c) bandwidth vs energy ---------- */
+    (function () {
+      var svg = root.querySelector('#s03-c'), el = mk(svg);
+      var M = { l: 62, r: 50, t: 8, b: 46 }, W = 730, H = 296, pw = W - M.l - M.r, ph = H - M.t - M.b;
+      var x0 = Math.log10(0.2), x1 = Math.log10(50), y0 = Math.log10(0.005), y1 = Math.log10(300);
+      function X(v) { return M.l + (Math.log10(v) - x0) / (x1 - x0) * pw; }
+      function Y(v) { return M.t + (1 - (Math.log10(v) - y0) / (y1 - y0)) * ph; }
+      var cl = el('clipPath', { id: 's03-clip' }); var cr = document.createElementNS(NS, 'rect');
+      [['x', M.l], ['y', M.t], ['width', pw], ['height', ph]].forEach(function (a) { cr.setAttribute(a[0], a[1]); }); cl.appendChild(cr);
+      [0.2, 0.5, 1, 2, 5, 10, 20, 50].forEach(function (v) {
+        el('line', { x1: X(v), x2: X(v), y1: M.t, y2: M.t + ph, style: 'stroke:var(--rule)' });
+        el('text', { x: X(v), y: M.t + ph + 16, 'text-anchor': 'middle', class: 'axis', style: 'font-size:12px' }, v);
+      });
+      [0.01, 0.1, 1, 10, 100].forEach(function (v) {
+        el('line', { x1: M.l, x2: M.l + pw, y1: Y(v), y2: Y(v), style: 'stroke:var(--rule)' });
+        el('text', { x: M.l - 7, y: Y(v) + 4, 'text-anchor': 'end', class: 'axis', style: 'font-size:12px' }, v);
+      });
+      el('text', { x: M.l + pw / 2, y: H - 6, 'text-anchor': 'middle', class: 'lbl', style: 'font-size:12px' }, 'Energy per bit (pJ/bit, log scale; scope differs by point, see caption)');
+      el('text', { x: 14, y: M.t + ph / 2, 'text-anchor': 'middle', class: 'lbl', style: 'font-size:12px', transform: 'rotate(-90 14 ' + (M.t + ph / 2) + ')' }, 'Peak bandwidth (TB/s, log scale)');
+      el('rect', { x: M.l, y: M.t, width: pw, height: ph, fill: 'none', style: 'stroke:var(--ink-3)', 'stroke-width': 0.8 });
+      var gl = el('g', { 'clip-path': 'url(#s03-clip)' });
+      function gline(a) { var e = document.createElementNS(NS, 'line'); for (var k in a) e.setAttribute(k, a[k]); gl.appendChild(e); }
+      D.iso_power_w.forEach(function (P) {
+        gline({ x1: X(0.2), y1: Y(P / (8 * 0.2)), x2: X(50), y2: Y(P / (8 * 50)), style: 'stroke:var(--ink-3)', 'stroke-width': 1, 'stroke-dasharray': '2 4' });
+        el('text', { x: M.l + pw + 5, y: Y(P / (8 * 50)) + 4, class: 'faint', style: 'font-size:12px' }, P >= 1000 ? (P / 1000) + ' kW' : P + ' W');
+      });
+      var pts = D.points, hb = pts.filter(function (p) { return p.kind === 'hbm'; });
+      var colr = { ddr: 'var(--mid)', hbm: 'var(--near)', d3: 'var(--conv)' };
+      el('polyline', { points: hb.map(function (p) { return X(p.pj_per_bit) + ',' + Y(p.tbps); }).join(' '), fill: 'none', style: 'stroke:var(--near);opacity:.5', 'stroke-width': 2 });
+      var ex = D.extrapolations;
+      el('line', { x1: X(2.4), y1: Y(18), x2: X(2.4), y2: Y(100), style: 'stroke:var(--near)', 'stroke-width': 1.5, 'stroke-dasharray': '4 3' });
+      el('line', { x1: X(2.4), y1: Y(18), x2: X(1.44), y2: Y(100), style: 'stroke:var(--near)', 'stroke-width': 1.5, 'stroke-dasharray': '1 3' });
+      function hol(e, lab, dx, dy, anchor, html) {
+        el('circle', { cx: X(e.pj_per_bit), cy: Y(e.tbps), r: 5, style: 'fill:var(--bg);stroke:var(--near)', 'stroke-width': 2 });
+        el('text', { x: X(e.pj_per_bit) + dx, y: Y(e.tbps) + dy, 'text-anchor': anchor, class: 'halo', style: 'stroke-width:5px;font-size:12px;font-weight:600;fill:var(--near)' }, lab);
+        tip(el('circle', { cx: X(e.pj_per_bit), cy: Y(e.tbps), r: 13, fill: 'transparent' }), html);
+      }
+      hol(ex[0], '2.4 pJ/bit → 1.92 kW', 9, 16, 'start', '<b>100 TB/s at HBM4\'s 2.4 pJ/bit</b><br>1.92 kW for memory alone, excluding fabric power. d-Matrix s6 [V]');
+      hol(ex[1], 'trend ~1.4–1.5 pJ/bit → ~1.2 kW', -9, -9, 'end', '<b>100 TB/s if the HBM trend continues</b><br>log-log fit of HBM1–HBM4: ~1.44–1.54 pJ/bit, ~1.15–1.25 kW [D]');
+      var LB = { 'HBM1': [10, 4], 'HBM2': [10, 4], 'HBM3': [10, 12], 'HBM3E': [10, 2], 'HBM4 (proj.)': [-10, 16, 'end'], 'DDR5-6400': [-8, -10, 'end'], 'DDR3-1600': [-8, 4, 'end'], 'DDR4-3200': [-8, 4, 'end'], 'GDDR6 (384-bit)': [10, 4], 'LPDDR5-6400': [-9, 4, 'end'], 'Raptor 3D (I/O only)': [12, 4], 'zHBM 3D (Samsung proj.)': [0, 24, 'middle'] };
+      pts.forEach(function (p) {
+        var cx = X(p.pj_per_bit), cy = Y(p.tbps), c = colr[p.kind];
+        if (p.kind === 'ddr') el('rect', { x: cx - 5, y: cy - 5, width: 10, height: 10, style: 'fill:' + c + ';stroke:var(--bg)', 'stroke-width': 2 });
+        else if (p.kind === 'd3') el('path', { d: 'M' + cx + ' ' + (cy - 7) + ' L' + (cx + 7) + ' ' + cy + ' L' + cx + ' ' + (cy + 7) + ' L' + (cx - 7) + ' ' + cy + ' Z', style: 'fill:' + c + ';stroke:var(--bg)', 'stroke-width': 2 });
+        else el('circle', { cx: cx, cy: cy, r: 6, style: 'fill:' + c + ';stroke:var(--bg)', 'stroke-width': 2 });
+        var w = p.tbps * 8 * p.pj_per_bit;
+        tip(el('circle', { cx: cx, cy: cy, r: 14, fill: 'transparent' }), '<b>' + p.name + '</b><br>' + p.pj_per_bit + ' pJ/bit · ' + p.tbps + ' TB/s<br>' + (/Raptor/.test(p.name) ? 'implied I/O power only' : 'implied memory power') + ' ≈ ' + fmt(w) + ' W [D]<br>' + (p.src || 'read from d-Matrix HC\'26 s6 [V, ±5%]'));
+        var lb = LB[p.name];
+        if (lb) el('text', { x: cx + lb[0], y: cy + lb[1], 'text-anchor': lb[2] || 'start', class: 'muted halo', style: 'stroke-width:5px;font-size:12px' + (p.kind === 'd3' ? ';fill:var(--conv);font-weight:600' : '') }, p.name);
+      });
+      var kx = M.l + 12, ky = M.t + ph - 96;
+      function row(k, draw, txt) { draw(ky + k * 17); el('text', { x: kx + 24, y: ky + k * 17 + 4, class: 'muted', style: 'font-size:12px' }, txt); }
+      row(0, function (y) { el('line', { x1: kx, x2: kx + 18, y1: y, y2: y, style: 'stroke:var(--ink-3)', 'stroke-width': 1, 'stroke-dasharray': '2 4' }); }, 'constant power: W = TB/s × 8 × pJ/bit');
+      row(1, function (y) { el('line', { x1: kx, x2: kx + 18, y1: y, y2: y, style: 'stroke:var(--near);opacity:.5', 'stroke-width': 2 }); }, 'HBM generation trend (solid)');
+      row(2, function (y) { el('line', { x1: kx, x2: kx + 18, y1: y, y2: y, style: 'stroke:var(--near)', 'stroke-width': 1.5, 'stroke-dasharray': '4 3' }); }, 'to 100 TB/s at HBM4 energy (dashed) [D]');
+      row(3, function (y) { el('line', { x1: kx, x2: kx + 18, y1: y, y2: y, style: 'stroke:var(--near)', 'stroke-width': 1.5, 'stroke-dasharray': '1 3' }); }, 'to 100 TB/s on HBM energy trend (dotted) [D]');
+      row(4, function (y) { el('circle', { cx: kx + 9, cy: y, r: 4.5, style: 'fill:var(--bg);stroke:var(--near)', 'stroke-width': 2 }); }, 'hollow: extrapolated point');
+    })();
+  })();
+  </script>
+</section>
+
+<section class="slide" id="s04" data-title="Pressure 2: capacity cost">
+  <style>
+    #s04 .s04-body { gap: 36px; }
+    #s04 .s04-right { display: flex; flex-direction: column; gap: 10px; font-size: 16px; line-height: 1.4; height: 400px; }
+    #s04 .s04-right .box { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    #s04 .s04-right .box span { display: block; }
+    #s04 .s04-right .box { padding: 10px 14px; }
+    #s04 .s04-right b { display: block; margin-bottom: 2px; }
+    #s04 .s04-cap { margin: 6px 0 0; }
+  </style>
+  <script type="application/json" id="s04-data">
+{"rows":[{"gen":"Gen0","tco_pct":15.6,"power_pct":14.6},{"gen":"Gen1","tco_pct":25.5,"power_pct":19.8},{"gen":"Gen2","tco_pct":21.6,"power_pct":19.7},{"gen":"Gen3","tco_pct":21.2,"power_pct":20.7},{"gen":"Gen4","tco_pct":31.8,"power_pct":28.8},{"gen":"Gen5","tco_pct":37.1,"power_pct":33.3}]}
+  </script>
+  <header class="slide-head">
+    <div class="kicker">04 · Pressure 2: capacity cost → B</div>
+    <h2>Capacity cost now bites: $/bit declines slowed <span style="white-space:nowrap">~2.5–3×</span> and memory reached 37% of Meta's rack TCO.</h2>
+    <div class="sub">Bits stopped getting cheap fast while core counts kept growing, and much of the memory bought sits idle.</div>
+  </header>
+  <div class="slide-body">
+    <div class="cols c-6-4 s04-body">
+      <div>
+        <svg id="s04-chart" viewBox="0 0 680 400" width="680" role="img" aria-label="Grouped bar chart of memory as a percentage of Meta rack TCO and rack power for hardware generations Gen0 to Gen5. TCO share runs 15.6, 25.5, 21.6, 21.2, 31.8, 37.1 percent; power share runs 14.6, 19.8, 19.7, 20.7, 28.8, 33.3 percent."></svg>
+        <p class="tiny s04-cap">Memory share of rack TCO and power across six Meta generations (data labels as printed). TPP, ASPLOS'23, Fig. 3.</p>
+      </div>
+      <div class="s04-right">
+        <div class="box"><b>$/bit decline:</b><span><strong>~33–37%/yr</strong> before ~2010; <strong>~12–15%/yr</strong> since (chart: slide 9).</span></div>
+        <div class="box"><b>Capacity per unit of CPU performance:</b><span>fell ~60–70% in 10 years.</span></div>
+        <div class="box far"><b>Idle bytes:</b><span><strong>32%</strong> of Google fleet memory is cold at 120 s; <strong>55–80%</strong> of Meta app memory is idle per 2 min.</span></div>
+        <div class="box"><b>Idle bytes become cheaper bytes:</b><span>production tiering is on slide 6.</span></div>
+      </div>
+    </div>
+  </div>
+  <footer class="slide-foot">
+    <div class="sources">Chart: Maruf et al., TPP, ASPLOS'23, Fig. 3, p.2, printed data labels [P]. $/bit: AI Impacts 2020 series averages [S]; our nominal 1990–2010 fit [D]; slowdown ratio 2.4–3.1× from the published AI Impacts rate pairs, depending on % vs log-rate [D]. Capacity per performance: Berger et al., IEEE TC'26 [P]. Cold/idle: Lagar-Cavilla ASPLOS'19 [P]; TPP §3 [P].</div>
+    <div class="pageno">04 / 10</div>
+  </footer>
+  <script>
+  (function () {
+    var root = document.getElementById('s04');
+    var svg = root.querySelector('#s04-chart');
+    var rows = JSON.parse(root.querySelector('#s04-data').textContent).rows;
+    var NS = 'http://www.w3.org/2000/svg';
+    function el(n, a, t) { var e = document.createElementNS(NS, n); for (var k in a) e.setAttribute(k, a[k]); if (t != null) e.textContent = t; svg.appendChild(e); return e; }
+    var L = 54, R = 672, T = 44, B = 337, ymax = 40;
+    function y(v) { return B - (v / ymax) * (B - T); }
+    [0, 10, 20, 30, 40].forEach(function (v) {
+      el('line', { x1: L, x2: R, y1: y(v), y2: y(v), style: 'stroke:var(--rule);stroke-width:' + (v === 0 ? 1.2 : 1), 'stroke-width': 1 });
+      el('text', { x: L - 8, y: y(v) + 4, 'text-anchor': 'end', class: 'axis' }, v);
+    });
+    el('text', { x: 12, y: (T + B) / 2, class: 'lbl', 'text-anchor': 'middle', transform: 'rotate(-90 12 ' + ((T + B) / 2) + ')' }, 'Share of rack (%)');
+    // legend
+    el('rect', { x: L, y: 2, width: 14, height: 14, style: 'fill:var(--mid)' });
+    el('text', { x: L + 20, y: 14, class: 'lbl' }, 'Memory share of rack TCO');
+    el('rect', { x: L + 230, y: 2, width: 14, height: 14, style: 'fill:var(--mid-soft);stroke:var(--mid);stroke-width:1.2' });
+    el('text', { x: L + 250, y: 14, class: 'lbl' }, 'Memory share of rack power');
+    var gw = (R - L) / rows.length, bw = 36, gap = 2;
+    rows.forEach(function (r, i) {
+      var cx = L + gw * (i + .5);
+      var x1 = cx - gap / 2 - bw, x2 = cx + gap / 2;
+      var t = el('rect', { x: x1, y: y(r.tco_pct), width: bw, height: B - y(r.tco_pct), style: 'fill:var(--mid)' });
+      var p = el('rect', { x: x2, y: y(r.power_pct), width: bw, height: B - y(r.power_pct), style: 'fill:var(--mid-soft);stroke:var(--mid);stroke-width:1.2' });
+      el('text', { x: x1 + bw / 2, y: y(r.tco_pct) - 5, 'text-anchor': 'middle', class: 'axis', style: 'fill:var(--ink)' }, r.tco_pct.toFixed(1));
+      el('text', { x: x2 + bw / 2, y: y(r.power_pct) - 5, 'text-anchor': 'middle', class: 'axis' }, r.power_pct.toFixed(1));
+      el('text', { x: cx, y: B + 20, 'text-anchor': 'middle', class: 'axis' }, r.gen);
+      if (window.DeckTip) {
+        window.DeckTip.attach(t, r.gen + ': memory = ' + r.tco_pct + '% of rack TCO. TPP, ASPLOS\'23, Fig. 3, p.2, printed label [P]. Share is non-monotonic and may reflect provisioning (GB per rack) as well as price.');
+        window.DeckTip.attach(p, r.gen + ': memory = ' + r.power_pct + '% of rack power. TPP, ASPLOS\'23, Fig. 3, p.2, printed label [P].');
+      }
+    });
+    el('text', { x: (L + R) / 2, y: B + 44, class: 'lbl', 'text-anchor': 'middle' }, 'Meta hardware generation');
+  })();
+  </script>
+</section>
+
+<section class="slide" id="s05" data-title="The cost frontier">
+  <style>
+    #s05 .s05-notes { display: grid; grid-template-columns: 1.3fr 1.1fr .8fr; gap: 28px; font-size: 16px; line-height: 1.38; margin-top: 0; }
+    #s05 .s05-notes p { margin: 0; display: grid; grid-template-columns: 22px 1fr; }
+    #s05 .s05-notes .n { font-family: var(--font-mono); color: var(--ink-3); }
+    #s05 .s05-cap { margin: 2px 0 0; font-size: 11.5px; }
+    #s05 .slide-head { margin-bottom: 2px; }
+  </style>
+  <script type="application/json" id="s05-data">
+{"rows":[
+{"tier":"3D DRAM–logic stacking","example":"d-Matrix Raptor card (32 GB)","role":"conv","status":"announced","lo":null,"hi":null,"point":3125.0,"usd":"n/a","lat":"—","src":"d-Matrix HC'26 s13; 100 TB/s / 32 GB = 3,125; vendor peak, not measured [D from V]"},
+{"tier":"HBM4","example":"MI455X, Helios, Rubin","role":"near","status":"announced","lo":53.9,"hi":72.7,"point":null,"usd":"above HBM3E","lat":"—","src":"AMD MI400 HC'26 s3, s5 (53.9, 54.8); NVIDIA Rubin HC'26 s8 (72.7, fleet-level, footnoted config) [D from V]"},
+{"tier":"HBM3E","example":"B200, GH200, GB200","role":"near","status":"shipping","lo":33.3,"hi":43.0,"point":null,"usd":"≥3 pre-shortage; ~3× wafer per bit","lat":"~300 ns (GPU, HBM3) [S]","src":"GH200 4,800/144 = 33.3; B200 8,000/192 = 41.7; GB200 NVL72 576/13.4 = 43.0 [D from V]; $/GB [S]/[P/V]"},
+{"tier":"HBM on CPUs, discontinued","example":"Xeon Max, A64FX","role":"near","status":"discontinued","lo":10.9,"hi":25.6,"point":31.25,"usd":"—","lat":"DDR + ~20% (Xeon Max)","src":"Xeon Max arXiv 2505.14294: STREAM 700/64 = 10.9, peak 1,638.4/64 = 25.6 [D from P]; A64FX 1,000/32 = 31.25 [S]"},
+{"tier":"MRDIMM-12800 ×16","example":"Diamond Rapids, Venice","role":"mid","status":"announced","lo":0.4,"hi":1.6,"point":null,"usd":">1 (unverified)","lat":"~DDR","src":"Intel DMR HC'26 s10, s15, s20: 1.6 TB/s ('up to') / 1, 2, 4 TB; capacities are our 16 × 64/128/256 GB assumption [D from V]"},
+{"tier":"CPU-attached LPDDR5X","example":"Vera SOCAMM, Grace","role":"mid","status":"shipping","lo":0.8,"hi":1.07,"point":null,"usd":"≈1","lat":">200 ns (Grace) [S]","src":"Vera HC'26 s28 (1,200/1,500 = 0.8); GB200 14/17 = 0.82; GH200 512/480 = 1.07 [S] [D from V]"},
+{"tier":"DDR5-6400 RDIMM ×12, 1DPC","example":"12-channel server socket","role":"mid","status":"shipping","lo":0.2,"hi":0.8,"point":null,"usd":"1 (256 GB 3DS at a premium)","lat":"~100–150 ns measured","src":"614.4 GB/s / (12 × 64 GB = 768 GB) = 0.8; / (12 × 256 GB = 3,072 GB) = 0.2 [D]"},
+{"tier":"CXL expander, Gen5","example":"x8 Gen5 card; Vistara tier","role":"far","status":"shipping","lo":0.0625,"hi":0.25,"point":0.225,"usd":"new DDR5 ≈1 + controller; recycled DDR4 0.13 (Vistara); all-in ~0.4–0.9 [D]","lat":"214–394 ns measured (FPGA at 394)","src":"Bar: 32 GB/s per direction / 512–128 GB [D]. Dot: Vistara ISCA'26 Table V, 57.6 GB/s / 256 GB = 0.225, configuration spec, not a measurement [P]"},
+{"tier":"RDMA far memory","example":"Fastswap/Mooncake-class","role":"far","status":"shipping","lo":0.01,"hi":0.1,"point":null,"usd":"—","lat":"~3.5–5.6 µs (64 B–4 KB page)","src":"Assumption-based derived range (about 12.5 GB/s NIC over 128 GB–1 TB); not a printed source [D]"},
+{"tier":"NVMe SSD","example":"enterprise NVMe, 8–30 TB","role":"far","status":"shipping","lo":0.0005,"hi":0.002,"point":null,"usd":"≪1 (unverified)","lat":"10–40 µs typical","src":"~14 GB/s / 8,000–30,000 GB; drive specs unverified [D]"}
+],
+"sram":{"point":312500.0,"label":"on-die SRAM","src":"NVIDIA Groq 3 LPX HC'26 s24: 40 PB/s / 128 GB = 312,500 [D from V]"}}
+  </script>
+  <header class="slide-head">
+    <div class="kicker">05 · The cost frontier</div>
+    <h2>Each tier bundles bandwidth with capacity: A buys GB/s per GB; B, cheaper or extended GB.</h2>
+    <div class="sub">Supplied bandwidth per GB stored, with relative $/GB and idle latency. Peak vendor specs (per direction for serial links) unless marked. $/GB is mostly secondary or unverified, so it is tabulated, not plotted.</div>
+  </header>
+  <div class="slide-body">
+    <svg id="s05-chart" viewBox="0 0 1160 335" width="1160" role="img" aria-label="Range plot on a log axis of supplied bandwidth per GB stored for ten memory tiers, from NVMe SSD at 0.0005 to 0.002 GB/s per GB, up through RDMA, CXL, DDR5, LPDDR5X and MRDIMM near 0.2 to 1.6, HBM3E at 33 to 43, HBM4 at 54 to 73, and a hollow vendor-peak 3D DRAM–logic stacking point near 3,100. A table beside each row gives relative cost per GB and idle latency."></svg>
+    <p class="tiny s05-cap">Specs [D from V]; hollow = discontinued tier or single-product point (vendor peak or spec). Objects are placed by matching access density (slide 6).</p>
+    <div class="s05-notes">
+      <p><span class="n">1</span><span>Deployed CXL is not a new density point: Vistara's tier (0.225) sits at capacity-maxed DDR (0.2). Its recycled DDR4 moves it down in $/GB.</span></p>
+      <p><span class="n">2</span><span>The middle improved: a 16-channel MRDIMM-12800 socket (1.6 TB/s) matches Xeon Max's HBM peak at many times the capacity.</span></p>
+      <p><span class="n">3</span><span>DDR is squeezed: on one bus, bigger DIMMs dilute GB/s per GB.</span></p>
+    </div>
+  </div>
+  <footer class="slide-foot">
+    <div class="sources">Derived from vendor specs [D from V]: AMD MI400 HC'26 s3, s5; NVIDIA Rubin HC'26 s8; Vera HC'26 s28; Intel DMR HC'26 s10, s15; d-Matrix HC'26 s13; NVIDIA Groq 3 LPX (LP30) HC'26 s24; GB200 spec. Vistara ISCA'26 Table V [P]; Xeon Max arXiv 2505.14294 [P]; recycled-DDR4 all-in cost: notes r2a §2.2 [D]; HBM $/GB [S]; Micron FQ2-25 p.6 [P/V]; RDMA range [D, assumption-based]; A64FX [S].</div>
+    <div class="pageno">05 / 10</div>
+  </footer>
+  <script>
+  (function () {
+    var root = document.getElementById('s05');
+    var svg = root.querySelector('#s05-chart');
+    var D = JSON.parse(root.querySelector('#s05-data').textContent);
+    var rows = D.rows, NS = 'http://www.w3.org/2000/svg';
+    function el(n, a, t, p) { var e = document.createElementNS(NS, n); for (var k in a) e.setAttribute(k, a[k]); if (t != null) e.textContent = t; (p || svg).appendChild(e); return e; }
+    var X0 = 232, PW = 500, X1 = X0 + PW, LMIN = -4, LMAX = 4;
+    var TX = 750, TX2 = 992, TOP = 22, RH = 28, RH_CXL = 28;
+    function x(v) { return X0 + (Math.log10(v) - LMIN) / (LMAX - LMIN) * PW; }
+    var heights = rows.map(function (r, i) { return i === 7 ? RH_CXL : RH; });
+    var ys = [], acc = TOP; heights.forEach(function (h) { ys.push(acc); acc += h; });
+    var BOT = acc;
+    var col = { conv: 'var(--conv)', near: 'var(--near)', mid: 'var(--mid)', far: 'var(--far)' };
+    // DDR5 RDIMM band 0.2-0.8
+    el('rect', { x: x(0.2), y: TOP, width: x(0.8) - x(0.2), height: BOT - TOP, style: 'fill:var(--mid-soft);opacity:.55' });
+    el('text', { x: (x(0.2) + x(0.8)) / 2, y: TOP - 7, 'text-anchor': 'middle', class: 'lbl' }, 'DDR5 RDIMM range 0.2–0.8');
+    // decade grid + ticks
+    var tl = { '-4': '0.0001', '-3': '0.001', '-2': '0.01', '-1': '0.1', '0': '1', '1': '10', '2': '100', '3': '1k', '4': '10k' };
+    for (var e = LMIN; e <= LMAX; e++) {
+      var gx = x(Math.pow(10, e));
+      el('line', { x1: gx, x2: gx, y1: TOP, y2: BOT, style: 'stroke:var(--rule)', 'stroke-width': 1 });
+      el('text', { x: gx, y: BOT + 16, 'text-anchor': 'middle', class: 'axis' }, tl[e]);
+    }
+    el('line', { x1: X0, x2: X1, y1: BOT, y2: BOT, style: 'stroke:var(--ink-3)', 'stroke-width': 1 });
+    el('text', { x: (X0 + X1) / 2, y: BOT + 31, 'text-anchor': 'middle', class: 'lbl' }, 'Supplied bandwidth per GB stored (GB/s per GB, log scale)');
+    // table header
+    el('text', { x: TX, y: TOP - 7, class: 'faint', style: 'font-size:12px;letter-spacing:.03em;font-weight:600' }, '$/GB (REL. DDR5 = 1)');
+    el('text', { x: TX2, y: TOP - 7, class: 'faint', style: 'font-size:12px;letter-spacing:.03em;font-weight:600' }, 'IDLE LATENCY');
+    function wrap(txt, xx, yc, n, cls, st) {
+      var words = txt.split(' '), lines = [], cur = '';
+      words.forEach(function (w) { if ((cur + ' ' + w).trim().length > n && cur) { lines.push(cur); cur = w; } else cur = (cur + ' ' + w).trim(); });
+      lines.push(cur);
+      var lh = 13, y0 = yc - (lines.length - 1) * lh / 2 + 4;
+      var t = el('text', { x: xx, y: y0, class: cls, style: st || '' });
+      lines.forEach(function (l, i) { el('tspan', { x: xx, dy: i ? lh : 0 }, l, t); });
+    }
+    function txt(xx, yy, s, anchor, extra) { return el('text', Object.assign({ x: xx, y: yy + 4, 'text-anchor': anchor || 'start', class: 'lbl halo' }, extra || {}), s); }
+    var endLab = {
+      1: { r: '54–73' }, 2: { r: '33–43' },
+      3: { l: 'Xeon Max 11–26 (STREAM–peak)', r: 'A64FX ~31' },
+      4: { l: '4 TB · 0.4', r: '1 TB · 1.6' },
+      5: { r: '0.8–1.1' },
+      6: { l: '256 GB DIMMs · 0.2', r: '64 GB DIMMs · 0.8' },
+      7: { l: '0.06', r: '' },
+      8: { r: 'config-dependent (assumed range)' },
+      9: { r: '0.0005–0.002' }
+    };
+    rows.forEach(function (r, i) {
+      var cy = ys[i] + heights[i] / 2, c = col[r.role], hollow = r.status === 'discontinued';
+      if (i) el('line', { x1: 0, x2: 1160, y1: ys[i], y2: ys[i], style: 'stroke:var(--rule)', 'stroke-width': 1 });
+      // row label
+      el('rect', { x: 0, y: cy - 11, width: 4, height: 22, style: 'fill:' + c });
+      el('text', { x: 12, y: cy - 3, style: 'font-size:14px;font-weight:600' }, r.tier);
+      el('text', { x: 12, y: cy + 12, class: 'faint', style: 'font-size:12px' }, r.example);
+      // marks
+      var g = el('g', {});
+      if (r.lo != null) {
+        var by = (i === 3 ? 7 : 0);
+        var bar = el('rect', { x: x(r.lo), y: cy - 5 + by, width: Math.max(2, x(r.hi) - x(r.lo)), height: 10, rx: 2, style: hollow ? 'fill:var(--bg);stroke:' + c + ';stroke-width:1.6' : 'fill:' + c }, null, g);
+      }
+      if (r.point != null) {
+        var py = (i === 3 ? cy - 4 : cy);
+        el('circle', { cx: x(r.point), cy: py, r: 5, style: r.role === 'far' ? 'fill:var(--bg);stroke:var(--ink);stroke-width:2' : 'fill:var(--bg);stroke:' + c + ';stroke-width:2' }, null, g);
+      }
+      // labels
+      var L = endLab[i] || {};
+      if (i === 0) {
+        txt(x(r.point) - 12, cy, 'vendor peak ~3,100', 'end');
+        txt(X0 + 6, cy, 'on-die SRAM ~3×10⁵ (scratchpad, not a capacity tier) →', 'start', { style: 'fill:var(--ink-3);font-size:12px' });
+      } else {
+        var lo = r.lo, hi = r.point != null && r.point > r.hi ? r.point : r.hi;
+        if (i === 7) {
+          txt(x(r.hi) + 12, cy, '0.06–0.25 · ring: Vistara (spec) 0.225', 'start');
+        } else {
+          if (L.l) txt(x(lo) - 8, cy + (i === 3 ? 7 : 0), L.l, 'end');
+          if (L.r) txt(x(hi) + (i === 3 ? 10 : 8), cy + (i === 3 ? -4 : 0), L.r, 'start');
+        }
+      }
+      // table
+      wrap(r.usd, TX, cy, 36, 'muted', 'font-size:13px');
+      wrap(r.lat, TX2, cy, 24, 'muted', 'font-size:13px');
+      if (window.DeckTip) window.DeckTip.attach(g, '<b>' + r.tier + '</b> (' + r.example + ')<br>' + r.src);
+    });
+    // RDMA / CXL basis tags handled via tooltips; fix CXL label positions overlaps by design
+    if (window.DeckTip) {
+      var sr = el('rect', { x: X0, y: ys[0], width: PW, height: 0, style: 'fill:none' });
+    }
+  })();
+  </script>
+</section>
+
+<section class="slide" id="s06" data-title="Skew and placement">
+  <style>
+    #s06 .s06-body { gap: 28px; }
+    #s06 .s06-right { display: flex; flex-direction: column; gap: 6px; padding-top: 2px; }
+    #s06 table.t { font-size: 13.5px; }
+    #s06 table.t td, #s06 table.t th { padding: 5px 7px; }
+    #s06 .s06-line { font-size: 14px; color: var(--ink-2); margin: 2px 0 0; line-height: 1.35; }
+    #s06 .s06-cap { margin: 4px 0 0; }
+  </style>
+  <script type="application/json" id="s06-data">
+{"rows": [{"label": "Meta services", "source": "Mahar et al., arXiv 2303.08396 (preprint)", "metric": "bandwidth", "window": "30 s", "x_bytes_pct_lo": 0, "x_bytes_pct_hi": 10, "x_plot_pct": 10, "x_bound": "≤", "y_activity_pct": 90, "y_bound": "≈", "measured_or_emulated": "measured (MemProf on live production services)", "loc": "PDF p.9, Sec. 5.1 (Fig. 18)", "tag": "D", "unc": "derived restatement; source sentence quoted"}, {"label": "Alibaba KV$", "source": "Wang et al., USENIX ATC'25 (arXiv 2506.02634)", "metric": "reuses", "window": "production trace (whole trace)", "x_bytes_pct_lo": 10, "x_bytes_pct_hi": 10, "x_plot_pct": 10, "x_bound": "=", "y_activity_pct": 77, "y_bound": "=", "measured_or_emulated": "measured (production trace)", "loc": "PDF p.2, Introduction findings", "tag": "D", "unc": "derived restatement; source sentence quoted"}, {"label": "Hao et al.", "source": "Hao et al., SIGMOD'24 Sec. 5.5", "metric": "accesses", "window": "steady-state benchmark run (no fixed time window)", "x_bytes_pct_lo": 13.0, "x_bytes_pct_hi": 16.7, "x_plot_pct": 14.3, "x_bound": "=", "y_activity_pct": 50, "y_bound": "≥", "measured_or_emulated": "emulated (remote memory emulated on CloudLab; zipfian skew 0.9)", "loc": "PDF p.16 = p.31:16, Sec. 5.5, Fig. 5b; sizes Sec. 5.1 p.31:12", "tag": "D", "unc": "derived: x = 3/(3+18) = 14.3%; alternatives 3/23 = 13.0% (share of the 23 GB workload) and 3/18 = 16.7% (local/remote); y is a lower bound only (exact rate is in Fig. 5b, not read)"}, {"label": "Google fleet", "source": "Lagar-Cavilla et al., ASPLOS'19", "metric": "accesses", "window": "120 s (cold = not accessed in T = 120 s)", "x_bytes_pct_lo": 39, "x_bytes_pct_hi": 99, "x_plot_pct": 68, "x_bound": "range", "y_activity_pct": 100, "y_bound": "=", "measured_or_emulated": "measured (production fleet)", "loc": "PDF p.3 (Fig. 1 text) and PDF p.2 (Intro)", "tag": "D", "unc": "derived: x = 100 - cold%; range as published (cold 1-61% across clusters)"}, {"label": "Meta TPP", "source": "Maruf et al., TPP, ASPLOS'23", "metric": "accesses", "window": "2 min (any two-minute interval)", "x_bytes_pct_lo": 20, "x_bytes_pct_hi": 45, "x_plot_pct": 32.5, "x_bound": "range", "y_activity_pct": 100, "y_bound": "=", "measured_or_emulated": "measured (Chameleon on production servers)", "loc": "PDF p.3 (Introduction); Sec. 3.2, Fig. 7", "tag": "D", "unc": "derived: x = 100 - idle%, idle 55-80% as published; y definitional"}, {"label": "Mooncake", "source": "Qin et al., Mooncake, FAST'25 (arXiv v4)", "metric": "reuses", "window": "sampled request trace (Kimi)", "x_bytes_pct_lo": 0, "x_bytes_pct_hi": 50, "x_plot_pct": 50, "x_bound": "≤", "y_activity_pct": 100, "y_bound": "=", "measured_or_emulated": "measured (trace from Kimi service; cache policy analysis is simulated)", "loc": "PDF p.8, Sec. 4.2, Fig. 6 (CDF of block hit count)", "tag": "D", "unc": "derived: x = 100 - (>50)% unused, so x < 50; y definitional"}]}
+  </script>
+  <header class="slide-head">
+    <div class="kicker">06 · Skew and placement</div>
+    <h2>Access is skewed within each workload, so a mix of tiers beats any single tier.</h2>
+    <div class="sub">A small hot head of the bytes carries most of the traffic; the tail stays cold for minutes.</div>
+  </header>
+  <div class="slide-body">
+    <div class="cols c-6-4 s06-body">
+      <div>
+        <svg id="s06-chart" viewBox="0 0 680 392" width="680" role="img" aria-label="Skew chart. Main panel, share of activity against share of bytes hottest first, with a dashed uniform-access diagonal: Meta services, at most 10 percent of bytes carry about 90 percent of bandwidth; Alibaba KV cache, 10 percent of blocks carry 77 percent of reuses; Hao et al., emulated, about 14 percent of bytes serve more than 50 percent of accesses. Top strip, statistics that are 100 percent by definition: Google fleet 39 to 99 percent of bytes, Meta TPP 20 to 45 percent, Mooncake at most 50 percent."></svg>
+        <p class="tiny s06-cap">Each point restates one published statistic as (share of bytes, share of activity). Metrics and windows differ; do not compare points with each other. [D]</p>
+      </div>
+      <div class="s06-right">
+        <table class="t">
+          <thead><tr><th>Object</th><th>Goes to</th><th>Examples</th></tr></thead>
+          <tbody>
+            <tr><td>High ρ, low I</td><td class="label-near">A: HBM (PIM proposed)</td><td>Decode attention over live KV (~1 FLOP/B × GQA group); bulk scans</td></tr>
+            <tr><td>High ρ, high I</td><td>On-chip SRAM</td><td>Prefill (~1000 FLOP/B); dense GEMM</td></tr>
+            <tr><td>Low ρ, high MLP</td><td class="label-far">B: CXL, compressed, pooled</td><td>Cold pages; most embedding rows; reusable KV</td></tr>
+            <tr><td>Low ρ, low MLP</td><td class="label-mid">DDR bus</td><td>Pointer chasing, B-trees, graphs (GAPBS worst on CXL)</td></tr>
+          </tbody>
+        </table>
+        <div class="tiny">ρ (access density) = GB/s demanded per GB stored: the demand-side twin of slide 5's axis. I = FLOP per byte moved · MLP = memory-level parallelism.</div>
+        <p class="s06-line">Low arithmetic intensity alone does not decide placement: embedding gathers are 0.25 FLOP/B, yet the big tables have low bandwidth demand.</p>
+        <p class="s06-line">Mixing pays: production moves ~20–25% of DRAM to cheaper tiers (zswap, TMTS's Optane, Vistara's CXL) at &lt;5% slowdown; TPP: 33% in emulation; local DRAM keeps 50–75%.</p>
+      </div>
+    </div>
+  </div>
+  <footer class="slide-foot">
+    <div class="sources">Mahar et al., arXiv 2303.08396 [P, preprint]; Wang et al., ATC'25 [P]; Hao et al., SIGMOD'24 p.31:16 [P, emulated]; Lagar-Cavilla ASPLOS'19 [P]; TPP §3 [P]; Mooncake FAST'25 [P]; table: SYNTHESIS §3 [Syn], Yuan T1, Gupta HPCA'20, MTrainS, Pond, Liu OSDI'25 [P]; tiering: zswap, TMTS, Vistara, TPP (emulated) [P]; local-DRAM share: Vistara, TMTS, TPP, Memstrata [D from P]. Points restated [D].</div>
+    <div class="pageno">06 / 10</div>
+  </footer>
+  <script>
+  (function () {
+    var root = document.getElementById('s06');
+    var svg = root.querySelector('#s06-chart');
+    var rows = JSON.parse(root.querySelector('#s06-data').textContent).rows;
+    var NS = 'http://www.w3.org/2000/svg';
+    function el(n, a, t) { var e = document.createElementNS(NS, n); for (var k in a) e.setAttribute(k, a[k]); if (t != null) e.textContent = t; svg.appendChild(e); return e; }
+    var L = 50, W = 610, R = L + W;
+    var SY0 = 22, SRH = 24, SY1 = SY0 + 3 * SRH;          // strip
+    var T = 112, H = 180, B = T + H;                       // main plot
+    function X(v) { return L + v / 100 * W; }
+    function Y(v) { return B - v / 100 * H; }
+    var INK = 'var(--ink)', ST = 'stroke:' + INK + ';stroke-width:1.6;';
+    function grid(y0, y1) { [0, 20, 40, 60, 80, 100].forEach(function (v) { el('line', { x1: X(v), x2: X(v), y1: y0, y2: y1, style: 'stroke:var(--rule);stroke-width:1' }); }); }
+    // ---- strip: y = 100 by definition
+    el('text', { x: L, y: 13, class: 'lbl', style: 'font-weight:600' }, 'Cold-fraction statistics: y = 100 by definition (not a measured activity share)');
+    el('rect', { x: L, y: SY0, width: W, height: SY1 - SY0, style: 'fill:var(--panel);stroke:var(--ink-3);stroke-width:1' });
+    grid(SY0, SY1);
+    // ---- main plot
+    [0, 20, 40, 60, 80, 100].forEach(function (v) {
+      el('line', { x1: L, x2: R, y1: Y(v), y2: Y(v), style: 'stroke:var(--rule);stroke-width:1' });
+      el('text', { x: L - 8, y: Y(v) + 4, 'text-anchor': 'end', class: 'axis' }, v);
+      el('text', { x: X(v), y: B + 16, 'text-anchor': 'middle', class: 'axis' }, v);
+    });
+    grid(T, B);
+    el('rect', { x: L, y: T, width: W, height: H, style: 'fill:none;stroke:var(--ink-3);stroke-width:1' });
+    el('text', { x: 12, y: T + H / 2, class: 'lbl', 'text-anchor': 'middle', transform: 'rotate(-90 12 ' + (T + H / 2) + ')' }, 'Share of activity (%)');
+    el('text', { x: L + W / 2, y: B + 82, class: 'lbl', 'text-anchor': 'middle' }, 'Share of bytes, hottest first (%)');
+    // uniform diagonal + label beside it
+    el('line', { x1: X(0), y1: Y(0), x2: X(100), y2: Y(100), style: 'stroke:var(--ink-3);stroke-width:1.3;stroke-dasharray:6 4' });
+    (function () {
+      var ang = Math.atan2(H, W), deg = -ang * 180 / Math.PI, cx = X(72), cy = Y(72);
+      var nx = Math.sin(ang), ny = Math.cos(ang);
+      ['uniform access: no skew', '(e.g., dense weights, read every decode step)'].forEach(function (t, i) {
+        var d = 16 + i * 15, px = cx + nx * d, py = cy + ny * d;
+        el('text', { x: px, y: py, class: 'lbl faint halo', 'text-anchor': 'middle', transform: 'rotate(' + deg + ' ' + px + ' ' + py + ')' }, t);
+      });
+    })();
+    // brackets (illustrative)
+    function bracket(a, b, color, l1, l2, anchor) {
+      var y = B + 30, cx = anchor === 'start' ? X(a) : (X(a) + X(b)) / 2;
+      el('path', { d: 'M' + X(a) + ',' + (y - 5) + ' V' + y + ' H' + X(b) + ' V' + (y - 5), style: 'fill:none;stroke:var(' + color + ');stroke-width:1.6' });
+      var st = 'fill:var(' + color + ');font-weight:600';
+      el('text', { x: cx, y: y + 17, 'text-anchor': anchor, class: 'lbl', style: st }, l1);
+      if (l2) el('text', { x: cx, y: y + 31, 'text-anchor': anchor, class: 'lbl', style: st }, l2);
+    }
+    bracket(0, 15, '--near', 'hot head → A (accel.)', 'or local DDR (CPU)', 'start');
+    bracket(15, 45, '--mid', 'warm → DDR', null, 'middle');
+    bracket(45, 100, '--far', 'cold tail → B', null, 'middle');
+    el('text', { x: R, y: B + 61, class: 'faint', 'text-anchor': 'end', style: 'font-size:12px;font-style:italic' }, 'brackets illustrative; A blue, B orange, DDR slate');
+
+    function tip(shapes, q) {
+      if (!window.DeckTip) return;
+      var xs = q.x_bound === 'range' ? q.x_bytes_pct_lo + '–' + q.x_bytes_pct_hi : (q.x_bound === '≤' ? '≤ ' : '') + q.x_plot_pct;
+      var html = '<b>' + q.label + '</b> (' + q.metric + ', ' + q.window + ')<br>x = ' + xs + '% of bytes; y ' + (q.y_bound === '=' ? '= ' : q.y_bound + ' ') + q.y_activity_pct + '%<br>' + q.measured_or_emulated + '<br>' + q.source + ', ' + q.loc + ' [' + q.tag + ']<br>' + q.unc;
+      shapes.forEach(function (sh) { window.DeckTip.attach(sh, html); });
+    }
+    function label2(x, y, a, b, anchor) {
+      el('text', { x: x, y: y, class: 'lbl halo', 'text-anchor': anchor || 'start', style: 'fill:var(--ink);font-weight:600' }, a);
+      el('text', { x: x, y: y + 14, class: 'lbl halo', 'text-anchor': anchor || 'start' }, b);
+    }
+    var by = {}; rows.forEach(function (q) { by[q.label] = q; });
+    var r = 5, sh;
+    var m = by['Meta services'];
+    sh = [el('circle', { cx: X(m.x_plot_pct), cy: Y(m.y_activity_pct), r: r, style: 'fill:' + INK })];
+    label2(X(m.x_plot_pct) + 12, Y(m.y_activity_pct) - 1, 'Meta services · x ≤ 10%, y ≈ 90%', 'bandwidth · 30 s · 9 services (preprint)'); tip(sh, m);
+    var a = by['Alibaba KV$'];
+    sh = [el('circle', { cx: X(a.x_plot_pct), cy: Y(a.y_activity_pct), r: r, style: 'fill:' + INK })];
+    label2(X(a.x_plot_pct) + 12, Y(a.y_activity_pct) + 6, 'Alibaba KV$ · x = 10%, y = 77%', 'KV$ reuses · production trace'); tip(sh, a);
+    var h = by['Hao et al.'], hx = X(h.x_plot_pct), hy = Y(h.y_activity_pct);
+    sh = [
+      el('line', { x1: X(h.x_bytes_pct_lo), x2: X(h.x_bytes_pct_hi), y1: hy, y2: hy, style: ST }),
+      el('path', { d: 'M' + hx + ',' + (hy - 6.5) + ' L' + (hx + 6.5) + ',' + hy + ' L' + hx + ',' + (hy + 6.5) + ' L' + (hx - 6.5) + ',' + hy + ' Z', style: 'fill:var(--bg);' + ST })
+    ];
+    [['Hao et al. \u00b7 x 13\u201316.7%,', 1], ['y \u2265 50% \u00b7 tuple accesses', 0], ['emulated, zipf 0.9', 0]].forEach(function (t, k) {
+      el('text', { x: X(h.x_bytes_pct_hi) + 12, y: hy - 10 + k * 14, class: 'lbl halo', style: t[1] ? 'fill:var(--ink);font-weight:600' : '' }, t[0]);
+    }); tip(sh, h);
+    // legend inside plot, lower right
+    var lx = X(60), ly = Y(9);
+    el('circle', { cx: lx, cy: ly, r: r, style: 'fill:' + INK });
+    el('text', { x: lx + 12, y: ly + 4, class: 'lbl' }, 'measured');
+    el('path', { d: 'M' + (lx + 100) + ',' + (ly - 6.5) + ' L' + (lx + 106.5) + ',' + ly + ' L' + (lx + 100) + ',' + (ly + 6.5) + ' L' + (lx + 93.5) + ',' + ly + ' Z', style: 'fill:var(--bg);' + ST });
+    el('text', { x: lx + 114, y: ly + 4, class: 'lbl' }, 'emulated');
+    // strip rows (hollow = definitional)
+    function srow(q, i) { return SY0 + SRH * (i + .5); }
+    function hollow(cx, cy) { return el('circle', { cx: cx, cy: cy, r: r, style: 'fill:var(--bg);' + ST }); }
+    function cap(x, y) { return el('line', { x1: x, x2: x, y1: y - 5, y2: y + 5, style: ST }); }
+    var g = by['Google fleet'], yg = srow(g, 0), s1;
+    s1 = [el('line', { x1: X(g.x_bytes_pct_lo), x2: X(g.x_bytes_pct_hi), y1: yg, y2: yg, style: ST + 'stroke-dasharray:5 3' }), cap(X(g.x_bytes_pct_lo), yg), cap(X(g.x_bytes_pct_hi), yg), hollow(X(g.x_plot_pct), yg)];
+    el('text', { x: X(g.x_bytes_pct_lo) - 8, y: yg + 4, class: 'lbl', 'text-anchor': 'end' }, 'Google fleet · accesses within 120 s'); tip(s1, g);
+    var t = by['Meta TPP'], yt = srow(t, 1);
+    s1 = [el('line', { x1: X(t.x_bytes_pct_lo), x2: X(t.x_bytes_pct_hi), y1: yt, y2: yt, style: ST + 'stroke-dasharray:5 3' }), cap(X(t.x_bytes_pct_lo), yt), cap(X(t.x_bytes_pct_hi), yt)];
+    el('text', { x: X(t.x_bytes_pct_hi) + 8, y: yt + 4, class: 'lbl' }, 'Meta TPP · accesses within 2 min · 4 apps'); tip(s1, t);
+    var mo = by['Mooncake'], ym = srow(mo, 2);
+    s1 = [el('line', { x1: X(0), x2: X(mo.x_bytes_pct_hi), y1: ym, y2: ym, style: 'stroke:' + INK + ';stroke-width:1;stroke-dasharray:1 3' }), hollow(X(mo.x_bytes_pct_hi), ym)];
+    el('text', { x: X(mo.x_bytes_pct_hi) + 10, y: ym + 4, class: 'lbl' }, 'Mooncake · KV block reuses · x ≤ 50%'); tip(s1, mo);
+  })();
+  </script>
+</section>
+
+<section class="slide" id="s07" data-title="Deployed vs ambitious">
+<style>
+#s07 .s07-wrap { display: grid; grid-template-columns: 22px 1fr 1fr; grid-template-rows: auto auto auto 1fr; column-gap: 14px; row-gap: 6px; height: 100%; }
+#s07 .s07-colhead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; align-self: end; padding: 0 2px; }
+#s07 .s07-colhead > b { font-family: var(--font-mono); font-size: 12.5px; letter-spacing: .08em; text-transform: uppercase; }
+#s07 .s07-key { font-size: 11.5px; color: var(--ink-3); white-space: nowrap; }
+#s07 .s07-rowlab { writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; font-family: var(--font-mono); font-size: 12px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); border-left: 1px solid var(--rule); padding-left: 6px; }
+#s07 .s07-cell { padding: 6px 14px 5px; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+#s07 .s07-cell.amb { border-style: dashed; border-width: 1.5px; background: var(--bg); }
+#s07 .s07-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+#s07 .s07-title { font-size: 17px; font-weight: 600; line-height: 1.2; white-space: nowrap; }
+#s07 .s07-forms { font-size: 13.5px; color: var(--ink-2); line-height: 1.2; margin-top: -2px; }
+#s07 .s07-pill { font-family: var(--font-mono); font-size: 11px; line-height: 1; padding: 4px 9px; border-radius: 999px; border: 1px solid; white-space: nowrap; color: var(--ink); }
+#s07 .s07-pill.near { background: var(--near-soft); border-color: var(--near); }
+#s07 .s07-pill.far { background: var(--far-soft); border-color: var(--far); }
+#s07 dl { display: grid; grid-template-columns: 82px 1fr; column-gap: 10px; row-gap: 2px; margin: 2px 0 0; font-size: 14px; line-height: 1.3; }
+#s07 dt { font-size: 12px; font-weight: 500; color: var(--ink-3); padding-top: 1px; white-space: nowrap; }
+#s07 dd { margin: 0; }
+#s07 .q { display: inline-block; font-family: var(--font-mono); font-size: 10.5px; line-height: 1; color: var(--ink-2); background: var(--bg); border: 1px solid #c9ced5; border-radius: 3px; padding: 1px 3px 2px; margin-left: 3px; vertical-align: 2px; white-space: nowrap; }
+#s07 .s07-foot { grid-column: 2 / 4; align-self: start; display: flex; gap: 24px; align-items: flex-start; justify-content: space-between; padding: 6px 0 0; }
+#s07 .s07-foot .callout { font-size: 17px; line-height: 1.3; }
+#s07 .s07-next { font-size: 12.5px; color: var(--ink-3); white-space: nowrap; padding-bottom: 2px; }
+</style>
+<header class="slide-head">
+  <div class="kicker">07 · Deployed vs ambitious</div>
+  <h2>The deployed forms need no new programming model; the ambitious forms remain niche.</h2>
+  <div class="sub">Split each direction in two: proximity vs compute at memory (A); cheaper, extended or shared GB, on one host or across hosts (B).</div>
+</header>
+<div class="slide-body">
+  <div class="s07-wrap">
+    <div></div>
+    <div class="s07-colhead"><b class="label-near">A · closer</b><span class="s07-key">dashed border = not at volume · P/V = primary, interested seller</span></div>
+    <div class="s07-colhead"><b class="label-far">B · farther</b><span class="s07-key">V = vendor · D = our arithmetic · spec = product spec</span></div>
+
+    <div class="s07-rowlab">Deployed</div>
+    <div class="box near s07-cell" id="s07-a1">
+      <div class="s07-top"><span class="s07-title">A1 · Proximity for bandwidth</span><span class="s07-pill near">Deployed at scale (accelerators)</span></div>
+      <div class="s07-forms">HBM, on-package, stacked</div>
+      <dl>
+        <dt>Driver</dt><dd>bandwidth per GB; pJ/bit caps bandwidth under a power budget</dd>
+        <dt>Best evidence</dt><dd id="s07-a1-ev">HBM3E/HBM4 at <span class="num">~33–73</span> GB/s per GB<span class="q">D</span></dd>
+        <dt>Main cost</dt><dd id="s07-a1-co"><span class="num">~3×</span><span class="q">P/V</span> the wafer per bit; capacity per $ and per mm²</dd>
+        <dt>Software</dt><dd id="s07-a1-sw">no change (transparent memory)</dd>
+      </dl>
+    </div>
+    <div class="box far s07-cell" id="s07-b1">
+      <div class="s07-top"><span class="s07-title">B1 · Cheaper or extended bytes</span><span class="s07-pill far" title="Meta: Vistara ISCA'26 [P]; Google: zswap (Lagar-Cavilla ASPLOS'19), TMTS ASPLOS'23 [P]; Azure: CXL deployment described in Octopus arXiv 2501.09020 [P] and the Azure M-series announcement [Pr]">Deployed (Meta, Google, Azure)</span></div>
+      <div class="s07-forms">compression, recycled DDR4, single-host CXL</div>
+      <dl>
+        <dt>Driver</dt><dd>$/GB; capacity per core</dd>
+        <dt>Best evidence</dt><dd id="s07-b1-ev">Vistara: <span class="num">0.13×</span> $/GB nominal; up to <span class="num">25%</span><span class="q">meas.</span> fewer servers for ML parameter serving</dd>
+        <dt>Main cost</dt><dd id="s07-b1-co"><span class="num">+100–160</span> ns<span class="q">meas.</span>; <span class="num">~3.2–3.6×</span><span class="q">D</span> less bandwidth per GB than local DDR; Optane: a cheaper tier must be cheaper to make</dd>
+        <dt>Software</dt><dd id="s07-b1-sw">transparent (OS tiering, zswap) or NUMA node</dd>
+      </dl>
+    </div>
+
+    <div class="s07-rowlab">Ambitious</div>
+    <div class="box near s07-cell amb" id="s07-a2">
+      <div class="s07-top"><span class="s07-title">A2 · Compute at memory</span><span class="s07-pill near">Demos and niche</span></div>
+      <div class="s07-forms">PIM / NDP</div>
+      <dl>
+        <dt>Driver</dt><dd id="s07-a2-dr">internal bandwidth <span class="num">4–16×</span><span class="q">V</span> the pins; in-die energy</dd>
+        <dt>Best evidence</dt><dd id="s07-a2-ev">AttAcc up to <span class="num">1.72×</span> vs 2×DGX at equal stacks<span class="q">sim.</span>; Aquabolt-XL <span class="num">&gt;2×</span> perf, <span class="num">&gt;70%</span> less energy<span class="q">V</span>; gains shrink vs strong baselines (Newton <span class="num">54×</span> vs GPU, <span class="num">10×</span> vs ideal<span class="q">sim.</span>)</dd>
+        <dt>Main cost</dt><dd id="s07-a2-co">HBM2-PIM <span class="num">6</span> GB<span class="q">spec</span> vs <span class="num">8</span> GB std<span class="q">D</span>; DRAM-process logic; heat</dd>
+        <dt>Software</dt><dd id="s07-a2-sw">new programming model, no VM/coherence</dd>
+      </dl>
+    </div>
+    <div class="box far s07-cell amb" id="s07-b2">
+      <div class="s07-top"><span class="s07-title">B2 · Sharing across hosts</span><span class="s07-pill far">Niche (KV pools, prototypes)</span></div>
+      <div class="s07-forms">pooling, RDMA far memory</div>
+      <dl>
+        <dt>Driver</dt><dd>statistical multiplexing</dd>
+        <dt>Best evidence</dt><dd id="s07-b2-ev">Mooncake RDMA KV pool in production (<span class="num">+75%</span> requests<span class="q">trace replay</span>); Pond <span class="num">−7–9%</span> DRAM<span class="q">sim.</span></dd>
+        <dt>Main cost</dt><dd id="s07-b2-co">switched CXL pooling of VM memory mostly ROI-negative<span class="q">modelled</span>; switch <span class="num">≥220</span> ns<span class="q">V</span></dd>
+        <dt>Software</dt><dd id="s07-b2-sw">pool management, failure domains, often app changes</dd>
+      </dl>
+    </div>
+
+    <div class="s07-foot">
+      <div class="callout">Pattern: ambitious forms find use only inside vendor-controlled stacks (PIM demos) or on bulk, predictable data (KV pools). The critiques mirror each other: A2 is limited by process, heat and capacity; B2 by latency and switch cost.</div>
+    </div>
+  </div>
+</div>
+<footer class="slide-foot"><div class="sources">SYNTHESIS v1.6 §4 [Syn]. A1: AMD, NVIDIA HC'26 [V]; Micron FQ2-25 p.6 [P/V]. A2: AttAcc ASPLOS'24 §7.6 [P, sim.]; Newton MICRO'20 §6 [P, sim.]; AiM ISSCC'22 Fig. 11.1.6 table [P]; Aquabolt-XL HC33, LPDDR5X-PIM HC'26, AiM SC23, UPMEM HC31 [V]. B1: Vistara ISCA'26 [P]; Lagar-Cavilla ASPLOS'19 [P]; latency adder as s02 [P]. B2: Mooncake FAST'25 [P]; Pond ASPLOS'23 [P, sim.]; Berger IEEE Micro'23 p.7 [P, modelled]; switch: XConn via Octopus arXiv 2501.09020 (NSDI'26) [V].</div><div class="pageno">07 / 10</div></footer>
+<script>
+(function(){
+  const root = document.getElementById('s07');
+  if (!root || !window.DeckTip) return;
+  const tips = {
+    's07-a1-ev': 'Derived [D] from vendor peak specs [V]: HBM3E ~33–43 GB/s per GB (GH200 144 GB / ~4.8 TB/s [S] → 33; B200 192 GB / 8 TB/s → 41.7; GB200 NVL72 576 TB/s / 13.4 TB → 43); HBM4 ~54–73 (MI455X 432 GB / 23.3 TB/s; Helios; Rubin). AMD, NVIDIA HC’26 slide text.',
+    's07-a1-co': 'Micron FQ2-25 prepared remarks p.6 [P/V]: “HBM3E consumes three times the amount of silicon compared to D5 to produce the same number of bits”; the same page expects the ratio to “exceed 4 to 1” with HBM4E (Micron Mar-2025 p.6).',
+    's07-a1-sw': 'HBM is ordinary device memory to the accelerator: no programming-model change. SYNTHESIS v1.6 §4 Pattern [Syn].',
+    's07-b1-ev': 'Vistara (Meta) ISCA’26 [P]: CXL tier of recycled DDR4, Cost/GB 0.13× vs local DDR5 (Table V, nominal, spec-based; all-in incl. two controllers per 256 GB and DDR4 resale value ~0.4–0.9× [D]). “Up to 25% reduction in server count for disaggregated ML inference”, in production; the 25% comes from capacity, not price.',
+    's07-b1-co': 'First-hop CXL adder over local DDR, measured [P]: Octopus +115–155, PolarCXLMem +119, Vistara +120, Melody +100–280 ns (280 = FPGA device; ASIC controllers +100–160). Bandwidth per GB [D]: local 614 GB/s / 768 GB = 0.8 vs CXL ≤0.25 (2× PCIe Gen5 x8 links cap reads at 64 GB/s / 256 GB) down to 0.225 (Table V, 57.6 GB/s) → ~3.2–3.6×. Measured (Table III, all reads): 497 / 768 = 0.65 vs 48 / 256 = 0.19 → ~3.4×. Optane: wound down in 2022 ($559M impairment) [P]; a B1 tier must be cheaper to make, not just to sell (SYNTHESIS v1.6 §4 B1).',
+    's07-b1-sw': 'Linux TPP tiering and zswap are kernel mechanisms [P]; a CXL expander appears as a CPU-less NUMA node. Applications are unchanged.',
+    's07-a2-dr': 'Vendor peak internal vs external bandwidth [V]: Aquabolt-XL HBM2-PIM 4× (HC33), LPDDR5X-PIM 8× (HC’26), GDDR6-AiM 16× (SK hynix SC23).',
+    's07-a2-ev': 'AttAcc ASPLOS’24 §7.6, Fig. 17 [P]: simulated (Ramulator-based). DGX+AttAcc (40+40 HBM stacks) up to 1.72× throughput vs 2×DGX (80 stacks). Aquabolt-XL HC33 slides [V]: “over 2X system performance while reducing energy consumption by more than 70%”. Newton MICRO’20 §6 [P, simulated: GPGPU-Sim, DRAMSim2]: 54× vs a Titan V-like GPU, 10× vs an ideal non-PIM design.',
+    's07-a2-co': 'AiM ISSCC’22 Fig. 11.1.6 table [P]: HBM2-PIM 6 GB/cube = 4H 4 Gb PIM dies + 4H 8 Gb dies, vs 8 GB for a normal 8-Hi stack (−25%). UPMEM HC31 [V]: DRAM process has 3× slower transistors, 3 metal layers.',
+    's07-a2-sw': 'PIM needs new kernels/runtime and data partitioning; no virtual memory or coherence inside the device (PrIM, UPMEM). SYNTHESIS v1.6 §4.',
+    's07-b2-ev': 'Mooncake FAST’25 [P]: ~75% more requests under SLOs, from a load test replaying real Kimi traces (10P+10D vs vLLM-[20M]). Pond ASPLOS’23 [P]: DRAM needs −9% / −7% at 182% / 222% of local latency (16-socket pool, simulated, Fig. 21).',
+    's07-b2-co': 'Berger et al. IEEE Micro’23 p.7 [P, modelled]: “most switch-based configurations are ROI negative”. Switch ≥220 ns is XConn’s figure [V], cited by Octopus (arXiv 2501.09020, NSDI’26); PolarCXLMem implies +284–305 ns [D from P].',
+    's07-b2-sw': 'Pooling needs a fabric/pool manager, has a larger failure blast radius, and RDMA far memory or KV pools usually need application or runtime changes. SYNTHESIS v1.6 §4.'
+  };
+  Object.keys(tips).forEach(function(id){
+    const el = root.querySelector('#' + id);
+    if (el) window.DeckTip.attach(el, tips[id]);
+  });
+})();
+</script>
+</section>
+
+<section class="slide" id="s08" data-title="Coupling">
+  <style>
+    #s08 .s08-cols { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 28px; height: 100%; align-items: start; }
+    #s08 .s08-h { font-size: 17px; font-weight: 700; margin: 0 0 8px; line-height: 1.3; white-space: nowrap; }
+    #s08 .s08-fig { height: 286px; }
+    #s08 .s08-cap { margin: 4px 0 8px; line-height: 1.35; }
+    #s08 .s08-txt { font-size: 16px; line-height: 1.4; margin: 0; }
+    #s08 .s08-note { font-family: var(--font-mono); font-size: 14px; font-weight: 600; color: var(--ink); margin: 6px 0 0; }
+    #s08 .s08-box { margin-top: 2px; box-sizing: border-box; padding: 14px 18px; }
+    #s08 .s08-fig3 { margin-top: 8px; height: 146px; }
+    #s08 .s08-box ul { margin: 0 0 12px; padding-left: 18px; font-size: 17px; line-height: 1.45; }
+    #s08 .s08-box .small { font-size: 16px; margin: 0; padding-top: 10px; border-top: 1px solid var(--far); }
+  </style>
+  <script type="application/json" id="s08-data">
+  {
+    "tiers": [
+      {"tier": "HBM3E", "capacity_tb": 13.4, "bandwidth_tbps": 576, "gbps_per_gb": 43.0},
+      {"tier": "LPDDR5X", "capacity_tb": 17, "bandwidth_tbps": 14, "gbps_per_gb": 0.82}
+    ],
+    "xlink_note": "our arithmetic [D]: DDR5 controller ~3x, CXL-PNM ~17x its link",
+    "xlink": [{"label": "CXL link", "x": 1}, {"label": "DDR5 controller, channel-level", "x": 3}, {"label": "LPDDR5X CXL-PNM, channel-level (sim.)", "x": 17}],
+    "shares": [
+      {"year": 2025, "wafer_share_pct": 18, "bit_share_pct": 8, "forecast": false},
+      {"year": 2026, "wafer_share_pct": 22, "bit_share_pct": 9, "forecast": false},
+      {"year": 2027, "wafer_share_pct": 30, "bit_share_pct": 13, "forecast": true}
+    ]
+  }
+  </script>
+  <header class="slide-head">
+    <div class="kicker">08 · Coupling</div>
+    <h2>The directions are coupled: A needs capacity tiers and competes for wafers; B pulls compute outward.</h2>
+  </header>
+  <div class="slide-body">
+    <div class="s08-cols">
+      <div>
+        <div class="s08-h"><span class="label-near">A</span> → <span class="label-far">capacity tiers</span></div>
+        <div class="s08-fig"><svg id="s08-svg1" role="img" aria-label="Two horizontal bar panels for the GB200 NVL72 rack. Capacity: HBM3E 13.4 TB, LPDDR5X 17 TB. Bandwidth: HBM3E 576 TB/s, LPDDR5X 14 TB/s." viewBox="0 0 368 254" width="368" height="254"></svg>
+        <div class="s08-note" id="s08-note1">≈43 vs ≈0.82 GB/s per GB [D]</div></div>
+        <div class="tiny s08-cap">GB200 NVL72 rack, NVIDIA spec [V] (colour = role: capacity tier)</div>
+        <p class="s08-txt">Closer trades capacity for bandwidth, so a capacity tier follows.</p>
+      </div>
+      <div>
+        <div class="s08-h"><span class="label-near">A</span> ↔ <span class="label-far">B</span> share wafers</div>
+        <div class="s08-fig" style="height:266px"><svg id="s08-svg2" role="img" aria-label="Grouped vertical bars of HBM share of DRAM, top-3 suppliers. Wafer input versus bit output: 2025 18 and 8 percent, 2026 22 and 9 percent, 2027 forecast 30 and 13 percent." viewBox="0 0 368 262" width="368" height="262"></svg></div>
+        <div class="tiny s08-cap">TrendForce, 2 June 2026 press release [S]: end-of-year wafer share; 2026 est. (June 2026), 2027 forecast.</div>
+        <p class="s08-txt">HBM3E takes ~3× the wafer per bit (HBM4E expected &gt;4:1), a named 2026-shortage driver. New-DRAM B tiers pay more; wafer-free B (recycled DDR4, compression) gains. The shortage did not cause B.</p>
+      </div>
+      <div>
+        <div class="s08-h"><span class="label-far">B → compute at the far (capacity) tier</span></div>
+        <div class="box far s08-box">
+          <ul>
+            <li>Deployed only in training (optimizer at the capacity tier: ZeRO, MemoryX).</li>
+            <li>Elsewhere: simulations (CXL-PNM, BEACON) or vendor claims (XCENA<sup class="tag">V</sup>).</li>
+          </ul>
+          <p class="small">Catch: a CXL controller sees channel-level, not bank-level, bandwidth.</p>
+        </div>
+        <div class="s08-fig3"><svg id="s08-svg3" role="img" aria-label="Horizontal bars, in multiples of the CXL link bandwidth: the link is 1, a DDR5 controller sees about 3, and LPDDR5X CXL-PNM (simulated) about 17. Bank-level bandwidth is not visible to the controller." viewBox="0 0 368 146" width="368" height="146"></svg></div>
+        <div class="tiny s08-cap">Channel-level bandwidth seen by a CXL controller, × its link [D]; CXL-PNM sim.</div>
+      </div>
+    </div>
+  </div>
+  <footer class="slide-foot">
+    <div class="sources">GB200 NVL72 spec, nvidia.com [V]; ZeRO-Offload ATC'21 [P]; ZeRO-Infinity SC'21 [P]; Cerebras MemoryX [V]. Shares: TrendForce 2026-06-02 [S]. Wafer ratio: ~3× Micron FQ2-25 remarks p.6, FQ1-26 p.5; &gt;4:1 (HBM4E) FQ2-25 p.6 only [P/V]; shortage drivers: Handy HC'26 s4 [S]. CXL-PNM HPCA'24 [P, sim.]; BEACON MICRO'22 [P, sim.]; XCENA HC'26 s9, s13 [V]; Bars: ~3× Structera A, 4× DDR5 (~200 GB/s) vs 64 GB/s link [D from V]; ~17× CXL-PNM ~1.1 TB/s vs 64 GB/s [D, assumes x16 Gen5].</div>
+    <div class="pageno">08 / 10</div>
+  </footer>
+  <script>
+  (function () {
+    var root = document.getElementById('s08');
+    var D = JSON.parse(root.querySelector('#s08-data').textContent);
+    var NS = 'http://www.w3.org/2000/svg';
+    function el(p, n, a, t) { var e = document.createElementNS(NS, n); for (var k in a) e.setAttribute(k, a[k]); if (t != null) e.textContent = t; p.appendChild(e); return e; }
+
+    /* ---- Col 1: two bar panels ---- */
+    var s1 = root.querySelector('#s08-svg1');
+    var X0 = 122, W = 196; // plot x range
+    var colors = ['var(--near)', 'var(--far)'];
+    var rowLbl = [['HBM3E'], ['LPDDR5X', 'behind NVLink-C2C']];
+    var panels = [
+      {title: 'Capacity (TB)', key: 'capacity_tb', max: 20, ticks: [0, 5, 10, 15, 20], y: 0, fmt: function (v) { return v + ' TB'; }},
+      {title: 'Bandwidth (TB/s)', key: 'bandwidth_tbps', max: 600, ticks: [0, 200, 400, 600], y: 128, fmt: function (v) { return v + ' TB/s'; }}
+    ];
+    panels.forEach(function (p) {
+      el(s1, 'text', {x: 0, y: p.y + 12, 'class': 'lbl', style: 'font-weight:600'}, p.title);
+      p.ticks.forEach(function (t) {
+        var x = X0 + W * t / p.max;
+        el(s1, 'line', {x1: x, x2: x, y1: p.y + 22, y2: p.y + 100, style: 'stroke:var(--rule);stroke-width:1'});
+        el(s1, 'text', {x: x, y: p.y + 116, 'class': 'axis', 'text-anchor': 'middle'}, t);
+      });
+      D.tiers.forEach(function (r, i) {
+        var by = p.y + 28 + i * 36, h = 26, v = r[p.key];
+        var w = W * v / p.max;
+        el(s1, 'rect', {x: X0, y: by, width: w, height: h, style: 'fill:' + colors[i]});
+        var lines = rowLbl[i];
+        lines.forEach(function (ln, j) {
+          el(s1, 'text', {x: X0 - 8, y: by + (lines.length === 1 ? 17 : 10 + j * 13), 'class': 'lbl', 'text-anchor': 'end', style: (j ? 'font-size:11px;' : 'font-weight:600;') + 'fill:' + colors[i]}, ln);
+        });
+        var inside = p.key === 'bandwidth_tbps' && w > 150;
+        var lab = el(s1, 'text', {x: inside ? X0 + w - 6 : X0 + w + 6, y: by + 18, 'class': 'lbl num', 'text-anchor': inside ? 'end' : 'start', style: inside ? 'fill:#fff;font-weight:600' : 'font-weight:600'}, p.fmt(v));
+      });
+    });
+
+    /* ---- Col 3: link multiples ---- */
+    var s3 = root.querySelector('#s08-svg3');
+    var Q0 = 12, QW = 330, QM = 20;
+    [0, 5, 10, 15, 20].forEach(function (t) {
+      var x = Q0 + QW * t / QM;
+      el(s3, 'line', {x1: x, x2: x, y1: 4, y2: 104, style: 'stroke:var(--rule);stroke-width:1'});
+      el(s3, 'text', {x: x, y: 120, 'class': 'axis', 'text-anchor': 'middle'}, t + (t === 20 ? '×' : ''));
+    });
+    el(s3, 'text', {x: Q0 + QW / 2, y: 140, 'class': 'lbl', 'text-anchor': 'middle', style: 'font-size:12px'}, 'Bandwidth seen, × CXL link');
+    D.xlink.forEach(function (r, i) {
+      var y = 22 + i * 30, w = QW * r.x / QM;
+      el(s3, 'text', {x: Q0, y: y - 4, 'class': 'lbl halo', style: 'font-size:12px'}, r.label);
+      el(s3, 'rect', {x: Q0, y: y, width: w, height: 14, style: 'fill:' + (i ? 'var(--far)' : 'var(--mid)')});
+      el(s3, 'text', {x: Q0 + w + 6, y: y + 12, 'class': 'lbl num', style: 'font-weight:600'}, i ? '~' + r.x + '×' : '1×');
+    });
+
+    /* ---- Col 2: grouped vertical bars ---- */
+    var s2 = root.querySelector('#s08-svg2');
+    var defs = el(s2, 'defs', {});
+    var pat = el(defs, 'pattern', {id: 's08-hatch', width: 6, height: 6, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)'});
+    el(pat, 'rect', {width: 6, height: 6, style: 'fill:var(--near)'});
+    el(pat, 'line', {x1: 0, y1: 0, x2: 0, y2: 6, style: 'stroke:#fff;stroke-width:2.5'});
+    var pat2 = el(defs, 'pattern', {id: 's08-hatch2', width: 6, height: 6, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)'});
+    el(pat2, 'rect', {width: 6, height: 6, style: 'fill:var(--near-soft)'});
+    el(pat2, 'line', {x1: 0, y1: 0, x2: 0, y2: 6, style: 'stroke:var(--near);stroke-width:1.2'});
+    var PX0 = 46, PX1 = 362, PY0 = 16, PY1 = 220, YMAX = 35;
+    function yy(v) { return PY1 - (PY1 - PY0) * v / YMAX; }
+    [0, 10, 20, 30].forEach(function (t) {
+      el(s2, 'line', {x1: PX0, x2: PX1, y1: yy(t), y2: yy(t), style: 'stroke:var(--rule);stroke-width:1'});
+      el(s2, 'text', {x: PX0 - 6, y: yy(t) + 4, 'class': 'axis', 'text-anchor': 'end'}, t);
+    });
+    el(s2, 'text', {transform: 'translate(11,' + ((PY0 + PY1) / 2) + ') rotate(-90)', 'class': 'lbl', 'text-anchor': 'middle', style: 'font-size:11.5px'}, 'Share of DRAM, top-3 suppliers (%)');
+    var gw = (PX1 - PX0) / 3, bw = 36;
+    D.shares.forEach(function (r, i) {
+      var cx = PX0 + gw * (i + 0.5);
+      var xa = cx - bw - 2, xb = cx + 2;
+      el(s2, 'rect', {x: xa, y: yy(r.wafer_share_pct), width: bw, height: PY1 - yy(r.wafer_share_pct), style: r.forecast ? 'fill:url(#s08-hatch)' : 'fill:var(--near)'});
+      el(s2, 'rect', {x: xb, y: yy(r.bit_share_pct), width: bw, height: PY1 - yy(r.bit_share_pct), style: (r.forecast ? 'fill:url(#s08-hatch2)' : 'fill:var(--near-soft)') + ';stroke:var(--near);stroke-width:1.2'});
+      el(s2, 'text', {x: xa + bw / 2, y: yy(r.wafer_share_pct) - 5, 'class': 'lbl num', 'text-anchor': 'middle', style: 'font-weight:600'}, r.wafer_share_pct);
+      el(s2, 'text', {x: xb + bw / 2, y: yy(r.bit_share_pct) - 5, 'class': 'lbl num', 'text-anchor': 'middle', style: 'font-weight:600'}, r.bit_share_pct);
+      el(s2, 'text', {x: cx, y: PY1 + 17, 'class': 'axis', 'text-anchor': 'middle'}, r.year + (r.forecast ? ' forecast' : (r.year === 2026 ? ' est.' : '')));
+    });
+    el(s2, 'line', {x1: PX0, x2: PX1, y1: PY1, y2: PY1, style: 'stroke:var(--ink-3);stroke-width:1'});
+    // direct labels (upper left, clear of the 2025 bars)
+    el(s2, 'rect', {x: PX0 + 10, y: PY0 + 6, width: 11, height: 11, style: 'fill:var(--near)'});
+    el(s2, 'text', {x: PX0 + 27, y: PY0 + 16, 'class': 'lbl'}, 'wafer input');
+    el(s2, 'rect', {x: PX0 + 10, y: PY0 + 26, width: 11, height: 11, style: 'fill:var(--near-soft);stroke:var(--near);stroke-width:1.2'});
+    el(s2, 'text', {x: PX0 + 27, y: PY0 + 36, 'class': 'lbl'}, 'bit output');
+    el(s2, 'rect', {x: PX0 + 10, y: PY0 + 46, width: 11, height: 11, style: 'fill:url(#s08-hatch)'});
+    el(s2, 'text', {x: PX0 + 27, y: PY0 + 56, 'class': 'lbl'}, 'hatched = 2027 forecast');
+  })();
+  </script>
+</section>
+
+<section class="slide" id="s09" data-title="Why both, why now">
+  <style>
+    #s09 .s09-cols { display: grid; grid-template-columns: 470px 1fr; gap: 26px; height: 100%; align-items: start; }
+    #s09 .s09-cap { margin: 4px 0 0; line-height: 1.35; }
+    #s09 table.t { font-size: 14px; }
+    #s09 table.t td, #s09 table.t th { padding: 5px 8px; }
+    #s09 table.t td:first-child { white-space: nowrap; }
+    #s09 .s09-note { margin: 8px 0 0; line-height: 1.35; }
+    #s09 .s09-cav { margin: 10px 0 0; font-size: 15px; line-height: 1.4; }
+  </style>
+  <script type="application/json" id="s09-data">{"series":[{"year":1990,"usd_per_gb":75509.69},{"year":1991,"usd_per_gb":43599.81},{"year":1992,"usd_per_gb":31176.39},{"year":1993,"usd_per_gb":30996.27},{"year":1994,"usd_per_gb":35534.39},{"year":1995,"usd_per_gb":31622.9},{"year":1996,"usd_per_gb":13165.06},{"year":1997,"usd_per_gb":3402.05},{"year":1998,"usd_per_gb":1074.12},{"year":1999,"usd_per_gb":1137.05},{"year":2000,"usd_per_gb":1002.55},{"year":2001,"usd_per_gb":304.41},{"year":2002,"usd_per_gb":199.78},{"year":2003,"usd_per_gb":134.02},{"year":2004,"usd_per_gb":166.04},{"year":2005,"usd_per_gb":155.95},{"year":2006,"usd_per_gb":87.36},{"year":2007,"usd_per_gb":43.06},{"year":2008,"usd_per_gb":16.83},{"year":2009,"usd_per_gb":12.67},{"year":2010,"usd_per_gb":18.51},{"year":2011,"usd_per_gb":7.89},{"year":2012,"usd_per_gb":4.57},{"year":2013,"usd_per_gb":6.63},{"year":2014,"usd_per_gb":8.28},{"year":2015,"usd_per_gb":5.05},{"year":2016,"usd_per_gb":3.42},{"year":2017,"usd_per_gb":5.89},{"year":2018,"usd_per_gb":6.065},{"year":2019,"usd_per_gb":3.335},{"year":2020,"usd_per_gb":3.045},{"year":2021,"usd_per_gb":3.383},{"year":2022,"usd_per_gb":2.528},{"year":2023,"usd_per_gb":1.539},{"year":2024,"usd_per_gb":1.585}],"break":2010.5,"partial_year":2024}</script>
+  <header class="slide-head">
+    <div class="kicker">09 · Why both, why now</div>
+    <h2>The 1990s had the same split; commodity DRAM let the middle outrun both, until ~2010.</h2>
+    <div class="sub">IRAM vs network RAM, often from the same people: Patterson and Anderson; later Oskin, J. Chang, Ranganathan.</div>
+  </header>
+  <div class="slide-body">
+    <div class="s09-cols">
+      <div>
+        <svg id="s09-svg" role="img" aria-label="Log-scale line chart of nominal DRAM price per gigabyte, 1990 to 2024. The price falls from about 75,500 dollars in 1990 to about 12 dollars in 2009, then flattens to roughly 1.6 dollars in 2024. Dashed fits to the plotted data fall about 37 percent per year to 2010 and about 12 percent per year after. A vertical line marks the slowdown at about 2010." viewBox="0 0 470 390" width="470" height="390"></svg>
+        <div class="tiny s09-cap">DRAM $/GB, nominal retail, log scale. Data: McCallum via AI Impacts [S]; 2024 partial; ends before the 2025–26 spike. Dashed: our fits [D].</div>
+      </div>
+      <div>
+        <table class="t">
+          <thead><tr><th></th><th>1990s</th><th>Since ~2010</th></tr></thead>
+          <tbody>
+            <tr><td><span class="label-near">A</span> aimed at</td><td>the off-chip bus: 98.5 vs 4.55 nJ per access (IRAM)</td><td>bandwidth capped by pJ/bit and die edge</td></tr>
+            <tr><td><span class="label-far">B</span> aimed at</td><td>disk: remote page 1.44 ms vs 3.6–14.3 ms</td><td>DRAM $/GB, idle memory, capacity per core</td></tr>
+            <tr><td><span class="label-mid">Middle</span></td><td>$/bit before ~2010: ~33–37%/yr. PIM "did not fade away because of lack of performance gains or energy efficiency"; commodity machines could "outrun them with economic affordability" (NDP'14)</td><td>$/bit ~12–15%/yr</td></tr>
+            <tr><td><b>Markets</b></td><td>games, PDAs, embedded vs science clusters</td><td>AI accelerators vs CPU cloud</td></tr>
+            <tr><td><b>New enablers</b></td><td>—</td><td>packaging decouples DRAM and logic processes; AI on vendor-controlled stacks; CXL standard; hyperscalers own the OS</td></tr>
+          </tbody>
+        </table>
+        <p class="tiny s09-note">Table: "before ~2010" combines AI Impacts averages (33–36%, 2020$) with our nominal fit (37%); "since" is AI Impacts (12–15%). Chart: our nominal-dollar fits, 1990–2010 and 2010–24.</p>
+        <p class="s09-cav">Caveat: memory crises were forecast before (memory wall 1995; Ranganathan 2011 bet on PCM/memristors); the difference now is a decade of measured $/bit slowdown.</p>
+      </div>
+    </div>
+  </div>
+  <footer class="slide-foot">
+    <div class="sources">Fromm et al. ISCA'97 Table 5 [P]; GMS SOSP'95 Table 1 [P]; NOW IEEE Micro'95 [P]; IRAM Micro'97, ICCD'97 [P]; NDP workshop, IEEE Micro'14 p.39 sidebar [P]; Wulf &amp; McKee 1995 [P]; Ranganathan, IEEE Computer'11 p.42 [P]; SeDRAM IEDM'20 Fig. 8 [P]; McCallum data via AI Impacts (Google Sheet) and McCallum table (Wayback capture) [S]; fits: AI Impacts 2020 [S] (CPI-adjusted 2020$); chart fits: ours, nominal [D]; "middle outran both" and enabler list [Syn].</div>
+    <div class="pageno">09 / 10</div>
+  </footer>
+  <script>
+  (function () {
+    var root = document.getElementById('s09');
+    var D = JSON.parse(root.querySelector('#s09-data').textContent);
+    var NS = 'http://www.w3.org/2000/svg';
+    function el(p, n, a, t) { var e = document.createElementNS(NS, n); for (var k in a) e.setAttribute(k, a[k]); if (t != null) e.textContent = t; p.appendChild(e); return e; }
+    var svg = root.querySelector('#s09-svg');
+    var X0 = 64, X1 = 458, Y0 = 14, Y1 = 344, XMIN = 1990, XMAX = 2024, LMIN = 0, LMAX = 5;
+    function xx(v) { return X0 + (X1 - X0) * (v - XMIN) / (XMAX - XMIN); }
+    function yy(v) { return Y1 - (Y1 - Y0) * (Math.log10(v) - LMIN) / (LMAX - LMIN); }
+    var yl = {0: '$1', 1: '$10', 2: '$100', 3: '$1k', 4: '$10k', 5: '$100k'};
+    for (var e = 0; e <= 5; e++) {
+      el(svg, 'line', {x1: X0, x2: X1, y1: yy(Math.pow(10, e)), y2: yy(Math.pow(10, e)), style: 'stroke:var(--rule);stroke-width:1'});
+      el(svg, 'text', {x: X0 - 6, y: yy(Math.pow(10, e)) + 4, 'class': 'axis', 'text-anchor': 'end'}, yl[e]);
+    }
+    [1990, 2000, 2010, 2020].forEach(function (t) {
+      el(svg, 'line', {x1: xx(t), x2: xx(t), y1: Y1, y2: Y1 + 4, style: 'stroke:var(--ink-3);stroke-width:1'});
+      el(svg, 'text', {x: xx(t), y: Y1 + 18, 'class': 'axis', 'text-anchor': t === 2024 ? 'end' : 'middle'}, t);
+    });
+    el(svg, 'line', {x1: X0, x2: X1, y1: Y1, y2: Y1, style: 'stroke:var(--ink-3);stroke-width:1'});
+    el(svg, 'text', {x: (X0 + X1) / 2, y: Y1 + 38, 'class': 'lbl', 'text-anchor': 'middle'}, 'Year');
+    el(svg, 'text', {transform: 'translate(13,' + ((Y0 + Y1) / 2) + ') rotate(-90)', 'class': 'lbl', 'text-anchor': 'middle'}, 'DRAM price, nominal ($/GB, log scale)');
+    // slowdown line
+    el(svg, 'line', {x1: xx(D.break), x2: xx(D.break), y1: Y0, y2: Y1, style: 'stroke:var(--ink-3);stroke-width:1'});
+    el(svg, 'text', {x: xx(D.break) - 5, y: Y0 + 12, 'class': 'lbl faint halo', 'text-anchor': 'end'}, 'slowdown (~2010)');
+    // OLS fit on ln(price)
+    function fit(a, b) {
+      var p = D.series.filter(function (r) { return r.year >= a && r.year <= b; });
+      var n = p.length, mx = 0, my = 0, i;
+      p.forEach(function (r) { mx += r.year / n; my += Math.log(r.usd_per_gb) / n; });
+      var sxy = 0, sxx = 0;
+      p.forEach(function (r) { sxy += (r.year - mx) * (Math.log(r.usd_per_gb) - my); sxx += (r.year - mx) * (r.year - mx); });
+      var s = sxy / sxx, c = my - s * mx;
+      return {s: s, c: c, rate: Math.round((Math.exp(s) - 1) * 100), f: function (x) { return Math.exp(c + s * x); }};
+    }
+    var f1 = fit(1990, 2010), f2 = fit(2010, 2024);
+    [[f1, 1990, 2010], [f2, 2010, 2024]].forEach(function (q) {
+      el(svg, 'line', {x1: xx(q[1]), y1: yy(q[0].f(q[1])), x2: xx(q[2]), y2: yy(q[0].f(q[2])), style: 'stroke:var(--ink-2);stroke-width:1.5;stroke-dasharray:6 4'});
+    });
+    // series
+    var d = D.series.map(function (r, i) { return (i ? 'L' : 'M') + xx(r.year).toFixed(1) + ',' + yy(r.usd_per_gb).toFixed(1); }).join('');
+    el(svg, 'path', {d: d, style: 'fill:none;stroke:var(--mid);stroke-width:1.4'});
+    D.series.forEach(function (r) {
+      var c = el(svg, 'circle', {cx: xx(r.year), cy: yy(r.usd_per_gb), r: 3, style: 'fill:' + (r.year === D.partial_year ? 'var(--bg)' : 'var(--mid)') + ';stroke:var(--mid);stroke-width:1.2'});
+      if (window.DeckTip) window.DeckTip.attach(c, r.year + ': $' + r.usd_per_gb + '/GB nominal (annual geometric mean of McCallum price points via AI Impacts sheet / Wayback table) [S]' + (r.year === D.partial_year ? '; partial year' : '') + (r.year >= 2018 ? ' (2018–24: single extraction)' : ''));
+    });
+    el(svg, 'text', {x: X1, y: Y0 + 30, 'class': 'lbl faint', 'text-anchor': 'end'}, 'hollow = 2024');
+    el(svg, 'text', {x: X1, y: Y0 + 45, 'class': 'lbl faint', 'text-anchor': 'end'}, '(partial year)');
+    // fit labels
+    el(svg, 'text', {x: xx(1992.5), y: yy(2.2), 'class': 'lbl halo', style: 'font-weight:600'}, 'nominal-dollar fit, 1990–2010:');
+    el(svg, 'text', {x: xx(1992.5), y: yy(2.2) + 15, 'class': 'lbl halo num', style: 'font-weight:600'}, '\u2212' + Math.abs(f1.rate) + '%/yr');
+    el(svg, 'text', {x: xx(2024), y: yy(80), 'class': 'lbl halo', 'text-anchor': 'end', style: 'font-weight:600'}, 'nominal-dollar fit, 2010–24:');
+    el(svg, 'text', {x: xx(2024), y: yy(80) + 15, 'class': 'lbl halo num', 'text-anchor': 'end', style: 'font-weight:600'}, '\u2212' + Math.abs(f2.rate) + '%/yr');
+  })();
+  </script>
+</section>
+
+<section class="slide" id="s10" data-title="Implications" data-notes="Pending full texts: Kwon ISSCC'21 (PIM area, pJ/bit), d-Matrix Raptor ISCA'26 (scope of 0.37 pJ/bit).">
+  <style>
+    #s10 .s10-body { align-items: start; gap: 32px; }
+    #s10 table.t td { line-height: 1.35; padding: 9px 8px; }
+    #s10 table.t th { padding-top: 0; }
+    #s10 .s10-conf { width: 43%; }
+    #s10 .s10-conf-cell { color: var(--ink-2); }
+    #s10 .s10-cf { display: flex; align-items: baseline; gap: 8px; }
+    #s10 .s10-pill { display: inline-flex; align-items: center; gap: 5px; flex: none; width: 100px; box-sizing: border-box;
+      font-size: 12.5px; font-weight: 600; letter-spacing: .02em; color: var(--ink);
+      background: var(--panel); border: 1px solid var(--rule); border-radius: 999px;
+      padding: 1px 9px; line-height: 1.5; }
+    #s10 .s10-dots { display: inline-flex; gap: 3px; }
+    #s10 .s10-dots i { width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--ink-2); box-sizing: border-box; }
+    #s10 .s10-dots i.on { background: var(--ink-2); }
+    #s10 .s10-panel-title { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink); font-weight: 600; margin: 0 0 8px; height: 18px; line-height: 18px; }
+    #s10 .s10-claim { margin: 18px 0 0; font-size: 19px; }
+    #s10 .s10-refute td:last-child { color: var(--ink-2); width: 46%; }
+    #s10 .s10-right { border-left: 1px solid var(--rule); padding-left: 24px; }
+    #s10 .s10-rivals { margin-top: 16px; padding: 10px 14px; background: var(--panel); font-size: 14.5px; line-height: 1.4; color: var(--ink-2); }
+    #s10 .s10-rivals .s10-panel-title { margin-bottom: 4px; }
+    #s10 .s10-rivals p { margin: 0 0 4px; }
+    #s10 .s10-rivals b { color: var(--ink); font-weight: 600; }
+  </style>
+  <header class="slide-head">
+    <div class="kicker">10 · Implications</div>
+    <h2>Specify memory by frontier position, not attach point; three observations would count against this account.</h2>
+    <div class="sub">A useful spec sheet: GB/s per GB, $/GB, pJ/bit with its scope, idle and loaded latency.</div>
+  </header>
+  <div class="slide-body">
+    <div class="cols c-6-4 s10-body">
+      <div class="s10-left">
+        <div class="s10-panel-title">What to expect</div>
+        <table class="t" aria-label="Hedged predictions with evidence confidence">
+          <thead>
+            <tr><th>Hedged prediction <span class="tag">[Syn]</span></th><th class="s10-conf">Evidence confidence</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>HBM without in-stack compute, on logic base dies, persists (A1)</td><td class="s10-conf-cell"><div class="s10-cf"><span class="s10-pill"><span class="s10-dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i></span>High</span><span>deployed at scale</span></div></td></tr>
+            <tr><td>Single-host CXL expansion and compression persist (B1)</td><td class="s10-conf-cell"><div class="s10-cf"><span class="s10-pill"><span class="s10-dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i></span>High</span><span>deployed (Meta, Google, Azure)</span></div></td></tr>
+            <tr><td>A keeps creating capacity tiers and competing for wafers</td><td class="s10-conf-cell"><div class="s10-cf"><span class="s10-pill"><span class="s10-dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i></span>Medium</span><span>GB200, wafer ratio, ZeRO (slide 8)</span></div></td></tr>
+            <tr><td>Compute at the far tier grows where software is vertically integrated, as in training</td><td class="s10-conf-cell"><div class="s10-cf"><span class="s10-pill"><span class="s10-dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i></span>Medium</span><span>deployed only in training</span></div></td></tr>
+            <tr><td>PIM (A2) and pooling (B2) stay niche outside vertically integrated AI stacks</td><td class="s10-conf-cell"><div class="s10-cf"><span class="s10-pill"><span class="s10-dots" aria-hidden="true"><i class="on"></i><i></i><i></i></span>Low</span><span>economics mostly simulated or modelled</span></div></td></tr>
+          </tbody>
+        </table>
+        <p class="callout s10-claim">On server CPUs, any product between the DIMM and HBM must beat MRDIMM-12800 + a large SRAM LLC + CXL.</p>
+      </div>
+      <div class="s10-right">
+        <div class="s10-panel-title">What would count against this account</div>
+        <table class="t s10-refute" aria-label="Observations that would count against this account">
+          <thead>
+            <tr><th>Observation</th><th>Would mean</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>CXL capacity tiers keep growing after DRAM $/GB returns to trend</td><td>B is driven by something else (fault isolation, lifecycle)</td></tr>
+            <tr><td>CPU HBM returns while MRDIMM keeps scaling</td><td>A fast middle is not why CPU HBM stopped</td></tr>
+            <tr><td>PIM wins in silicon at iso-stack, iso-capacity baselines</td><td>A2 stands on its own, apart from A1's trade-offs</td></tr>
+          </tbody>
+        </table>
+        <div class="box s10-rivals">
+          <div class="s10-panel-title">Rival explanations, weighed</div>
+          <p><b>Different markets:</b> first-order, yet single workloads (LLM serving, GB200) use both, so markets differ because their binding constraint differs.</p>
+          <p><b>Vendor incentives:</b> real (escaping commodity pricing), but HMC, Gen-Z and The Machine show incentives alone don't make a direction work.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="slide-foot">
+    <div class="sources">SYNTHESIS v1.6 §8 and Confidence [Syn]. Evidence basis: A1/B1 deployed (slides 5, 7); coupling (slide 8); A2/B2 economics mostly simulated or modelled (AttAcc, CXL-PNM, Berger, Pond). Rival explanations: SYNTHESIS v1.6 §7 [Syn].</div>
+    <div class="pageno">10 / 10</div>
+  </footer>
+</section>
+
+</div>
+
+<script>
+(function(){
+  const slides=[...document.querySelectorAll('.slide')];
+  const deck=document.querySelector('.deck');
+  const pos=document.getElementById('pos');
+  let i=0;
+  function fit(){
+    if(!document.body.classList.contains('present')){ deck.style.transform=''; deck.style.height=''; return; }
+    const bar=document.querySelector('.deck-bar'); const bh=bar?bar.getBoundingClientRect().height:0;
+    const s=Math.min(window.innerWidth/1282, (window.innerHeight-bh)/722);
+    deck.style.transform='scale('+s+')'; deck.style.transformOrigin='top center';
+  }
+  function show(k){
+    i=Math.max(0,Math.min(slides.length-1,k));
+    slides.forEach((s,j)=>s.classList.toggle('active', j===i));
+    pos.textContent=(i+1)+' / '+slides.length+' · '+(slides[i].dataset.title||'');
+    try{ history.replaceState(null,'','#'+slides[i].id); }catch(e){}
+    if(!document.body.classList.contains('present')) slides[i].scrollIntoView({block:'start'});
+  }
+  function toggle(){ document.body.classList.toggle('present'); slides.forEach(sl=>{ sl.style.zoom=''; }); fitScroll(); fit(); show(i); }
+  document.getElementById('mode').addEventListener('click', toggle);
+  document.getElementById('prev').addEventListener('click', ()=>show(i-1));
+  document.getElementById('next').addEventListener('click', ()=>show(i+1));
+  document.addEventListener('keydown', e=>{
+    const t=e.target; if(t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(t.tagName))) return;
+    const pres=document.body.classList.contains('present');
+    if(e.key==='ArrowRight'||e.key==='PageDown'||(e.key===' '&&pres)){ e.preventDefault(); show(i+1); }
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); show(i-1); }
+    else if(e.key==='Home'){ e.preventDefault(); show(0); }
+    else if(e.key==='End'){ e.preventDefault(); show(slides.length-1); }
+    else if(e.key==='p'||e.key==='P'){ toggle(); }
+    else if(e.key==='Escape'&&pres){ toggle(); }
+  });
+  let tx=null;
+  document.addEventListener('touchstart', e=>{ if(document.body.classList.contains('present')) tx=e.touches[0].clientX; }, {passive:true});
+  document.addEventListener('touchend', e=>{ if(tx===null) return; const dx=e.changedTouches[0].clientX-tx; tx=null; if(Math.abs(dx)>40) show(i+(dx<0?1:-1)); }, {passive:true});
+  window.addEventListener('resize', fit);
+  const h=(location.hash||'').slice(1); const k=slides.findIndex(s=>s.id===h);
+  // scale slides down to fit narrow screens in scroll mode
+  function fitScroll(){
+    if(document.body.classList.contains('present')) return;
+    const s=Math.min(1,(window.innerWidth-24)/1282);
+    slides.forEach(sl=>{ sl.style.zoom = s<1 ? s : ''; });
+  }
+  window.addEventListener('resize', fitScroll); fitScroll();
+  show(k>=0?k:0);
+})();
+</script>

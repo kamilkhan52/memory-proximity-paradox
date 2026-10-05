@@ -1,0 +1,225 @@
+<title>Memory: Closer and Farther</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap">
+<style>
+/* Deck design system: 1280x720 slides on white; technical, quiet; one accent per meaning.
+   Colour encodes the argument everywhere:
+     --near  (A, closer / tighter coupling)   blue
+     --far   (B, farther / disaggregation)    orange
+     --mid   (the DDR baseline / middle)      slate
+     --conv  (convergence / 3D / both)        green
+   Never use these for anything else. */
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --ink: #111418;
+  --ink-2: #4a5059;
+  --ink-3: #5f6570;
+  --rule: #e3e6ea;
+  --panel: #f6f7f9;
+  --near: #2a78d6;
+  --near-soft: #e6f0fb;
+  --far: #eb6834;
+  --far-soft: #fdeee7;
+  --mid: #3c4a5c;
+  --mid-soft: #eceff3;
+  --conv: #1baf7a;
+  --conv-soft: #e4f6ef;
+  --warn: #b42318;
+  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --slide-w: 1280px;
+  --slide-h: 720px;
+}
+html, body { background: var(--bg); color: var(--ink); }
+body { margin: 0; font-family: var(--font-body); }
+
+/* ---------- slide frame ---------- */
+.deck { display: flex; flex-direction: column; align-items: center; gap: 28px; padding-block: 28px; }
+.slide {
+  position: relative; box-sizing: border-box;
+  width: var(--slide-w); height: var(--slide-h);
+  padding: 44px 60px 0 60px;
+  background: var(--bg); color: var(--ink);
+  border: 1px solid var(--rule);
+  display: grid; grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+  font-size: 18px; line-height: 1.45;
+}
+.slide-head { margin-bottom: 18px; }
+.kicker { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
+.slide h2 { font-family: var(--font-display); font-weight: 600; font-size: 34px; line-height: 1.15; margin: 0; max-width: 1100px; text-wrap: balance; }
+.slide .sub { font-size: 18px; color: var(--ink-2); margin-top: 8px; max-width: 1050px; }
+.slide-body { min-height: 0; position: relative; }
+.slide-foot {
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 24px;
+  border-top: 1px solid var(--rule); padding: 8px 0 12px; margin-top: 10px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); line-height: 1.4;
+}
+.slide-foot .sources { max-width: 1060px; min-height: 4.2em; display: flex; flex-direction: column; justify-content: flex-end; }
+.slide-foot .pageno { white-space: nowrap; }
+
+/* ---------- common building blocks ---------- */
+.cols { display: grid; gap: 28px; height: 100%; }
+.cols.c2 { grid-template-columns: 1fr 1fr; }
+.cols.c-6-4 { grid-template-columns: 6fr 4fr; }
+.cols.c-4-6 { grid-template-columns: 4fr 6fr; }
+.cols > * { min-width: 0; }
+.slide p { margin: 0 0 10px; }
+.slide ul { margin: 0 0 10px; padding-left: 20px; }
+.slide li { margin-bottom: 6px; }
+.small { font-size: 15px; color: var(--ink-2); }
+.tiny { font-size: 12.5px; color: var(--ink-3); }
+.tag { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+.num { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--font-mono); }
+.callout { border-left: 3px solid var(--ink); padding: 4px 0 4px 14px; font-family: var(--font-display); font-size: 21px; line-height: 1.3; }
+.box { border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; }
+.box.near { border-color: var(--near); background: var(--near-soft); }
+.box.far { border-color: var(--far); background: var(--far-soft); }
+.box.mid { border-color: var(--mid); background: var(--mid-soft); }
+.box.conv { border-color: var(--conv); background: var(--conv-soft); }
+.label-near { color: var(--near); font-weight: 600; }
+.label-far { color: var(--far); font-weight: 600; }
+.label-mid { color: var(--mid); font-weight: 600; }
+.label-conv { color: var(--conv); font-weight: 600; }
+table.t { border-collapse: collapse; width: 100%; font-size: 15px; }
+table.t th, table.t td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+table.t th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-2); font-weight: 600; }
+table.t td.n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ---------- charts (SVG) ---------- */
+.slide svg { display: block; max-width: 100%; height: auto; }
+.slide svg text { font-family: var(--font-body); fill: var(--ink); }
+.slide svg .axis { fill: var(--ink-2); font-family: var(--font-mono); font-size: 12px; }
+.slide svg .lbl { fill: var(--ink-2); font-size: 13px; }
+.slide svg .muted { fill: var(--ink-2); }
+.slide svg .faint { fill: var(--ink-3); }
+.slide svg .halo { paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
+
+/* ---------- deck chrome (assembled deck only) ---------- */
+.deck-bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; width: 100%; background: rgba(255,255,255,.94); border-bottom: 1px solid var(--rule); font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); display: flex; justify-content: space-between; align-items: center; padding: 8px 20px; box-sizing: border-box; }
+.deck-bar button { font: inherit; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); border-radius: 4px; padding: 3px 9px; cursor: pointer; }
+.deck-bar button:focus-visible { outline: 2px solid var(--near); outline-offset: 2px; }
+.scaler { transform-origin: top center; }
+body.present { overflow: hidden; height: 100%; }
+body.present .deck { gap: 0; padding: 0; }
+body.present .slide { display: none; border: none; }
+body.present .slide.active { display: grid; }
+#tip { position: fixed; pointer-events: none; background: var(--ink); color: #fff; font-family: var(--font-body); font-size: 12.5px; padding: 6px 8px; border-radius: 4px; line-height: 1.35; max-width: 300px; z-index: 20; }
+
+</style>
+
+
+<div id="tip" hidden></div>
+<script>
+window.DeckTip = (function(){
+  const tip = document.getElementById('tip');
+  function move(e){ const x=Math.min(e.clientX+14, window.innerWidth-310); tip.style.left=x+'px'; tip.style.top=(e.clientY+14)+'px'; }
+  return {
+    attach(el, html){ el.addEventListener('mouseenter', e=>{tip.innerHTML=html; tip.hidden=false; move(e);});
+                      el.addEventListener('mousemove', move); el.addEventListener('mouseleave', ()=>{tip.hidden=true;}); }
+  };
+})();
+</script>
+
+<div class="deck">
+<section class="slide" id="s01" data-title="Question and answer">
+  <style>
+    #s01 .s01-answer { display: flex; flex-direction: column; gap: 22px; padding-top: 2px; }
+    #s01 .s01-answer .kicker { margin-bottom: 0; }
+    #s01 .s01-pt { display: grid; grid-template-columns: 22px 1fr; column-gap: 8px; align-items: start; }
+    #s01 .s01-n { font-family: var(--font-mono); font-size: 13px; color: var(--ink-3); padding-top: 4px; }
+    #s01 .s01-pt p { margin: 0; font-size: 18px; line-height: 1.42; color: var(--ink); text-wrap: pretty; }
+    #s01 .s01-pt .callout { margin: 0; font-size: 21px; line-height: 1.3; }
+    #s01 .s01-ab { display: flex; flex-direction: column; gap: 8px; }
+    #s01 .s01-fig { display: flex; flex-direction: column; }
+    #s01 .s01-figtitle { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 4px 52px; }
+    #s01 .s01-fig .tiny { margin: 0 0 0 52px; }
+  </style>
+  <header class="slide-head">
+    <div class="kicker">01 · Question and answer</div>
+    <h2>Closer and farther are not opposites: both leave DDR's narrow spot on one cost frontier.</h2>
+    <div class="sub">Why are tighter memory–compute coupling (A) and memory disaggregation / far memory (B) both attractive?</div>
+  </header>
+  <div class="slide-body">
+    <div class="cols c-4-6">
+      <div class="s01-answer">
+        <div class="kicker">Answer</div>
+        <div class="s01-pt">
+          <span class="s01-n">1</span>
+          <p class="callout">Distance is not what is optimized.</p>
+        </div>
+        <div class="s01-pt">
+          <span class="s01-n">2</span>
+          <div class="s01-ab">
+            <p><span class="label-near">A</span> answers the bandwidth pressure: more GB/s per GB, fewer pJ/bit (HBM, 3D DRAM–logic stacking, PIM).</p>
+            <p><span class="label-far">B</span> answers capacity cost: cheaper, extended or shared GB (compression, CXL, RDMA pools).</p>
+          </div>
+        </div>
+        <div class="s01-pt">
+          <span class="s01-n">3</span>
+          <p>Skew is within each workload, so mixed tiers win; the <span class="label-mid">DDR middle</span> persists.</p>
+        </div>
+        <div class="s01-pt">
+          <span class="s01-n">4</span>
+          <p>The directions are coupled, and since ~2010 slower $/bit declines no longer let the middle outrun both.</p>
+        </div>
+      </div>
+
+      <div class="s01-fig">
+        <div class="s01-figtitle">The frontier, schematically</div>
+        <svg id="s01-frontier" viewBox="0 0 680 380" role="img"
+             aria-label="Schematic, not to scale. Horizontal axis: GB/s per GB stored. Vertical axis: dollars per GB. A slate box, the DDR DIMM, sits left of centre. A blue arrow labelled A runs up and to the right toward HBM, PIM and 3D DRAM–logic stacking. An orange arrow labelled B runs straight down toward compression and recycled DDR4 behind CXL; a thinner orange arrow runs down and to the left toward RDMA pools and SSD.">
+          <defs>
+            <marker id="s01-head-near" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+              <path d="M0,0.8 L10,5 L0,9.2 Z" style="fill:var(--near)"/>
+            </marker>
+            <marker id="s01-head-far" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="14" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto">
+              <path d="M0,0.8 L10,5 L0,9.2 Z" style="fill:var(--far)"/>
+            </marker>
+            <marker id="s01-head-far-s" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto">
+              <path d="M0,0.8 L10,5 L0,9.2 Z" style="fill:var(--far)"/>
+            </marker>
+          </defs>
+
+          <!-- axes (no ticks: schematic) -->
+          <g style="stroke:var(--ink-3)" stroke-width="1" fill="none">
+            <path d="M52,10 V352 H672"/>
+          </g>
+          <text class="lbl" x="672" y="374" text-anchor="end" font-size="14" style="font-size:14px">GB/s per GB stored →</text>
+          <text class="lbl" transform="translate(38,10) rotate(-90)" text-anchor="end" style="font-size:14px">$/GB →</text>
+
+          <!-- A: tighter coupling, up and to the right -->
+          <line x1="352" y1="160" x2="484" y2="84" style="stroke:var(--near)" stroke-width="3" stroke-linecap="round" marker-end="url(#s01-head-near)"/>
+          <text x="400" y="110" text-anchor="end" font-size="13" font-weight="600" style="fill:var(--near)"><tspan font-size="16">A</tspan>  tighter coupling</text>
+          <text x="498" y="66" font-size="14" font-weight="500" style="fill:var(--near)">HBM</text>
+          <text x="498" y="92" font-size="14" font-weight="500" style="fill:var(--near)">PIM (compute in the stack)</text>
+          <text x="498" y="118" font-size="14" font-weight="500" style="fill:var(--conv)">3D DRAM–logic stacking</text>
+
+          <!-- the DDR DIMM: the middle -->
+          <rect x="180" y="164" width="172" height="58" rx="10" style="fill:var(--mid-soft);stroke:var(--mid)" stroke-width="1.5"/>
+          <text x="266" y="190" text-anchor="middle" font-size="15" font-weight="600" style="fill:var(--mid)">DDR DIMM</text>
+          <text x="266" y="209" text-anchor="middle" font-size="12.5" class="muted">(the middle)</text>
+
+          <!-- B: farther, straight down (and a thinner branch down-left) -->
+          <line x1="282" y1="226" x2="282" y2="302" style="stroke:var(--far)" stroke-width="3" stroke-linecap="round" marker-end="url(#s01-head-far)"/>
+          <text x="296" y="262" font-size="13" font-weight="600" style="fill:var(--far)"><tspan font-size="16">B</tspan>  disaggregation / far memory</text>
+          <text x="296" y="302" font-size="14" font-weight="500" style="fill:var(--far)">compression · recycled DDR4 behind CXL</text>
+          <line x1="212" y1="226" x2="150" y2="290" style="stroke:var(--far)" stroke-width="1.75" stroke-linecap="round" marker-end="url(#s01-head-far-s)"/>
+          <text x="142" y="314" text-anchor="middle" font-size="14" font-weight="500" style="fill:var(--far)">RDMA pools · SSD</text>
+
+          <!-- schematic note -->
+          <text x="668" y="340" text-anchor="end" font-size="12.5" class="faint">Schematic, not to scale. Spec-derived positions: slide 5.</text>
+        </svg>
+        <p class="tiny">Latency is a separate constraint (slide 2); skew decides the mix (slide 6).</p>
+      </div>
+    </div>
+  </div>
+  <footer class="slide-foot">
+    <div class="sources">Answer: SYNTHESIS v1.6, executive summary [Syn]; frontier framing after review r2d F2 [Syn]. Schematic only; values on slides 2–5. Tags: [P] primary, read in full · [P/V] primary, interested seller · [V] vendor · [Pr] press · [S] secondary · [D] our arithmetic · [Syn] our synthesis · [pend] awaiting full text · [unverified].</div>
+    <div class="pageno">01 / 10</div>
+  </footer>
+</section>
+
+</div>

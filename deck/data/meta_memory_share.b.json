@@ -1,0 +1,97 @@
+{
+  "id": "meta_memory_share",
+  "version": 1,
+  "slides": [
+    "s04"
+  ],
+  "title": "Memory as a percentage of Meta rack TCO and power by hardware generation",
+  "units": {
+    "tco_pct": "% of rack TCO",
+    "power_pct": "% of rack power"
+  },
+  "conventions": "Printed data labels from the paper's Fig. 3. Legend: Power = black squares, Cost = orange triangles; Cost is read as TCO per the caption and text.",
+  "sources": {
+    "tpp": {
+      "cite": "Maruf et al., TPP, ASPLOS 2023 (arXiv 2206.02878)",
+      "path": "fulltext/tpp-asplos23.pdf",
+      "locator": "p.2, Fig. 3",
+      "tag": "P"
+    }
+  },
+  "rows": [
+    {
+      "gen": "Gen0",
+      "tco_pct": 15.6,
+      "power_pct": 14.6,
+      "src": "tpp",
+      "loc": "p.2, Fig. 3",
+      "tag": "P",
+      "unc": "exact (printed data label)",
+      "note": "Orange triangle line = Cost (TCO), labels above; black square line = Power, labels below (legend under plot)."
+    },
+    {
+      "gen": "Gen1",
+      "tco_pct": 25.5,
+      "power_pct": 19.8,
+      "src": "tpp",
+      "loc": "p.2, Fig. 3",
+      "tag": "P",
+      "unc": "exact (printed data label)",
+      "note": "Orange triangle line = Cost (TCO), labels above; black square line = Power, labels below (legend under plot)."
+    },
+    {
+      "gen": "Gen2",
+      "tco_pct": 21.6,
+      "power_pct": 19.7,
+      "src": "tpp",
+      "loc": "p.2, Fig. 3",
+      "tag": "P",
+      "unc": "exact (printed data label)",
+      "note": "Orange triangle line = Cost (TCO), labels above; black square line = Power, labels below (legend under plot). Non-monotonic series."
+    },
+    {
+      "gen": "Gen3",
+      "tco_pct": 21.2,
+      "power_pct": 20.7,
+      "src": "tpp",
+      "loc": "p.2, Fig. 3",
+      "tag": "P",
+      "unc": "exact (printed data label)",
+      "note": "Orange triangle line = Cost (TCO), labels above; black square line = Power, labels below (legend under plot). Non-monotonic series."
+    },
+    {
+      "gen": "Gen4",
+      "tco_pct": 31.8,
+      "power_pct": 28.8,
+      "src": "tpp",
+      "loc": "p.2, Fig. 3",
+      "tag": "P",
+      "unc": "exact (printed data label)",
+      "note": "Orange triangle line = Cost (TCO), labels above; black square line = Power, labels below (legend under plot)."
+    },
+    {
+      "gen": "Gen5",
+      "tco_pct": 37.1,
+      "power_pct": 33.3,
+      "src": "tpp",
+      "loc": "p.2, Fig. 3",
+      "tag": "P",
+      "unc": "exact (printed data label)",
+      "note": "Orange triangle line = Cost (TCO), labels above; black square line = Power, labels below (legend under plot)."
+    }
+  ],
+  "extraction": {
+    "agent_a": "see meta_memory_share.json",
+    "agent_b": "extractor B (blind)",
+    "method": "pdftotext plus rendering p.2 at 200 dpi and viewing the plot; labels matched to series by position and legend",
+    "cross_check": {
+      "max_disagreement": "not yet compared",
+      "resolved": "pending"
+    }
+  },
+  "caveats": [
+    "Cost/TCO and Power are Meta rack-level shares; the paper does not give absolute values.",
+    "Non-monotonic: TCO 25.5 (Gen1) -> 21.2 (Gen3) -> 37.1 (Gen5); power 19.8 -> 19.7 -> 20.7.",
+    "The text says memory is the more prominent portion of rack power and TCO, without defining Gen0-Gen5."
+  ]
+}

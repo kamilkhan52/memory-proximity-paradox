@@ -1,0 +1,17 @@
+# Instructions for figure-data agents (Phase 1)
+
+You extract the data for ONE figure of a 10-slide technical deck. Accuracy is the whole job.
+
+Read:
+1. /Users/kamil/research/memory-proximity-paradox/deck/BRIEF.md: §B (global rules), §E (figure data specs: the row for YOUR figure, the common rules and the JSON envelope), and §D for the slide(s) that use your figure, including its "Evidence" and "do not say" lists.
+2. The sources named in your §E row. Full texts are in /Users/kamil/research/memory-proximity-paradox/fulltext/ (see MANIFEST.md; extract text with `pdftotext -layout`, and render pages with `pdftoppm -f N -l N -r 200 -png`, then view the PNGs with the Read tool when values are in figures or tables). Hot Chips 2026 slide text is in fulltext/hotchips26/decks_text/. Slide images are under fulltext/hotchips26/lightrag_server/slide_assets_vision/, or use `unzip -p fulltext/hotchips26-handover-no-source.zip '<path>'`. Research notes are in /Users/kamil/research/memory-proximity-paradox/notes/.
+
+Rules:
+- Use the JSON envelope from §E exactly. Every row carries src, loc (page/figure/table/slide), tag, unc and note.
+- Prefer printed numbers over chart reads. For chart reads, state the axis type (linear or log) and your method (for example, pixel positions measured against labelled gridlines), and give a realistic uncertainty.
+- Do not invent values. If a needed source is not readable in full, do NOT use its abstract. Write `"status": "FULL TEXT NEEDED: <item>"` for that row and continue with the rest.
+- If you fetch an online source (WebFetch), save the PDF or HTML into /Users/kamil/research/memory-proximity-paradox/fulltext/ (curl -L -o …) and record the path. Web search may be unavailable; use known URLs.
+- Work independently. Do NOT open the other extractor's file (`<id>.json` vs `<id>.b.json`).
+- Arithmetic you do is tagged D, with the formula in `unc`.
+
+Output: write your JSON to the path given in your task. Return a compact summary (≤200 words): rows extracted, anything uncertain or missing, and any disagreement with the BRIEF's §D Evidence numbers (quote both).

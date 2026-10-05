@@ -1,0 +1,132 @@
+<section class="slide" id="s05" data-title="The cost frontier">
+  <style>
+    #s05 .s05-notes { display: grid; grid-template-columns: 1.3fr 1.1fr .8fr; gap: 28px; font-size: 16px; line-height: 1.38; margin-top: 0; }
+    #s05 .s05-notes p { margin: 0; display: grid; grid-template-columns: 22px 1fr; }
+    #s05 .s05-notes .n { font-family: var(--font-mono); color: var(--ink-3); }
+    #s05 .s05-cap { margin: 2px 0 0; font-size: 11.5px; }
+    #s05 .slide-head { margin-bottom: 2px; }
+  </style>
+  <script type="application/json" id="s05-data">
+{"rows":[
+{"tier":"3D DRAM–logic stacking","example":"d-Matrix Raptor card (32 GB)","role":"conv","status":"announced","lo":null,"hi":null,"point":3125.0,"usd":"n/a","lat":"—","src":"d-Matrix HC'26 s13; 100 TB/s / 32 GB = 3,125; vendor peak, not measured [D from V]"},
+{"tier":"HBM4","example":"MI455X, Helios, Rubin","role":"near","status":"announced","lo":53.9,"hi":72.7,"point":null,"usd":"above HBM3E","lat":"—","src":"AMD MI400 HC'26 s3, s5 (53.9, 54.8); NVIDIA Rubin HC'26 s8 (72.7, fleet-level, footnoted config) [D from V]"},
+{"tier":"HBM3E","example":"B200, GH200, GB200","role":"near","status":"shipping","lo":33.3,"hi":43.0,"point":null,"usd":"≥3 pre-shortage; ~3× wafer per bit","lat":"~300 ns (GPU, HBM3) [S]","src":"GH200 4,800/144 = 33.3; B200 8,000/192 = 41.7; GB200 NVL72 576/13.4 = 43.0 [D from V]; $/GB [S]/[P/V]"},
+{"tier":"HBM on CPUs, discontinued","example":"Xeon Max, A64FX","role":"near","status":"discontinued","lo":10.9,"hi":25.6,"point":31.25,"usd":"—","lat":"DDR + ~20% (Xeon Max)","src":"Xeon Max arXiv 2505.14294: STREAM 700/64 = 10.9, peak 1,638.4/64 = 25.6 [D from P]; A64FX 1,000/32 = 31.25 [S]"},
+{"tier":"MRDIMM-12800 ×16","example":"Diamond Rapids, Venice","role":"mid","status":"announced","lo":0.4,"hi":1.6,"point":null,"usd":">1 (unverified)","lat":"~DDR","src":"Intel DMR HC'26 s10, s15, s20: 1.6 TB/s ('up to') / 1, 2, 4 TB; capacities are our 16 × 64/128/256 GB assumption [D from V]"},
+{"tier":"CPU-attached LPDDR5X","example":"Vera SOCAMM, Grace","role":"mid","status":"shipping","lo":0.8,"hi":1.07,"point":null,"usd":"≈1","lat":">200 ns (Grace) [S]","src":"Vera HC'26 s28 (1,200/1,500 = 0.8); GB200 14/17 = 0.82; GH200 512/480 = 1.07 [S] [D from V]"},
+{"tier":"DDR5-6400 RDIMM ×12, 1DPC","example":"12-channel server socket","role":"mid","status":"shipping","lo":0.2,"hi":0.8,"point":null,"usd":"1 (256 GB 3DS at a premium)","lat":"~100–150 ns measured","src":"614.4 GB/s / (12 × 64 GB = 768 GB) = 0.8; / (12 × 256 GB = 3,072 GB) = 0.2 [D]"},
+{"tier":"CXL expander, Gen5","example":"x8 Gen5 card; Vistara tier","role":"far","status":"shipping","lo":0.0625,"hi":0.25,"point":0.225,"usd":"new DDR5 ≈1 + controller; recycled DDR4 0.13 (Vistara); all-in ~0.4–0.9 [D]","lat":"214–394 ns measured (FPGA at 394)","src":"Bar: 32 GB/s per direction / 512–128 GB [D]. Dot: Vistara ISCA'26 Table V, 57.6 GB/s / 256 GB = 0.225, configuration spec, not a measurement [P]"},
+{"tier":"RDMA far memory","example":"Fastswap/Mooncake-class","role":"far","status":"shipping","lo":0.01,"hi":0.1,"point":null,"usd":"—","lat":"~3.5–5.6 µs (64 B–4 KB page)","src":"Assumption-based derived range (about 12.5 GB/s NIC over 128 GB–1 TB); not a printed source [D]"},
+{"tier":"NVMe SSD","example":"enterprise NVMe, 8–30 TB","role":"far","status":"shipping","lo":0.0005,"hi":0.002,"point":null,"usd":"≪1 (unverified)","lat":"10–40 µs typical","src":"~14 GB/s / 8,000–30,000 GB; drive specs unverified [D]"}
+],
+"sram":{"point":312500.0,"label":"on-die SRAM","src":"NVIDIA Groq 3 LPX HC'26 s24: 40 PB/s / 128 GB = 312,500 [D from V]"}}
+  </script>
+  <header class="slide-head">
+    <div class="kicker">05 · The cost frontier</div>
+    <h2>Each tier bundles bandwidth with capacity: A buys GB/s per GB; B, cheaper or extended GB.</h2>
+    <div class="sub">Supplied bandwidth per GB stored, with relative $/GB and idle latency. Peak vendor specs (per direction for serial links) unless marked. $/GB is mostly secondary or unverified, so it is tabulated, not plotted.</div>
+  </header>
+  <div class="slide-body">
+    <svg id="s05-chart" viewBox="0 0 1160 335" width="1160" role="img" aria-label="Range plot on a log axis of supplied bandwidth per GB stored for ten memory tiers, from NVMe SSD at 0.0005 to 0.002 GB/s per GB, up through RDMA, CXL, DDR5, LPDDR5X and MRDIMM near 0.2 to 1.6, HBM3E at 33 to 43, HBM4 at 54 to 73, and a hollow vendor-peak 3D DRAM–logic stacking point near 3,100. A table beside each row gives relative cost per GB and idle latency."></svg>
+    <p class="tiny s05-cap">Specs [D from V]; hollow = discontinued tier or single-product point (vendor peak or spec). Objects are placed by matching access density (slide 6).</p>
+    <div class="s05-notes">
+      <p><span class="n">1</span><span>Deployed CXL is not a new density point: Vistara's tier (0.225) sits at capacity-maxed DDR (0.2). Its recycled DDR4 moves it down in $/GB.</span></p>
+      <p><span class="n">2</span><span>The middle improved: a 16-channel MRDIMM-12800 socket (1.6 TB/s) matches Xeon Max's HBM peak at many times the capacity.</span></p>
+      <p><span class="n">3</span><span>DDR is squeezed: on one bus, bigger DIMMs dilute GB/s per GB.</span></p>
+    </div>
+  </div>
+  <footer class="slide-foot">
+    <div class="sources">Derived from vendor specs [D from V]: AMD MI400 HC'26 s3, s5; NVIDIA Rubin HC'26 s8; Vera HC'26 s28; Intel DMR HC'26 s10, s15; d-Matrix HC'26 s13; NVIDIA Groq 3 LPX (LP30) HC'26 s24; GB200 spec. Vistara ISCA'26 Table V [P]; Xeon Max arXiv 2505.14294 [P]; recycled-DDR4 all-in cost: notes r2a §2.2 [D]; HBM $/GB [S]; Micron FQ2-25 p.6 [P/V]; RDMA range [D, assumption-based]; A64FX [S].</div>
+    <div class="pageno">05 / 10</div>
+  </footer>
+  <script>
+  (function () {
+    var root = document.getElementById('s05');
+    var svg = root.querySelector('#s05-chart');
+    var D = JSON.parse(root.querySelector('#s05-data').textContent);
+    var rows = D.rows, NS = 'http://www.w3.org/2000/svg';
+    function el(n, a, t, p) { var e = document.createElementNS(NS, n); for (var k in a) e.setAttribute(k, a[k]); if (t != null) e.textContent = t; (p || svg).appendChild(e); return e; }
+    var X0 = 232, PW = 500, X1 = X0 + PW, LMIN = -4, LMAX = 4;
+    var TX = 750, TX2 = 992, TOP = 22, RH = 28, RH_CXL = 28;
+    function x(v) { return X0 + (Math.log10(v) - LMIN) / (LMAX - LMIN) * PW; }
+    var heights = rows.map(function (r, i) { return i === 7 ? RH_CXL : RH; });
+    var ys = [], acc = TOP; heights.forEach(function (h) { ys.push(acc); acc += h; });
+    var BOT = acc;
+    var col = { conv: 'var(--conv)', near: 'var(--near)', mid: 'var(--mid)', far: 'var(--far)' };
+    // DDR5 RDIMM band 0.2-0.8
+    el('rect', { x: x(0.2), y: TOP, width: x(0.8) - x(0.2), height: BOT - TOP, style: 'fill:var(--mid-soft);opacity:.55' });
+    el('text', { x: (x(0.2) + x(0.8)) / 2, y: TOP - 7, 'text-anchor': 'middle', class: 'lbl' }, 'DDR5 RDIMM range 0.2–0.8');
+    // decade grid + ticks
+    var tl = { '-4': '0.0001', '-3': '0.001', '-2': '0.01', '-1': '0.1', '0': '1', '1': '10', '2': '100', '3': '1k', '4': '10k' };
+    for (var e = LMIN; e <= LMAX; e++) {
+      var gx = x(Math.pow(10, e));
+      el('line', { x1: gx, x2: gx, y1: TOP, y2: BOT, style: 'stroke:var(--rule)', 'stroke-width': 1 });
+      el('text', { x: gx, y: BOT + 16, 'text-anchor': 'middle', class: 'axis' }, tl[e]);
+    }
+    el('line', { x1: X0, x2: X1, y1: BOT, y2: BOT, style: 'stroke:var(--ink-3)', 'stroke-width': 1 });
+    el('text', { x: (X0 + X1) / 2, y: BOT + 31, 'text-anchor': 'middle', class: 'lbl' }, 'Supplied bandwidth per GB stored (GB/s per GB, log scale)');
+    // table header
+    el('text', { x: TX, y: TOP - 7, class: 'faint', style: 'font-size:12px;letter-spacing:.03em;font-weight:600' }, '$/GB (REL. DDR5 = 1)');
+    el('text', { x: TX2, y: TOP - 7, class: 'faint', style: 'font-size:12px;letter-spacing:.03em;font-weight:600' }, 'IDLE LATENCY');
+    function wrap(txt, xx, yc, n, cls, st) {
+      var words = txt.split(' '), lines = [], cur = '';
+      words.forEach(function (w) { if ((cur + ' ' + w).trim().length > n && cur) { lines.push(cur); cur = w; } else cur = (cur + ' ' + w).trim(); });
+      lines.push(cur);
+      var lh = 13, y0 = yc - (lines.length - 1) * lh / 2 + 4;
+      var t = el('text', { x: xx, y: y0, class: cls, style: st || '' });
+      lines.forEach(function (l, i) { el('tspan', { x: xx, dy: i ? lh : 0 }, l, t); });
+    }
+    function txt(xx, yy, s, anchor, extra) { return el('text', Object.assign({ x: xx, y: yy + 4, 'text-anchor': anchor || 'start', class: 'lbl halo' }, extra || {}), s); }
+    var endLab = {
+      1: { r: '54–73' }, 2: { r: '33–43' },
+      3: { l: 'Xeon Max 11–26 (STREAM–peak)', r: 'A64FX ~31' },
+      4: { l: '4 TB · 0.4', r: '1 TB · 1.6' },
+      5: { r: '0.8–1.1' },
+      6: { l: '256 GB DIMMs · 0.2', r: '64 GB DIMMs · 0.8' },
+      7: { l: '0.06', r: '' },
+      8: { r: 'config-dependent (assumed range)' },
+      9: { r: '0.0005–0.002' }
+    };
+    rows.forEach(function (r, i) {
+      var cy = ys[i] + heights[i] / 2, c = col[r.role], hollow = r.status === 'discontinued';
+      if (i) el('line', { x1: 0, x2: 1160, y1: ys[i], y2: ys[i], style: 'stroke:var(--rule)', 'stroke-width': 1 });
+      // row label
+      el('rect', { x: 0, y: cy - 11, width: 4, height: 22, style: 'fill:' + c });
+      el('text', { x: 12, y: cy - 3, style: 'font-size:14px;font-weight:600' }, r.tier);
+      el('text', { x: 12, y: cy + 12, class: 'faint', style: 'font-size:12px' }, r.example);
+      // marks
+      var g = el('g', {});
+      if (r.lo != null) {
+        var by = (i === 3 ? 7 : 0);
+        var bar = el('rect', { x: x(r.lo), y: cy - 5 + by, width: Math.max(2, x(r.hi) - x(r.lo)), height: 10, rx: 2, style: hollow ? 'fill:var(--bg);stroke:' + c + ';stroke-width:1.6' : 'fill:' + c }, null, g);
+      }
+      if (r.point != null) {
+        var py = (i === 3 ? cy - 4 : cy);
+        el('circle', { cx: x(r.point), cy: py, r: 5, style: r.role === 'far' ? 'fill:var(--bg);stroke:var(--ink);stroke-width:2' : 'fill:var(--bg);stroke:' + c + ';stroke-width:2' }, null, g);
+      }
+      // labels
+      var L = endLab[i] || {};
+      if (i === 0) {
+        txt(x(r.point) - 12, cy, 'vendor peak ~3,100', 'end');
+        txt(X0 + 6, cy, 'on-die SRAM ~3×10⁵ (scratchpad, not a capacity tier) →', 'start', { style: 'fill:var(--ink-3);font-size:12px' });
+      } else {
+        var lo = r.lo, hi = r.point != null && r.point > r.hi ? r.point : r.hi;
+        if (i === 7) {
+          txt(x(r.hi) + 12, cy, '0.06–0.25 · ring: Vistara (spec) 0.225', 'start');
+        } else {
+          if (L.l) txt(x(lo) - 8, cy + (i === 3 ? 7 : 0), L.l, 'end');
+          if (L.r) txt(x(hi) + (i === 3 ? 10 : 8), cy + (i === 3 ? -4 : 0), L.r, 'start');
+        }
+      }
+      // table
+      wrap(r.usd, TX, cy, 36, 'muted', 'font-size:13px');
+      wrap(r.lat, TX2, cy, 24, 'muted', 'font-size:13px');
+      if (window.DeckTip) window.DeckTip.attach(g, '<b>' + r.tier + '</b> (' + r.example + ')<br>' + r.src);
+    });
+    // RDMA / CXL basis tags handled via tooltips; fix CXL label positions overlaps by design
+    if (window.DeckTip) {
+      var sr = el('rect', { x: X0, y: ys[0], width: PW, height: 0, style: 'fill:none' });
+    }
+  })();
+  </script>
+</section>

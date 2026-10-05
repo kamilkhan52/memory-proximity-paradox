@@ -1,0 +1,586 @@
+{
+ "id": "tier_frontier",
+ "version": 1,
+ "slides": [
+  "s05"
+ ],
+ "title": "Tier frontier: supplied bandwidth per GB stored",
+ "units": {
+  "gbps_per_gb": "GB/s per GB (= 1/s)",
+  "energy_pj_bit": "pJ/bit, scope stated"
+ },
+ "conventions": "Peak per-direction vendor specs unless basis says otherwise; 1 TB = 1000 GB, 1 PB = 1000 TB. Every plotted value is derived (D) as bandwidth / capacity; not read from charts. $/GB shown as relative strings only.",
+ "sources": {
+  "amd_sys": {
+   "cite": "AMD, MI400 series system architecture, Hot Chips 2026",
+   "path": "fulltext/hotchips26/decks_text/FINAL_AMD_MI400_System_Arch_Hot_Chips_2026.pdf.md",
+   "locator": "s3 (Venice 1.6 TB/s; MI455 432 GB, 23.3 TB/s), s5 (Helios 31 TB, 1.7 PB/s)",
+   "tag": "V"
+  },
+  "rubin": {
+   "cite": "NVIDIA, Rubin, Hot Chips 2026",
+   "path": "fulltext/hotchips26/decks_text/FINAL_NV_HC2026_Rubin.pdf.md",
+   "locator": "s8 (100 MW AI Factory: HBM4 11 PB, 800 PB/s)",
+   "tag": "V"
+  },
+  "vera": {
+   "cite": "NVIDIA, Vera, Hot Chips 2026",
+   "path": "fulltext/hotchips26/decks_text/HC2026.NVIDIA_Vera.JonathonEvans.PolychronisXekalakis_v06.pdf.md",
+   "locator": "s28 (1.5TB SOCAMM LPDDR5X, 1.2TB/s Memory BW)",
+   "tag": "V"
+  },
+  "dmr": {
+   "cite": "Intel, Diamond Rapids, Hot Chips 2026",
+   "path": "fulltext/hotchips26/decks_text/DMR_at_Hot_Chips_2026_FINAL.pdf.md",
+   "locator": "s10 (up to 1.6 TB/s), s15 (16 channels, up to 12800MT/s MRDIMM)",
+   "tag": "V"
+  },
+  "dmatrix": {
+   "cite": "d-Matrix, Raptor, Hot Chips 2026",
+   "path": "fulltext/hotchips26/decks_text/hc2026.dmatrix.SudeepBhoja.v3.0.pdf.md",
+   "locator": "s13 'From Raptor Chiplet to Rack' (Card: 8 chiplets, 32 GB, 100 TB/s)",
+   "tag": "V"
+  },
+  "lp30": {
+   "cite": "NVIDIA, LP30 / Groq 3 LPX, Hot Chips 2026",
+   "path": "fulltext/hotchips26/decks_text/NV_HC2026_LP30_Final.pdf.md",
+   "locator": "s24 (256 LPUs, 128GB SRAM capacity, 40 PB/s aggregate SRAM bandwidth)",
+   "tag": "V"
+  },
+  "xmax": {
+   "cite": "arXiv 2505.14294 (Xeon Max 9468 heterogeneous memory)",
+   "path": "fulltext/arxiv-2505.14294.pdf",
+   "locator": "p.1 right col. (per tile: 16 GB HBM2e at 409.6 GB/s peak; 4 tiles; achieves ~700 GB/s HBM by STREAM, Fig. 2; HBM ~20% higher latency than DDR)",
+   "tag": "P"
+  },
+  "vistara": {
+   "cite": "Gholkar et al. (Meta), Vistara: Making CXL Real, ISCA'26",
+   "path": "fulltext/vistara-isca26.pdf",
+   "locator": "Table V (p.4): Local 768 GB, 614.4 GB/s, 132 W, 1, 1; CXL 256 GB, 57.6 GB/s, 30 W, 0.7, 0.13. Table VI (p.5): idle latency local ~130 ns, CXL ~250 ns",
+   "tag": "P"
+  },
+  "r3": {
+   "cite": "notes/r3_gap_evidence.md D7, D2",
+   "path": "notes/r3_gap_evidence.md",
+   "locator": "D7 table; MONAKA para (A64FX 32 GB, 1 TB/s)",
+   "tag": "D"
+  },
+  "q4": {
+   "cite": "notes/q4_workloads.md section 5.3",
+   "path": "notes/q4_workloads.md",
+   "locator": "5.3 tier supply table (GH200 4.8 TB/s / 144 GB; LPDDR5X 512 GB/s / 480 GB; CXL x8 Gen5 25-32 GB/s / 128-512 GB; NVMe ~14 GB/s / 8-30 TB)",
+   "tag": "S"
+  },
+  "q5": {
+   "cite": "notes/q5_critiques_convergence.md C4 (NVIDIA GB200 NVL72 spec table)",
+   "path": "notes/q5_critiques_convergence.md",
+   "locator": "C4: 17 TB LPDDR5X at 14 TB/s; 13.4 TB HBM3E at 576 TB/s",
+   "tag": "V"
+  },
+  "r2d": {
+   "cite": "notes/r2d_review.md F2",
+   "path": "notes/r2d_review.md",
+   "locator": "F2",
+   "tag": "D"
+  },
+  "r2a": {
+   "cite": "notes/r2a_supply_economics.md section 2.2 and line ~205",
+   "path": "notes/r2a_supply_economics.md",
+   "locator": "2.2 (Vistara 0.13x; all-in 0.3-0.6x)",
+   "tag": "D"
+  },
+  "syn": {
+   "cite": "SYNTHESIS_v1.3.md section 2 table and footnotes",
+   "path": "SYNTHESIS_v1.3.md",
+   "locator": "section 2 table (rows, $/GB, latency, energy columns)",
+   "tag": "Syn"
+  },
+  "q3": {
+   "cite": "notes/q3_root_causes.md section 4 latency ladder",
+   "path": "notes/q3_root_causes.md",
+   "locator": "lines ~239-245, 309-314",
+   "tag": "S"
+  },
+  "fastswap": {
+   "cite": "Amaro et al., Fastswap, EuroSys'20",
+   "path": "fulltext/12-fastswap.pdf",
+   "locator": "p.13 fn.7: average 4 KB RDMA read latency 3.9 us measured in their testbed",
+   "tag": "P"
+  }
+ },
+ "rows": [
+  {
+   "id": "raptor",
+   "tier": "3D DRAM-on-logic",
+   "example": "d-Matrix Raptor card",
+   "role": "conv",
+   "status": "announced",
+   "gbps_per_gb_lo": null,
+   "gbps_per_gb_hi": null,
+   "gbps_per_gb_point": 3125,
+   "point_label": "vendor peak",
+   "basis": "vendor peak",
+   "inputs": {
+    "capacity": "32 GB (card)",
+    "bandwidth": "100 TB/s (card)",
+    "formula": "100000 GB/s / 32 GB = 3125"
+   },
+   "usd_per_gb_rel": "n/a",
+   "usd_tag": "-",
+   "idle_latency": "-",
+   "lat_tag": "-",
+   "energy_pj_bit": "0.37",
+   "energy_scope": "I/O only (d-Matrix claim, measured per vendor); not full access",
+   "src": "dmatrix",
+   "loc": "s13; line ~232 of deck text",
+   "tag": "D",
+   "unc": "derived: 100 TB/s / 32 GB (vendor peak, not measured)",
+   "note": "Chiplet 4 GB 12.5 TB/s gives the same 3125. Rack 2.3 TB / 7.2 PB/s gives 3130."
+  },
+  {
+   "id": "hbm4",
+   "tier": "HBM4",
+   "example": "MI455X, Helios, Rubin",
+   "role": "near",
+   "status": "announced",
+   "gbps_per_gb_lo": 53.9,
+   "gbps_per_gb_hi": 72.7,
+   "gbps_per_gb_point": null,
+   "basis": "vendor peak",
+   "members": [
+    {
+     "name": "MI455X",
+     "capacity": "432 GB",
+     "bandwidth": "23.3 TB/s",
+     "value": 53.9,
+     "formula": "23300/432"
+    },
+    {
+     "name": "Helios rack",
+     "capacity": "31 TB",
+     "bandwidth": "1.7 PB/s",
+     "value": 54.8,
+     "formula": "1.7e6/31e3"
+    },
+    {
+     "name": "Rubin 100 MW AI factory (fleet)",
+     "capacity": "11 PB",
+     "bandwidth": "800 PB/s",
+     "value": 72.7,
+     "formula": "800/11"
+    }
+   ],
+   "inputs": {
+    "capacity": "432 GB; 31 TB; 11 PB",
+    "bandwidth": "23.3 TB/s; 1.7 PB/s; 800 PB/s",
+    "formula": "BW / capacity"
+   },
+   "usd_per_gb_rel": "above HBM3E",
+   "usd_tag": "Pr/unverified (no primary HBM4 $/GB)",
+   "idle_latency": "-",
+   "lat_tag": "-",
+   "src": "amd_sys",
+   "loc": "AMD s3, s5; Rubin s8",
+   "tag": "D",
+   "unc": "derived: cap ÷ BW from HC'26 slides (vendor peak)",
+   "note": "Rubin value is a fleet-level ratio (11 PB / 800 PB/s), not per-GPU. Sources: amd_sys, rubin.",
+   "energy_pj_bit": null,
+   "energy_scope": null
+  },
+  {
+   "id": "hbm3e",
+   "tier": "HBM3E",
+   "example": "B200, GH200",
+   "role": "near",
+   "status": "shipping",
+   "gbps_per_gb_lo": 33.3,
+   "gbps_per_gb_hi": 41.7,
+   "gbps_per_gb_point": null,
+   "basis": "vendor peak",
+   "members": [
+    {
+     "name": "GH200",
+     "capacity": "144 GB",
+     "bandwidth": "~4.8 TB/s",
+     "value": 33.3,
+     "formula": "4800/144",
+     "tag": "S"
+    },
+    {
+     "name": "B200",
+     "capacity": "192 GB",
+     "bandwidth": "8 TB/s",
+     "value": 41.7,
+     "formula": "8000/192",
+     "tag": "V (NVIDIA spec, not in our files; FLAG G7)"
+    }
+   ],
+   "inputs": {
+    "capacity": "144 GB; 192 GB",
+    "bandwidth": "4.8 TB/s; 8 TB/s",
+    "formula": "BW / capacity"
+   },
+   "usd_per_gb_rel": ">=3 pre-shortage; ~3x wafer per bit",
+   "usd_tag": "S (SemiAnalysis) ; P/V (Micron FQ2-25 p.6)",
+   "idle_latency": "~300 ns from GPU",
+   "lat_tag": "S (Chips and Cheese; <300 ns GH200, ~330 ns H100)",
+   "src": "q4",
+   "loc": "q4 5.3; synthesis section 2",
+   "tag": "D",
+   "unc": "derived: BW ÷ cap; GH200 inputs [S], B200 inputs vendor spec not in files",
+   "note": "Neither B200 nor GH200 input is a primary read by us.",
+   "energy_pj_bit": null,
+   "energy_scope": null
+  },
+  {
+   "id": "hbm_cpu",
+   "tier": "HBM on CPUs (discontinued)",
+   "example": "Xeon Max, A64FX",
+   "role": "near",
+   "status": "discontinued",
+   "gbps_per_gb_lo": 10.9,
+   "gbps_per_gb_hi": 25.6,
+   "gbps_per_gb_point": 31.25,
+   "point_label": "A64FX",
+   "basis": "peak per direction (Xeon Max peak; STREAM measured at low end)",
+   "members": [
+    {
+     "name": "Xeon Max peak",
+     "capacity": "64 GB (4 x 16 GB)",
+     "bandwidth": "1.6384 TB/s (4 x 409.6 GB/s)",
+     "value": 25.6,
+     "formula": "1638.4/64",
+     "tag": "D from P"
+    },
+    {
+     "name": "Xeon Max STREAM",
+     "capacity": "64 GB",
+     "bandwidth": "~700 GB/s measured",
+     "value": 10.9,
+     "formula": "700/64",
+     "tag": "D from P (measured)"
+    },
+    {
+     "name": "A64FX",
+     "capacity": "32 GB HBM2",
+     "bandwidth": "1 TB/s",
+     "value": 31.25,
+     "formula": "1000/32 (32 if 1024 GB/s)",
+     "tag": "D from secondary"
+    }
+   ],
+   "inputs": {
+    "capacity": "64 GB; 32 GB",
+    "bandwidth": "1.64 TB/s peak, ~0.7 TB/s STREAM; 1 TB/s",
+    "formula": "BW / capacity"
+   },
+   "usd_per_gb_rel": "-",
+   "usd_tag": "-",
+   "idle_latency": "DDR + ~20% (Xeon Max, single core)",
+   "lat_tag": "P (arXiv 2505.14294)",
+   "src": "xmax",
+   "loc": "arXiv 2505.14294 p.1 right col.; Fig. 2",
+   "tag": "D",
+   "unc": "derived: cap ÷ BW; Xeon Max exact (printed); A64FX 1 TB/s from Wikipedia/MEMSYS'24 [S]; 31.25 vs notes' ~32",
+   "note": "Paper prints no absolute ns, only the ~20% ratio. A64FX source (r3 D7) is secondary.",
+   "energy_pj_bit": null,
+   "energy_scope": null
+  },
+  {
+   "id": "mrdimm",
+   "tier": "MRDIMM-12800 x16",
+   "example": "Diamond Rapids, Venice",
+   "role": "mid",
+   "status": "announced",
+   "gbps_per_gb_lo": 0.4,
+   "gbps_per_gb_hi": 1.6,
+   "gbps_per_gb_point": null,
+   "basis": "vendor peak (up to)",
+   "members": [
+    {
+     "capacity": "1 TB (16 x 64 GB)",
+     "value": 1.6,
+     "formula": "1600/1000"
+    },
+    {
+     "capacity": "2 TB (16 x 128 GB)",
+     "value": 0.8,
+     "formula": "1600/2000"
+    },
+    {
+     "capacity": "4 TB (16 x 256 GB)",
+     "value": 0.4,
+     "formula": "1600/4000"
+    }
+   ],
+   "end_labels": {
+    "hi": "1 TB",
+    "lo": "4 TB"
+   },
+   "inputs": {
+    "capacity": "1 / 2 / 4 TB (assumes 1DPC with 64/128/256 GB DIMMs; DIMM sizes our assumption)",
+    "bandwidth": "1.6 TB/s (16 x 8 B x 12800 MT/s = 1638 GB/s)",
+    "formula": "1600 / capacity"
+   },
+   "usd_per_gb_rel": ">1",
+   "usd_tag": "unverified",
+   "idle_latency": "~DDR",
+   "lat_tag": "Syn (no MRDIMM measurement)",
+   "src": "dmr",
+   "loc": "DMR s10, s15 (and s20); AMD MI400 system s3 (Venice 1.6 TB/s)",
+   "tag": "D",
+   "unc": "config-dependent: 1/2/4 TB at 1DPC; derived: 1.6 TB/s ÷ capacity",
+   "note": "Capacities are not printed on the slides; 16 channels printed s15.",
+   "energy_pj_bit": null,
+   "energy_scope": null
+  },
+  {
+   "id": "lpddr",
+   "tier": "CPU-attached LPDDR5X",
+   "example": "Vera SOCAMM, Grace",
+   "role": "mid",
+   "status": "shipping",
+   "gbps_per_gb_lo": 0.8,
+   "gbps_per_gb_hi": 1.07,
+   "gbps_per_gb_point": null,
+   "basis": "vendor peak",
+   "members": [
+    {
+     "name": "Vera SOCAMM",
+     "capacity": "1.5 TB",
+     "bandwidth": "1.2 TB/s",
+     "value": 0.8,
+     "formula": "1200/1500",
+     "tag": "D from V (announced)"
+    },
+    {
+     "name": "GB200 Grace",
+     "capacity": "17 TB",
+     "bandwidth": "14 TB/s",
+     "value": 0.82,
+     "formula": "14000/17000",
+     "tag": "D from V"
+    },
+    {
+     "name": "GH200",
+     "capacity": "480 GB",
+     "bandwidth": "~512 GB/s",
+     "value": 1.07,
+     "formula": "512/480",
+     "tag": "D from S"
+    }
+   ],
+   "inputs": {
+    "capacity": "1.5 TB; 17 TB; 480 GB",
+    "bandwidth": "1.2 TB/s; 14 TB/s; ~512 GB/s",
+    "formula": "BW / capacity"
+   },
+   "usd_per_gb_rel": "~1",
+   "usd_tag": "V (NVIDIA Grace 'similar cost')",
+   "idle_latency": ">200 ns (Grace)",
+   "lat_tag": "S (Chips and Cheese)",
+   "energy_pj_bit": "~12",
+   "energy_scope": "full access, LPDDR4 device level (Lee 2018) ; not Vera",
+   "src": "vera",
+   "loc": "Vera s28; q5 C4; q4 5.3",
+   "tag": "D",
+   "unc": "derived: cap ÷ BW",
+   "note": "Vera and GB200 give 0.8; GH200 1.07 is the top."
+  },
+  {
+   "id": "ddr5",
+   "tier": "DDR5-6400 RDIMM x12, 1DPC",
+   "example": "12-channel server",
+   "role": "mid",
+   "status": "shipping",
+   "gbps_per_gb_lo": 0.2,
+   "gbps_per_gb_hi": 0.8,
+   "gbps_per_gb_point": null,
+   "basis": "peak (shared bus, not per direction)",
+   "members": [
+    {
+     "capacity": "768 GB (12 x 64 GB)",
+     "value": 0.8,
+     "formula": "614.4/768"
+    },
+    {
+     "capacity": "3072 GB (12 x 256 GB)",
+     "value": 0.2,
+     "formula": "614.4/3072"
+    }
+   ],
+   "end_labels": {
+    "hi": "64 GB DIMMs",
+    "lo": "256 GB DIMMs"
+   },
+   "inputs": {
+    "capacity": "768 GB to 3 TB",
+    "bandwidth": "614.4 GB/s (12 x 51.2 GB/s)",
+    "formula": "614.4 / (12 x DIMM size)"
+   },
+   "usd_per_gb_rel": "1 (256 GB 3DS at a premium)",
+   "usd_tag": "P (Memstrata for 3DS premium); baseline definition",
+   "idle_latency": "80-120 ns",
+   "lat_tag": "P (q3 ladder; Vistara local ~130 ns)",
+   "energy_pj_bit": "~16.5-21",
+   "energy_scope": "full access, DDR4 device level (Lee 2018); DDR5 not measured",
+   "src": "vistara",
+   "loc": "Vistara Table V (local 768 GB, 614.4 GB/s)",
+   "tag": "D",
+   "unc": "derived: 614.4 GB/s ÷ (12 x DIMM size); 614.4 printed in Vistara Table V",
+   "note": "DDR is a half-duplex shared bus, so per-direction does not strictly apply."
+  },
+  {
+   "id": "cxl",
+   "tier": "CXL expander, Gen5",
+   "example": "x8 Gen5 expander; Vistara",
+   "role": "far",
+   "status": "shipping",
+   "gbps_per_gb_lo": 0.0625,
+   "gbps_per_gb_hi": 0.25,
+   "gbps_per_gb_point": 0.225,
+   "point_label": "Vistara, measured",
+   "basis": "peak per direction (bar); Vistara 57.6 GB/s is Table V spec (point)",
+   "members": [
+    {
+     "capacity": "512 GB",
+     "value": 0.0625,
+     "formula": "32/512"
+    },
+    {
+     "capacity": "256 GB",
+     "value": 0.125,
+     "formula": "32/256"
+    },
+    {
+     "capacity": "128 GB",
+     "value": 0.25,
+     "formula": "32/128"
+    },
+    {
+     "name": "Vistara",
+     "capacity": "256 GB DDR4",
+     "bandwidth": "57.6 GB/s",
+     "value": 0.225,
+     "formula": "57.6/256"
+    }
+   ],
+   "inputs": {
+    "capacity": "128-512 GB",
+    "bandwidth": "x8 Gen5 = 32 GB/s per direction; Vistara 57.6 GB/s",
+    "formula": "32 / capacity; 57.6 / 256"
+   },
+   "usd_per_gb_rel": "new DDR5 ~1 + controller; recycled DDR4 0.13 nominal, 0.3-0.6 all-in",
+   "usd_tag": "P (Vistara Table V, 0.13 nominal); D (r2a 2.2, all-in)",
+   "idle_latency": "214-394 ns (measured); Vistara ~250 ns vs ~130 ns local",
+   "lat_tag": "P (Melody via q3 ladder; Vistara Table VI)",
+   "energy_pj_bit": "~22-44 direct, ~28-67 switched",
+   "energy_scope": "link + DRAM, excl. controller (derived from Intel Gen5 SerDes 11.4 pJ/b/lane)",
+   "src": "vistara",
+   "loc": "Vistara Table V p.4; q4 5.3; r2d F2",
+   "tag": "D",
+   "unc": "derived: 32 GB/s ÷ 128-512 GB; Vistara 57.6 ÷ 256 (the 57.6 GB/s is a Table V spec, labelled 'measured' only in the brief)",
+   "note": "Vistara 57.6 is Table V 'BW' with no stated measurement method; the brief's point label 'measured' should be checked. Sustained CXL BW is 9.8-80.3% of local DRAM (Wang et al. arXiv 2405.14209 via notes q2; not re-read here)."
+  },
+  {
+   "id": "rdma",
+   "tier": "RDMA far memory",
+   "example": "remote memory over RDMA",
+   "role": "far",
+   "status": "shipping",
+   "gbps_per_gb_lo": 0.0125,
+   "gbps_per_gb_hi": 0.098,
+   "gbps_per_gb_point": null,
+   "basis": "config-dependent",
+   "inputs": {
+    "capacity": "128 GB to 1 TB per host (assumed)",
+    "bandwidth": "12.5 GB/s (100 GbE) to ~50 GB/s (400 GbE)",
+    "formula": "12.5/1000 = 0.0125; 12.5/128 = 0.098"
+   },
+   "usd_per_gb_rel": "-",
+   "usd_tag": "-",
+   "idle_latency": "~3.5-3.9 us (4 KB)",
+   "lat_tag": "P (Fastswap p.13 fn.7: 3.9 us; 3.5 us end not located)",
+   "src": "syn",
+   "loc": "SYNTHESIS_v1.3 section 2 footnote (0.01-0.1); Fastswap p.13 fn.7",
+   "tag": "D",
+   "unc": "config-dependent: NIC speed ÷ remote capacity; SYNTHESIS footnote states no config, our config assumed to reproduce 0.01-0.1",
+   "note": "Order-of-magnitude range only; no source prints GB/s per GB.",
+   "energy_pj_bit": null,
+   "energy_scope": null
+  },
+  {
+   "id": "nvme",
+   "tier": "NVMe SSD",
+   "example": "enterprise NVMe",
+   "role": "far",
+   "status": "shipping",
+   "gbps_per_gb_lo": 0.00047,
+   "gbps_per_gb_hi": 0.00175,
+   "gbps_per_gb_point": null,
+   "basis": "peak (specs unverified)",
+   "inputs": {
+    "capacity": "8-30 TB",
+    "bandwidth": "~14 GB/s",
+    "formula": "14/30000 = 0.00047; 14/8000 = 0.00175"
+   },
+   "usd_per_gb_rel": "<<1",
+   "usd_tag": "unverified",
+   "idle_latency": "10-50 us",
+   "lat_tag": "P (TPP Fig. 2 10-40 us; Micron spec ~50 us, snippet)",
+   "src": "q4",
+   "loc": "q4 5.3",
+   "tag": "D",
+   "unc": "derived: 14 GB/s ÷ 8-30 TB; drive specs unverified",
+   "note": "Brief rounds to 0.0005-0.002.",
+   "energy_pj_bit": null,
+   "energy_scope": null
+  },
+  {
+   "id": "sram_offscale",
+   "tier": "On-die SRAM (off-scale marker)",
+   "example": "NVIDIA LP30 / Groq 3 LPX rack",
+   "role": "conv",
+   "status": "announced",
+   "gbps_per_gb_lo": null,
+   "gbps_per_gb_hi": null,
+   "gbps_per_gb_point": 312500,
+   "point_label": "~3x10^5; scratchpad, not a capacity tier",
+   "basis": "vendor peak",
+   "inputs": {
+    "capacity": "128 GB SRAM (256 LPUs)",
+    "bandwidth": "40 PB/s aggregate",
+    "formula": "40e6 GB/s / 128 GB = 312,500"
+   },
+   "usd_per_gb_rel": "n/a",
+   "usd_tag": "-",
+   "idle_latency": "-",
+   "lat_tag": "-",
+   "src": "lp30",
+   "loc": "LP30 s24",
+   "tag": "D",
+   "unc": "derived: 40 PB/s ÷ 128 GB (vendor peak)",
+   "note": "Synthesis footnote uses a different per-chip basis (~0.5 GB at ~156 TB/s = 312,000), consistent.",
+   "energy_pj_bit": null,
+   "energy_scope": null
+  }
+ ],
+ "extraction": {
+  "agent_a": "(not read)",
+  "agent_b": "extractor B, blind",
+  "method": "Read deck text lines and rendered slide text for each spec; recomputed all ratios; fetched Vistara camera-ready PDF to fulltext/vistara-isca26.pdf and read Table V and Table VI; read Xeon Max arXiv text.",
+  "cross_check": {
+   "max_disagreement": "pending",
+   "resolved": "pending"
+  }
+ },
+ "caveats": [
+  "B200 8 TB/s / 192 GB is NVIDIA spec not in our files (FLAG G7).",
+  "A64FX 1 TB/s / 32 GB is from secondary sources (Wikipedia/MEMSYS'24 via r3 D7); 1000/32 = 31.25, brief says 32.",
+  "MRDIMM capacities 1/2/4 TB assume 1DPC with 64/128/256 GB DIMMs; not printed on slides.",
+  "Vistara 57.6 GB/s is Table V spec, not described as a measurement; the point label 'Vistara, measured' follows the brief but the 0.225 is derived from a table value.",
+  "RDMA GB/s per GB range has no source derivation; assumed configs reproduce it. 3.5 us latency end not located; Fastswap prints 3.9 us.",
+  "Energy fields are for report only and carry scope strings; never compare across scopes.",
+  "$/GB values copied from SYNTHESIS v1.3 section 2 and notes r2a; not independently verified; no HBM4 $/GB."
+ ]
+}

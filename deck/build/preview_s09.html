@@ -1,0 +1,226 @@
+<title>Memory: Closer and Farther</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap">
+<style>
+/* Deck design system: 1280x720 slides on white; technical, quiet; one accent per meaning.
+   Colour encodes the argument everywhere:
+     --near  (A, closer / tighter coupling)   blue
+     --far   (B, farther / disaggregation)    orange
+     --mid   (the DDR baseline / middle)      slate
+     --conv  (convergence / 3D / both)        green
+   Never use these for anything else. */
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --ink: #111418;
+  --ink-2: #4a5059;
+  --ink-3: #5f6570;
+  --rule: #e3e6ea;
+  --panel: #f6f7f9;
+  --near: #2a78d6;
+  --near-soft: #e6f0fb;
+  --far: #eb6834;
+  --far-soft: #fdeee7;
+  --mid: #3c4a5c;
+  --mid-soft: #eceff3;
+  --conv: #1baf7a;
+  --conv-soft: #e4f6ef;
+  --warn: #b42318;
+  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --slide-w: 1280px;
+  --slide-h: 720px;
+}
+html, body { background: var(--bg); color: var(--ink); }
+body { margin: 0; font-family: var(--font-body); }
+
+/* ---------- slide frame ---------- */
+.deck { display: flex; flex-direction: column; align-items: center; gap: 28px; padding-block: 28px; }
+.slide {
+  position: relative; box-sizing: border-box;
+  width: var(--slide-w); height: var(--slide-h);
+  padding: 44px 60px 0 60px;
+  background: var(--bg); color: var(--ink);
+  border: 1px solid var(--rule);
+  display: grid; grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+  font-size: 18px; line-height: 1.45;
+}
+.slide-head { margin-bottom: 18px; }
+.kicker { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
+.slide h2 { font-family: var(--font-display); font-weight: 600; font-size: 34px; line-height: 1.15; margin: 0; max-width: 1100px; text-wrap: balance; }
+.slide .sub { font-size: 18px; color: var(--ink-2); margin-top: 8px; max-width: 1050px; }
+.slide-body { min-height: 0; position: relative; }
+.slide-foot {
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 24px;
+  border-top: 1px solid var(--rule); padding: 8px 0 12px; margin-top: 10px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); line-height: 1.4;
+}
+.slide-foot .sources { max-width: 1060px; min-height: 4.2em; display: flex; flex-direction: column; justify-content: flex-end; }
+.slide-foot .pageno { white-space: nowrap; }
+
+/* ---------- common building blocks ---------- */
+.cols { display: grid; gap: 28px; height: 100%; }
+.cols.c2 { grid-template-columns: 1fr 1fr; }
+.cols.c-6-4 { grid-template-columns: 6fr 4fr; }
+.cols.c-4-6 { grid-template-columns: 4fr 6fr; }
+.cols > * { min-width: 0; }
+.slide p { margin: 0 0 10px; }
+.slide ul { margin: 0 0 10px; padding-left: 20px; }
+.slide li { margin-bottom: 6px; }
+.small { font-size: 15px; color: var(--ink-2); }
+.tiny { font-size: 12.5px; color: var(--ink-3); }
+.tag { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+.num { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--font-mono); }
+.callout { border-left: 3px solid var(--ink); padding: 4px 0 4px 14px; font-family: var(--font-display); font-size: 21px; line-height: 1.3; }
+.box { border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; }
+.box.near { border-color: var(--near); background: var(--near-soft); }
+.box.far { border-color: var(--far); background: var(--far-soft); }
+.box.mid { border-color: var(--mid); background: var(--mid-soft); }
+.box.conv { border-color: var(--conv); background: var(--conv-soft); }
+.label-near { color: var(--near); font-weight: 600; }
+.label-far { color: var(--far); font-weight: 600; }
+.label-mid { color: var(--mid); font-weight: 600; }
+.label-conv { color: var(--conv); font-weight: 600; }
+table.t { border-collapse: collapse; width: 100%; font-size: 15px; }
+table.t th, table.t td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+table.t th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-2); font-weight: 600; }
+table.t td.n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ---------- charts (SVG) ---------- */
+.slide svg { display: block; max-width: 100%; height: auto; }
+.slide svg text { font-family: var(--font-body); fill: var(--ink); }
+.slide svg .axis { fill: var(--ink-2); font-family: var(--font-mono); font-size: 12px; }
+.slide svg .lbl { fill: var(--ink-2); font-size: 13px; }
+.slide svg .muted { fill: var(--ink-2); }
+.slide svg .faint { fill: var(--ink-3); }
+.slide svg .halo { paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
+
+/* ---------- deck chrome (assembled deck only) ---------- */
+.deck-bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; width: 100%; background: rgba(255,255,255,.94); border-bottom: 1px solid var(--rule); font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); display: flex; justify-content: space-between; align-items: center; padding: 8px 20px; box-sizing: border-box; }
+.deck-bar button { font: inherit; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); border-radius: 4px; padding: 3px 9px; cursor: pointer; }
+.deck-bar button:focus-visible { outline: 2px solid var(--near); outline-offset: 2px; }
+.scaler { transform-origin: top center; }
+body.present { overflow: hidden; height: 100%; }
+body.present .deck { gap: 0; padding: 0; }
+body.present .slide { display: none; border: none; }
+body.present .slide.active { display: grid; }
+#tip { position: fixed; pointer-events: none; background: var(--ink); color: #fff; font-family: var(--font-body); font-size: 12.5px; padding: 6px 8px; border-radius: 4px; line-height: 1.35; max-width: 300px; z-index: 20; }
+
+</style>
+
+
+<div id="tip" hidden></div>
+<script>
+window.DeckTip = (function(){
+  const tip = document.getElementById('tip');
+  function move(e){ const x=Math.min(e.clientX+14, window.innerWidth-310); tip.style.left=x+'px'; tip.style.top=(e.clientY+14)+'px'; }
+  return {
+    attach(el, html){ el.addEventListener('mouseenter', e=>{tip.innerHTML=html; tip.hidden=false; move(e);});
+                      el.addEventListener('mousemove', move); el.addEventListener('mouseleave', ()=>{tip.hidden=true;}); }
+  };
+})();
+</script>
+
+<div class="deck">
+<section class="slide" id="s09" data-title="Why both, why now">
+  <style>
+    #s09 .s09-cols { display: grid; grid-template-columns: 470px 1fr; gap: 26px; height: 100%; align-items: start; }
+    #s09 .s09-cap { margin: 4px 0 0; line-height: 1.35; }
+    #s09 table.t { font-size: 14px; }
+    #s09 table.t td, #s09 table.t th { padding: 5px 8px; }
+    #s09 table.t td:first-child { white-space: nowrap; }
+    #s09 .s09-note { margin: 8px 0 0; line-height: 1.35; }
+    #s09 .s09-cav { margin: 10px 0 0; font-size: 15px; line-height: 1.4; }
+  </style>
+  <script type="application/json" id="s09-data">{"series":[{"year":1990,"usd_per_gb":75509.69},{"year":1991,"usd_per_gb":43599.81},{"year":1992,"usd_per_gb":31176.39},{"year":1993,"usd_per_gb":30996.27},{"year":1994,"usd_per_gb":35534.39},{"year":1995,"usd_per_gb":31622.9},{"year":1996,"usd_per_gb":13165.06},{"year":1997,"usd_per_gb":3402.05},{"year":1998,"usd_per_gb":1074.12},{"year":1999,"usd_per_gb":1137.05},{"year":2000,"usd_per_gb":1002.55},{"year":2001,"usd_per_gb":304.41},{"year":2002,"usd_per_gb":199.78},{"year":2003,"usd_per_gb":134.02},{"year":2004,"usd_per_gb":166.04},{"year":2005,"usd_per_gb":155.95},{"year":2006,"usd_per_gb":87.36},{"year":2007,"usd_per_gb":43.06},{"year":2008,"usd_per_gb":16.83},{"year":2009,"usd_per_gb":12.67},{"year":2010,"usd_per_gb":18.51},{"year":2011,"usd_per_gb":7.89},{"year":2012,"usd_per_gb":4.57},{"year":2013,"usd_per_gb":6.63},{"year":2014,"usd_per_gb":8.28},{"year":2015,"usd_per_gb":5.05},{"year":2016,"usd_per_gb":3.42},{"year":2017,"usd_per_gb":5.89},{"year":2018,"usd_per_gb":6.065},{"year":2019,"usd_per_gb":3.335},{"year":2020,"usd_per_gb":3.045},{"year":2021,"usd_per_gb":3.383},{"year":2022,"usd_per_gb":2.528},{"year":2023,"usd_per_gb":1.539},{"year":2024,"usd_per_gb":1.585}],"break":2010.5,"partial_year":2024}</script>
+  <header class="slide-head">
+    <div class="kicker">09 · Why both, why now</div>
+    <h2>The 1990s had the same split; commodity DRAM let the middle outrun both, until ~2010.</h2>
+    <div class="sub">IRAM vs network RAM, often from the same people: Patterson and Anderson; later Oskin, J. Chang, Ranganathan.</div>
+  </header>
+  <div class="slide-body">
+    <div class="s09-cols">
+      <div>
+        <svg id="s09-svg" role="img" aria-label="Log-scale line chart of nominal DRAM price per gigabyte, 1990 to 2024. The price falls from about 75,500 dollars in 1990 to about 12 dollars in 2009, then flattens to roughly 1.6 dollars in 2024. Dashed fits to the plotted data fall about 37 percent per year to 2010 and about 12 percent per year after. A vertical line marks the slowdown at about 2010." viewBox="0 0 470 390" width="470" height="390"></svg>
+        <div class="tiny s09-cap">DRAM $/GB, nominal retail, log scale. Data: McCallum via AI Impacts [S]; 2024 partial; ends before the 2025–26 spike. Dashed: our fits [D].</div>
+      </div>
+      <div>
+        <table class="t">
+          <thead><tr><th></th><th>1990s</th><th>Since ~2010</th></tr></thead>
+          <tbody>
+            <tr><td><span class="label-near">A</span> aimed at</td><td>the off-chip bus: 98.5 vs 4.55 nJ per access (IRAM)</td><td>bandwidth capped by pJ/bit and die edge</td></tr>
+            <tr><td><span class="label-far">B</span> aimed at</td><td>disk: remote page 1.44 ms vs 3.6–14.3 ms</td><td>DRAM $/GB, idle memory, capacity per core</td></tr>
+            <tr><td><span class="label-mid">Middle</span></td><td>$/bit before ~2010: ~33–37%/yr. PIM "did not fade away because of lack of performance gains or energy efficiency"; commodity machines could "outrun them with economic affordability" (NDP'14)</td><td>$/bit ~12–15%/yr</td></tr>
+            <tr><td><b>Markets</b></td><td>games, PDAs, embedded vs science clusters</td><td>AI accelerators vs CPU cloud</td></tr>
+            <tr><td><b>New enablers</b></td><td>—</td><td>packaging decouples DRAM and logic processes; AI on vendor-controlled stacks; CXL standard; hyperscalers own the OS</td></tr>
+          </tbody>
+        </table>
+        <p class="tiny s09-note">Table: "before ~2010" combines AI Impacts averages (33–36%, 2020$) with our nominal fit (37%); "since" is AI Impacts (12–15%). Chart: our nominal-dollar fits, 1990–2010 and 2010–24.</p>
+        <p class="s09-cav">Caveat: memory crises were forecast before (memory wall 1995; Ranganathan 2011 bet on PCM/memristors); the difference now is a decade of measured $/bit slowdown.</p>
+      </div>
+    </div>
+  </div>
+  <footer class="slide-foot">
+    <div class="sources">Fromm et al. ISCA'97 Table 5 [P]; GMS SOSP'95 Table 1 [P]; NOW IEEE Micro'95 [P]; IRAM Micro'97, ICCD'97 [P]; NDP workshop, IEEE Micro'14 p.39 sidebar [P]; Wulf &amp; McKee 1995 [P]; Ranganathan, IEEE Computer'11 p.42 [P]; SeDRAM IEDM'20 Fig. 8 [P]; McCallum data via AI Impacts (Google Sheet) and McCallum table (Wayback capture) [S]; fits: AI Impacts 2020 [S] (CPI-adjusted 2020$); chart fits: ours, nominal [D]; "middle outran both" and enabler list [Syn].</div>
+    <div class="pageno">09 / 10</div>
+  </footer>
+  <script>
+  (function () {
+    var root = document.getElementById('s09');
+    var D = JSON.parse(root.querySelector('#s09-data').textContent);
+    var NS = 'http://www.w3.org/2000/svg';
+    function el(p, n, a, t) { var e = document.createElementNS(NS, n); for (var k in a) e.setAttribute(k, a[k]); if (t != null) e.textContent = t; p.appendChild(e); return e; }
+    var svg = root.querySelector('#s09-svg');
+    var X0 = 64, X1 = 458, Y0 = 14, Y1 = 344, XMIN = 1990, XMAX = 2024, LMIN = 0, LMAX = 5;
+    function xx(v) { return X0 + (X1 - X0) * (v - XMIN) / (XMAX - XMIN); }
+    function yy(v) { return Y1 - (Y1 - Y0) * (Math.log10(v) - LMIN) / (LMAX - LMIN); }
+    var yl = {0: '$1', 1: '$10', 2: '$100', 3: '$1k', 4: '$10k', 5: '$100k'};
+    for (var e = 0; e <= 5; e++) {
+      el(svg, 'line', {x1: X0, x2: X1, y1: yy(Math.pow(10, e)), y2: yy(Math.pow(10, e)), style: 'stroke:var(--rule);stroke-width:1'});
+      el(svg, 'text', {x: X0 - 6, y: yy(Math.pow(10, e)) + 4, 'class': 'axis', 'text-anchor': 'end'}, yl[e]);
+    }
+    [1990, 2000, 2010, 2020].forEach(function (t) {
+      el(svg, 'line', {x1: xx(t), x2: xx(t), y1: Y1, y2: Y1 + 4, style: 'stroke:var(--ink-3);stroke-width:1'});
+      el(svg, 'text', {x: xx(t), y: Y1 + 18, 'class': 'axis', 'text-anchor': t === 2024 ? 'end' : 'middle'}, t);
+    });
+    el(svg, 'line', {x1: X0, x2: X1, y1: Y1, y2: Y1, style: 'stroke:var(--ink-3);stroke-width:1'});
+    el(svg, 'text', {x: (X0 + X1) / 2, y: Y1 + 38, 'class': 'lbl', 'text-anchor': 'middle'}, 'Year');
+    el(svg, 'text', {transform: 'translate(13,' + ((Y0 + Y1) / 2) + ') rotate(-90)', 'class': 'lbl', 'text-anchor': 'middle'}, 'DRAM price, nominal ($/GB, log scale)');
+    // slowdown line
+    el(svg, 'line', {x1: xx(D.break), x2: xx(D.break), y1: Y0, y2: Y1, style: 'stroke:var(--ink-3);stroke-width:1'});
+    el(svg, 'text', {x: xx(D.break) - 5, y: Y0 + 12, 'class': 'lbl faint halo', 'text-anchor': 'end'}, 'slowdown (~2010)');
+    // OLS fit on ln(price)
+    function fit(a, b) {
+      var p = D.series.filter(function (r) { return r.year >= a && r.year <= b; });
+      var n = p.length, mx = 0, my = 0, i;
+      p.forEach(function (r) { mx += r.year / n; my += Math.log(r.usd_per_gb) / n; });
+      var sxy = 0, sxx = 0;
+      p.forEach(function (r) { sxy += (r.year - mx) * (Math.log(r.usd_per_gb) - my); sxx += (r.year - mx) * (r.year - mx); });
+      var s = sxy / sxx, c = my - s * mx;
+      return {s: s, c: c, rate: Math.round((Math.exp(s) - 1) * 100), f: function (x) { return Math.exp(c + s * x); }};
+    }
+    var f1 = fit(1990, 2010), f2 = fit(2010, 2024);
+    [[f1, 1990, 2010], [f2, 2010, 2024]].forEach(function (q) {
+      el(svg, 'line', {x1: xx(q[1]), y1: yy(q[0].f(q[1])), x2: xx(q[2]), y2: yy(q[0].f(q[2])), style: 'stroke:var(--ink-2);stroke-width:1.5;stroke-dasharray:6 4'});
+    });
+    // series
+    var d = D.series.map(function (r, i) { return (i ? 'L' : 'M') + xx(r.year).toFixed(1) + ',' + yy(r.usd_per_gb).toFixed(1); }).join('');
+    el(svg, 'path', {d: d, style: 'fill:none;stroke:var(--mid);stroke-width:1.4'});
+    D.series.forEach(function (r) {
+      var c = el(svg, 'circle', {cx: xx(r.year), cy: yy(r.usd_per_gb), r: 3, style: 'fill:' + (r.year === D.partial_year ? 'var(--bg)' : 'var(--mid)') + ';stroke:var(--mid);stroke-width:1.2'});
+      if (window.DeckTip) window.DeckTip.attach(c, r.year + ': $' + r.usd_per_gb + '/GB nominal (annual geometric mean of McCallum price points via AI Impacts sheet / Wayback table) [S]' + (r.year === D.partial_year ? '; partial year' : '') + (r.year >= 2018 ? ' (2018–24: single extraction)' : ''));
+    });
+    el(svg, 'text', {x: X1, y: Y0 + 30, 'class': 'lbl faint', 'text-anchor': 'end'}, 'hollow = 2024');
+    el(svg, 'text', {x: X1, y: Y0 + 45, 'class': 'lbl faint', 'text-anchor': 'end'}, '(partial year)');
+    // fit labels
+    el(svg, 'text', {x: xx(1992.5), y: yy(2.2), 'class': 'lbl halo', style: 'font-weight:600'}, 'nominal-dollar fit, 1990–2010:');
+    el(svg, 'text', {x: xx(1992.5), y: yy(2.2) + 15, 'class': 'lbl halo num', style: 'font-weight:600'}, '\u2212' + Math.abs(f1.rate) + '%/yr');
+    el(svg, 'text', {x: xx(2024), y: yy(80), 'class': 'lbl halo', 'text-anchor': 'end', style: 'font-weight:600'}, 'nominal-dollar fit, 2010–24:');
+    el(svg, 'text', {x: xx(2024), y: yy(80) + 15, 'class': 'lbl halo num', 'text-anchor': 'end', style: 'font-weight:600'}, '\u2212' + Math.abs(f2.rate) + '%/yr');
+  })();
+  </script>
+</section>
+
+</div>

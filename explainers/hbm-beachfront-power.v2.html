@@ -1,0 +1,399 @@
+<title>HBM Bandwidth Limits</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap">
+<style>
+/* Layout: one reading column (~68ch) with full-width figures; white technical-report look, single light theme by choice. */
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --ink: #111418;
+  --ink-2: #4a5059;
+  --ink-3: #7a808a;
+  --rule: #e3e6ea;
+  --panel: #f6f7f9;
+  --hbm: #2a78d6;      /* series 1: HBM / 2.5D path */
+  --ddr: #eb6834;      /* series 2: DDR / off-package path */
+  --d3: #1baf7a;       /* series 3: 3D DRAM-logic stacking */
+  --compute: #3c4a5c;
+  --phy: #f1a33c;
+  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 980px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 64px; }
+.col { max-width: 68ch; }
+h1 { font-family: var(--font-display); font-weight: 600; font-size: 2.1rem; line-height: 1.15; margin: 0 0 12px; text-wrap: balance; }
+h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.45rem; margin: 48px 0 8px; text-wrap: balance; }
+h3 { font-size: 1rem; font-weight: 600; margin: 24px 0 6px; }
+p { margin: 0 0 12px; }
+ul { padding-left: 20px; margin: 0 0 12px; }
+li { margin-bottom: 6px; }
+.lede { font-size: 1.1rem; }
+.eyebrow { font-family: var(--font-mono); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
+.claim { border-left: 3px solid var(--ink); padding: 6px 0 6px 14px; font-family: var(--font-display); font-size: 1.12rem; margin: 18px 0 8px; }
+.verdict { font-size: .95rem; color: var(--ink-2); margin-bottom: 20px; }
+.ladder { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 22px 0 8px; }
+.step { border: 1px solid var(--rule); border-radius: 6px; padding: 12px; min-width: 0; }
+.step .n { font-family: var(--font-mono); font-size: .72rem; color: var(--ink-3); letter-spacing: .06em; }
+.step .t { font-weight: 600; margin: 2px 0 4px; }
+.step .d { font-size: .88rem; color: var(--ink-2); }
+.step.key { border-color: var(--ink); }
+figure { margin: 22px 0 8px; }
+.fig { border: 1px solid var(--rule); border-radius: 6px; padding: 14px; overflow-x: auto; }
+figcaption { font-size: .86rem; color: var(--ink-2); margin-top: 8px; max-width: 84ch; }
+figcaption b { color: var(--ink); }
+svg text { font-family: var(--font-body); fill: var(--ink); }
+svg .mono { font-family: var(--font-mono); }
+svg .muted { fill: var(--ink-2); }
+svg .faint { fill: var(--ink-3); }
+svg .halo { paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 600; font-size: .76rem; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-2); }
+td.num { font-variant-numeric: tabular-nums; font-family: var(--font-mono); white-space: nowrap; }
+.tablewrap { overflow-x: auto; margin: 12px 0 4px; }
+.tag { font-family: var(--font-mono); font-size: .72rem; color: var(--ink-3); }
+td .tag { white-space: nowrap; }
+p.tag { line-height: 1.5; max-width: 110ch; }
+.math { font-family: var(--font-mono); background: var(--panel); padding: 2px 6px; border-radius: 4px; font-size: .9rem; }
+.note { background: var(--panel); border-radius: 6px; padding: 14px 16px; font-size: .93rem; }
+ol.refs { font-size: .85rem; color: var(--ink-2); padding-left: 22px; }
+#tip { position: fixed; pointer-events: none; background: var(--ink); color: #fff; font-size: .8rem; padding: 6px 8px; border-radius: 4px; line-height: 1.35; max-width: 280px; }
+@media (max-width: 720px) { .ladder { grid-template-columns: repeat(2, minmax(0, 1fr)); } h1 { font-size: 1.7rem; } }
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">Explainer · memory-proximity research · 2026-10-03 · revised after accuracy review</div>
+  <h1>Why HBM bandwidth stops scaling: die edge, then power</h1>
+  <div class="col">
+    <div class="claim">"The interposer solves wires per stack, so beachfront then caps the number of stacks. After that, energy per bit binds."</div>
+    <p class="verdict">The sentence is right in outline, with two corrections. "Wires per stack" and "stacks per die" are one limit: wires per millimetre of die edge. And power is a limit at the same time, not only "after".</p>
+    <p class="lede">A silicon interposer lets one memory attachment carry 2,048 data wires instead of a DDR channel's 64. Those wires are wide, single-ended and unterminated, so they only reach a few millimetres. The host's HBM PHY therefore has to sit at a die edge, facing the stack. Bandwidth then depends on two things: how many wires fit per millimetre of edge, and how much edge a reticle-limited die has, which is room for about six stacks. Getting more edge means more dies, and interposer size runs out. Even with more stacks, today's energy per bit would push memory power above the GPU's own power budget long before bandwidth gets anywhere near on-chip SRAM levels.</p>
+    <p><span class="math">BW<sub>package</sub> = edge length × wires per mm of edge × bit rate per wire</span> &nbsp; and &nbsp; <span class="math">P<sub>memory</sub> = BW × E<sub>bit</sub></span></p>
+  </div>
+
+  <div class="ladder" role="list" aria-label="Which limit binds at each step">
+    <div class="step" role="listitem"><div class="n">DDR DIMM</div><div class="t">Wires per attachment</div><div class="d">64 data bits per channel, through ~1 mm package balls, the board and a connector.</div></div>
+    <div class="step key" role="listitem"><div class="n">HBM ON INTERPOSER</div><div class="t">Wires per mm of die edge</div><div class="d">~256 DQ per mm of PHY; about 6 stacks fit on a reticle-sized die.</div></div>
+    <div class="step" role="listitem"><div class="n">MORE DIES, MORE STACKS</div><div class="t">Interposer size and power</div><div class="d">100 TB/s at 2.4 pJ/bit = 1.92 kW for memory alone.</div></div>
+    <div class="step" role="listitem"><div class="n">ESCAPE: 3D STACKING</div><div class="t">Area instead of edge</div><div class="d">The edge limit disappears; capacity per mm² and heat become the costs.</div></div>
+  </div>
+
+  <h2>1. The interposer buys width per attachment</h2>
+  <div class="col">
+    <p>Off-package, every bit crosses solder balls about 1 mm apart, centimetres of board and a DIMM connector. A DDR5 channel is two 32-bit subchannels: 64 data bits, plus ECC on RDIMMs. It costs a CPU roughly 160–200 signal pins. On a silicon interposer, connections are microbumps tens of microns apart and routes are millimetres long, so one HBM4 stack gets 2,048 data wires.</p>
+    <p>Per attachment, that is about 32× the wires and about 38× the bandwidth. The rate per wire barely differs: MI455X's HBM4 works out to ≈7.6 Gb/s per pin, against DDR5-6400's 6.4 [D]. Nearly all the gain is width.</p>
+  </div>
+  <figure>
+    <div class="fig"><svg id="fig1" viewBox="0 0 940 360" width="100%" role="img" aria-label="Cross-sections comparing one DDR5 channel with one HBM4 stack on a silicon interposer"></svg></div>
+    <figcaption><b>Figure 1. One memory attachment, off-package vs on-interposer.</b> Schematic, not to scale.
+    <ul>
+      <li>DDR5-6400: 51.2 GB/s per channel. DDR5 pins per channel: 160–200 [P: notes q3].</li>
+      <li>MI455X: 23.3 TB/s from 12 HBM4 stacks, so ≈1.94 TB/s per stack [D from V: AMD HC'26].</li>
+      <li>HBM4 data width: 2,048 [S: JEDEC JESD270-4; V: d-Matrix HC'26 s5].</li>
+      <li>Ball pitch (~1 mm) and microbump pitch (tens of µm) are [background].</li>
+      <li>The host-side PHY sits at the GPU die edge. It faces the stack's base-die PHY across a 2–5.5 mm channel [V: Samsung HC'26 s11].</li>
+    </ul></figcaption>
+  </figure>
+
+  <h2>2. Why the stack must sit at a die edge, and what that caps</h2>
+  <div class="col">
+    <p><b>Reach, not energy, pins the stack to the edge.</b> An HBM link is a very wide parallel bus of single-ended, unterminated lines [V: SK hynix HC'26, "1024 IOs (Single-ended)"]. On fine-pitch interposer wiring it only works over a few millimetres. Samsung's floorplans give channel depths of 3.5 mm (HBM2), 4.5 mm (HBM3) and 5.5 mm (HBM4) [V: Samsung HC'26 s11].</p>
+    <p>A stack placed farther away does not just cost more energy: the standard HBM PHY stops working, and a serialized, longer-reach interface is needed instead. JEDEC's SPHBM4 makes exactly that trade, with 512 signals at 4:1 serialization on an organic substrate [S].</p>
+    <p><b>Width per stack and stacks per die are therefore the same limit.</b> Doubling HBM to 2,048 DQ meant widening the PHY from 6 mm to 8 mm and lengthening the channel from 3.5 to 5.5 mm, going from HBM2 to standard HBM4 [V: Samsung s11]. About 2,048 DQ across an ~8 mm PHY is roughly 256 DQ per mm of die edge [D]. Samsung names "B-die PHY I/O count and speed" and TSV counts as the main per-stack bottlenecks [V: s5].</p>
+    <p><b>How many stacks fit.</b></p>
+    <ul>
+      <li>A monolithic die cannot exceed the ~26 × 33 mm reticle.</li>
+      <li>An HBM4 stack's footprint is about 11 × 12.8 mm [V: Samsung s10–11]. A die's two 33 mm edges therefore hold about three stacks each, six in total. Samsung draws it that way [V: s9].</li>
+      <li>The die edge is also shared with die-to-die links and off-package I/O.</li>
+      <li>More stacks need more dies, and so a bigger interposer or bridge package. Samsung says the "interposer size [is] reaching its physical limit" [V: s9]. d-Matrix cites "interposer size, warpage" [V: s5].</li>
+    </ul>
+  </div>
+  <figure>
+    <div class="fig"><svg id="fig2" viewBox="0 0 940 400" width="100%" role="img" aria-label="To-scale top view of a reticle-sized die with six HBM4 stacks, and three four-die layouts"></svg></div>
+    <figcaption><b>Figure 2. The die edge sets the stack count.</b>
+    <ul>
+      <li><b>Left, to scale</b> (1 mm = 6 px): a 26 × 33 mm reticle-limited die with three 11 × 12.8 mm HBM4 stacks on each long edge. Layout after Samsung HC'26 s9. Footprint after s10–11: sHBM4 is 11 × 12.8 mm, its PHY 8 × 4 mm, its channel depth 5.5 mm. The gap between die and stack is illustrative.</li>
+      <li><b>Right, schematic:</b> four compute dies arranged three ways, redrawn from d-Matrix HC'26 s5. Its stack counts match the slide, which labels them "HBM edges".</li>
+    </ul></figcaption>
+  </figure>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>HBM generation (Samsung floorplans)</th><th>Host-facing PHY</th><th>Channel depth</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td>HBM2</td><td class="num">6 × 1.2 mm</td><td class="num">3.5 mm</td><td><span class="tag">[V] Samsung HC'26 s11</span></td></tr>
+        <tr><td>HBM3</td><td class="num">8 × 3 mm</td><td class="num">4.5 mm</td><td><span class="tag">[V] s11</span></td></tr>
+        <tr><td>Standard HBM4 (sHBM4)</td><td class="num">8 × 4 mm</td><td class="num">5.5 mm</td><td><span class="tag">[V] s11</span></td></tr>
+        <tr><td>Custom HBM4 (cHBM4: D2D interface on a logic base die)</td><td class="num">8.5 × 1.5 mm</td><td class="num">2 mm</td><td><span class="tag">[V] s11</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="tag">Custom base dies attack this limit directly: replacing the HBM PHY with a die-to-die PHY shrinks the PHY footprint and the channel [V: Samsung s10–11]. AMD frees edge another way. On MI455X the HBM4 attaches to the fabric and cache dies, and the compute dies are hybrid-bonded on top of them [V: AMD HC'26].</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Package</th><th>Stacks</th><th>Bandwidth</th><th>Per stack</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td>AMD MI455X (HBM4)</td><td class="num">12</td><td class="num">23.3 TB/s</td><td class="num">1.94 TB/s</td><td><span class="tag">[V] AMD HC'26; per stack [D]</span></td></tr>
+        <tr><td>NVIDIA Rubin R200 (HBM4), per d-Matrix</td><td class="num">8</td><td class="num">not stated</td><td class="num">—</td><td><span class="tag">[V] d-Matrix s28</span></td></tr>
+        <tr><td>d-Matrix's "practical limit w/ HBM4"</td><td class="num">—</td><td class="num">~20 TB/s</td><td class="num">—</td><td><span class="tag">[V] d-Matrix s5</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="tag">MI455X already exceeds d-Matrix's ~20 TB/s, so read the practical ceiling with HBM4 as roughly 20–25 TB/s per package.</p>
+
+  <h2>3. Power binds alongside: P = BW × energy per bit</h2>
+  <div class="col">
+    <p>Each HBM generation has cut energy per bit, but more slowly than bandwidth has risen, so memory power keeps climbing. Figure 3 replots d-Matrix's chart of 8-stack package bandwidth against energy per bit, with lines of constant power added. HBM generations climb from about 50 W to about 350 W [D]. Reaching 100 TB/s would take:</p>
+    <ul>
+      <li><b>At HBM4's 2.4 pJ/bit</b> (no further improvement): 1.92 kW for memory alone [V: d-Matrix s6].</li>
+      <li><b>If the historical HBM trend continues</b> (~1.4 pJ/bit): about 1.15 kW [D: log-log fit of the five HBM points].</li>
+      <li><b>At 5 pJ/bit</b>, the figure d-Matrix uses for HBM4 in its own like-for-like table (40 mW per GB/s, including on-chip delivery): about 4 kW [D from V: s28].</li>
+    </ul>
+    <p>For scale, Samsung's example GPU draws 1.2 kW of compute power, plus about 220 W of DRAM at ~14 TB/s [V: Samsung s23]. O'Connor made the same point in 2017: a 60 W DRAM budget caps HBM2 at about 2 TB/s [P]. Power has been a co-limit all along, not just the next wall after beachfront.</p>
+  </div>
+  <figure>
+    <div class="fig"><svg id="fig3" viewBox="0 0 940 540" width="100%" role="img" aria-label="Log-log chart of peak package bandwidth versus energy per bit with lines of constant memory power"></svg></div>
+    <figcaption><b>Figure 3. Bandwidth vs energy per bit, with constant-power lines.</b>
+    <ul>
+      <li><b>Data.</b> Memory points are replotted from d-Matrix, Hot Chips 2026 tutorial, slide 6, read from a log-log chart. An independent pixel read agrees within ±5% [V, approximate]. HBM points are 8-stack packages.</li>
+      <li><b>Scope.</b> d-Matrix's energy scope is inconsistent: it calls HBM4's 2–3 pJ/bit "I/O energy" (s17), "data-movement energy" (s6) and "system" (s8). Treat these values as I/O-dominated.</li>
+      <li><b>3D points.</b> zHBM is derived from Samsung's projection: ≈32 TB/s at ≈124 W of DRAM power [D from V]. Raptor's 0.37 pJ/bit is measured I/O energy only [V].</li>
+      <li><b>Lines.</b> Grey diagonals are constant memory power: P[W] = BW[TB/s] × 8 × E[pJ/bit].</li>
+    </ul>
+    Hover a point for its values.</figcaption>
+  </figure>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Case</th><th>Bandwidth</th><th>Energy</th><th>Memory power</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td>Samsung example: 1 GPU + 4 HBM4E (2.5D)</td><td class="num">≈14 TB/s</td><td class="num">≈2.0 pJ/b [D]</td><td class="num">≈220 W beside a 1,200 W GPU</td><td><span class="tag">[V] Samsung s23, read against chart axes</span></td></tr>
+        <tr><td>Samsung zHBM: 4 DRAM stacks hybrid-bonded on the xPU (3D, no interposer or PHY)</td><td class="num">≈32 TB/s</td><td class="num">≈0.47 pJ/b [D]</td><td class="num">≈124 W</td><td><span class="tag">[V] projection, s21–24</span></td></tr>
+        <tr><td>MI455X at 2.4 pJ/bit</td><td class="num">23.3 TB/s</td><td class="num">2.4 pJ/b</td><td class="num">≈450 W [D]</td><td><span class="tag">[D] AMD bandwidth × d-Matrix pJ/b</span></td></tr>
+        <tr><td>d-Matrix Raptor (logic on top of DRAM, 3D)</td><td class="num">100 TB/s</td><td class="num">0.37 pJ/b (I/O)</td><td class="num">296 W (I/O only)</td><td><span class="tag">[V] d-Matrix s23</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="tag">The Samsung pJ/bit values assume DRAM power is quoted at the stated peak bandwidth; Samsung states no utilization.</p>
+
+  <h2>4. The escape route, and its price</h2>
+  <div class="col">
+    <p>3D stacking replaces edge with area: the interface runs through the face of the die rather than its perimeter. Samsung's zHBM projection reaches about 32 TB/s from only four stacks once they are bonded onto the xPU [V]. d-Matrix's Raptor reaches 100 TB/s at 0.37 pJ/bit of measured I/O energy [V]. The costs move elsewhere:</p>
+    <ul>
+      <li><b>Capacity per area.</b> Raptor holds 11.4 MB/mm², against 21.9–26.3 for HBM4 [V: d-Matrix s28].</li>
+      <li><b>Heat.</b> In Raptor the logic sits on top and the DRAM underneath, inside the logic's thermal footprint. At 105 °C retention falls from 32 ms to 4 ms, so refresh runs 8× as often [V: s17, s25–26]. In DRAM-over-logic designs such as zHBM, the heat also has to cross the DRAM.</li>
+    </ul>
+    <p><b>Interface energy needs a like-for-like comparison.</b></p>
+    <ul>
+      <li>Raptor's 0.37 pJ/bit is measured I/O.</li>
+      <li>The HBM2 interposer wire alone is ~0.3 pJ/bit [P: O'Connor].</li>
+      <li>An HBM interface including its PHY is ~1.5 pJ/bit [P: UniIC IEDM'20].</li>
+    </ul>
+    <p>Measured against the full HBM interface, the I/O gain is about 4×, not d-Matrix's "~10×". Most of an HBM access is spent inside the DRAM anyway: 1.21 pJ/bit on activation and 2.24 pJ/bit on moving data within the die [P: O'Connor].</p>
+    <div class="note"><b>The general principle.</b> Bandwidth has to cross a boundary: in 2.5D that boundary is an edge, a length; in 3D it is a face, an area. Compute grows with area. 2.5D memory bandwidth grows with edge length × wires per mm × rate per wire. Each bit costs energy roughly in proportion to how far it travels and how much circuitry it passes through. Each step closer changes which of these limits binds.</div>
+  </div>
+
+  <h2>What to remember</h2>
+  <div class="col">
+    <ul>
+      <li>The interposer raises width per attachment about 32× (2,048 vs 64 data wires). The rate per wire barely changes.</li>
+      <li>The link reaches only a few millimetres, so bandwidth is capped by wires per mm of die edge: about six stacks per reticle-sized die. More dies run into interposer size limits.</li>
+      <li>Power is a co-limit. 100 TB/s costs ~1.1–1.9 kW of memory power at HBM-class energy (≈4 kW at d-Matrix's like-for-like figure), against a GPU that draws ~1.2 kW itself.</li>
+      <li>3D stacking swaps edge for area and escapes both limits, at a cost in capacity per mm² and heat.</li>
+    </ul>
+  </div>
+
+  <h2>Sources</h2>
+  <ol class="refs">
+    <li>d-Matrix (S. Bhoja), Hot Chips 2026 tutorial: s5 "HBM: The Bandwidth Issue"; s6 "HBM: The Power Problem"; s8 "Why 3D-DRAM?"; s17, s23, s25–26, s28. Vendor slides. Pinning down the energy scopes needs the full text of the Raptor ISCA 2026 paper, which we don't have yet.</li>
+    <li>Samsung (S. Han), Hot Chips 2026 tutorial "HBM Base Die":
+      <ul>
+        <li>s5: bandwidth-scaling bottlenecks.</li>
+        <li>s9: reticle and interposer limits; 6 HBM per 26 × 33 mm xPU.</li>
+        <li>s10–11: PHY footprint, channel depth, sHBM4 footprint.</li>
+        <li>s21–24: zHBM; s23 is the bandwidth and power chart with a 1,200 W GPU assumption.</li>
+      </ul></li>
+    <li>AMD, Hot Chips 2026, "AMD Instinct MI400 GPU Architecture": MI455X with 12 HBM4 stacks, 432 GB, 23.3 TB/s; HBM4 on the fabric and cache dies; CoWoS-L.</li>
+    <li>SK hynix, Hot Chips 2026 tutorial: "1024 IOs (Single-ended)".</li>
+    <li>M. O'Connor et al., "Fine-Grained DRAM," MICRO 2017: HBM2 activation 1.21, on-die movement 2.24 and I/O 0.3 pJ/bit (3.75 total); 60 W ≈ 2 TB/s. The 3.92 commonly quoted includes overhead our notes attribute to ECC; confirming that needs the full text.</li>
+    <li>UniIC, IEDM 2020: HBM interface ~1.5 pJ/bit including PHY (Table 1).</li>
+    <li>JEDEC JESD270-4 (HBM4, April 2025): 2,048-bit interface at 8 Gb/s. SPHBM4 (Dec 2025): 512 signals, 4:1 serialization, organic substrate. Both via press releases [S].</li>
+    <li>DDR5 channel organization and pin counts: research notes q3 (COAXIAL; Sun et al. MICRO'23).</li>
+  </ol>
+  <p class="tag">Tags: [P] primary, read in full · [V] vendor slides · [S] secondary · [D] our arithmetic · [background] general engineering knowledge, not tied to a source we read.</p>
+</div>
+<div id="tip" hidden></div>
+
+<script>
+(function () {
+  const NS = "http://www.w3.org/2000/svg";
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const C = { ink: css('--ink'), ink2: css('--ink-2'), ink3: css('--ink-3'), rule: css('--rule'), hbm: css('--hbm'), ddr: css('--ddr'), d3: css('--d3'), compute: css('--compute'), panel: css('--panel'), bg: css('--bg'), phy: css('--phy') };
+  function el(parent, tag, attrs, text) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (text !== undefined) e.textContent = text;
+    parent.appendChild(e); return e;
+  }
+  const white = { fill: '#fff', style: 'fill:#fff' };
+  const tip = document.getElementById('tip');
+  function showTip(evt, html) { tip.innerHTML = html; tip.hidden = false; moveTip(evt); }
+  function moveTip(evt) { const x = Math.min(evt.clientX + 14, window.innerWidth - 290); tip.style.left = x + 'px'; tip.style.top = (evt.clientY + 14) + 'px'; }
+  function hideTip() { tip.hidden = true; }
+
+  /* ---------- Figure 1 ---------- */
+  const f1 = document.getElementById('fig1');
+  el(f1, 'text', { x: 20, y: 24, 'font-weight': 600, 'font-size': 15 }, 'DDR5 RDIMM channel (off-package)');
+  el(f1, 'text', { x: 20, y: 46, 'font-size': 13 }, '64 data bits per channel (+ECC on RDIMM)');
+  el(f1, 'text', { x: 20, y: 64, 'font-size': 13 }, '≈160–200 CPU signal pins per channel');
+  el(f1, 'text', { x: 20, y: 82, 'font-size': 13, 'font-weight': 600, fill: C.ddr, style: 'fill:' + C.ddr }, 'DDR5-6400: 51.2 GB/s per channel');
+  el(f1, 'rect', { x: 20, y: 255, width: 420, height: 18, fill: '#d8e8d2', stroke: C.ink3, 'stroke-width': 0.6 });
+  el(f1, 'rect', { x: 40, y: 215, width: 150, height: 26, fill: C.panel, stroke: C.ink3, 'stroke-width': 0.8 });
+  el(f1, 'rect', { x: 75, y: 190, width: 80, height: 25, fill: C.compute });
+  el(f1, 'text', Object.assign({ x: 115, y: 207, 'font-size': 11, 'text-anchor': 'middle' }, white), 'CPU die');
+  el(f1, 'text', { x: 115, y: 233, 'font-size': 10, 'text-anchor': 'middle', class: 'muted' }, 'package substrate');
+  for (let i = 0; i < 9; i++) el(f1, 'circle', { cx: 50 + i * 16.5, cy: 248, r: 5.5, fill: '#b9bec6', stroke: C.ink3, 'stroke-width': 0.5 });
+  el(f1, 'path', { d: 'M190 262 L330 262', stroke: C.ddr, 'stroke-width': 3, fill: 'none' });
+  el(f1, 'text', { x: 26, y: 290, 'font-size': 11, class: 'muted' }, 'solder balls ~1 mm pitch · motherboard: centimetres of trace');
+  el(f1, 'rect', { x: 330, y: 236, width: 40, height: 20, fill: '#d9dce1', stroke: C.ink3, 'stroke-width': 0.6 });
+  el(f1, 'text', { x: 350, y: 249, 'font-size': 9, 'text-anchor': 'middle', class: 'muted' }, 'slot');
+  el(f1, 'rect', { x: 343, y: 100, width: 14, height: 136, fill: '#2f6b3a' });
+  for (let i = 0; i < 4; i++) { el(f1, 'rect', { x: 357, y: 110 + i * 30, width: 22, height: 22, fill: C.compute }); el(f1, 'rect', { x: 321, y: 110 + i * 30, width: 22, height: 22, fill: C.compute }); }
+  el(f1, 'text', { x: 392, y: 124, 'font-size': 11, class: 'muted' }, 'DRAM chips');
+  el(f1, 'text', { x: 392, y: 138, 'font-size': 11, class: 'muted' }, 'on a DIMM');
+  el(f1, 'text', { x: 20, y: 322, 'font-size': 12, class: 'muted' }, 'Rate limited by multi-drop loading, connectors and trace');
+  el(f1, 'text', { x: 20, y: 338, 'font-size': 12, class: 'muted' }, 'length, hence 1 DIMM per channel at full speed.');
+
+  const ox = 490;
+  el(f1, 'text', { x: ox, y: 24, 'font-weight': 600, 'font-size': 15 }, 'HBM4 stack on a silicon interposer (2.5D)');
+  el(f1, 'text', { x: ox, y: 46, 'font-size': 13 }, '2,048 data wires per stack');
+  el(f1, 'text', { x: ox, y: 64, 'font-size': 13 }, 'single-ended, unterminated, mm reach');
+  el(f1, 'text', { x: ox, y: 82, 'font-size': 13, 'font-weight': 600, fill: C.hbm, style: 'fill:' + C.hbm }, '≈1.94 TB/s per stack (MI455X)');
+  el(f1, 'rect', { x: ox, y: 262, width: 430, height: 14, fill: '#d8e8d2', stroke: C.ink3, 'stroke-width': 0.6 });
+  el(f1, 'text', { x: ox + 6, y: 273, 'font-size': 10, class: 'muted' }, 'package substrate');
+  el(f1, 'rect', { x: ox + 15, y: 240, width: 400, height: 16, fill: '#c9ced6', stroke: C.ink3, 'stroke-width': 0.6 });
+  el(f1, 'text', { x: ox + 21, y: 252, 'font-size': 10 }, 'silicon interposer');
+  for (let i = 0; i < 26; i++) el(f1, 'circle', { cx: ox + 40 + i * 6.5, cy: 236.5, r: 2.2, fill: '#9aa1ab' });
+  for (let i = 0; i < 24; i++) el(f1, 'circle', { cx: ox + 250 + i * 6.5, cy: 236.5, r: 2.2, fill: '#9aa1ab' });
+  el(f1, 'rect', { x: ox + 35, y: 214, width: 170, height: 20, fill: '#6f8faa' });
+  el(f1, 'rect', { x: ox + 175, y: 216, width: 28, height: 16, fill: C.phy });
+  el(f1, 'text', Object.assign({ x: ox + 100, y: 228, 'font-size': 10, 'text-anchor': 'middle' }, white), 'base die');
+  el(f1, 'text', { x: ox + 189, y: 228, 'font-size': 9, 'text-anchor': 'middle' }, 'PHY');
+  for (let i = 0; i < 6; i++) el(f1, 'rect', { x: ox + 35, y: 194 - i * 17, width: 170, height: 14, fill: C.hbm, opacity: 0.9 });
+  for (let i = 0; i < 4; i++) el(f1, 'rect', { x: ox + 70 + i * 24, y: 109, width: 3, height: 105, fill: '#c27a12' });
+  el(f1, 'text', { x: ox + 120, y: 102, 'font-size': 11, 'text-anchor': 'middle', class: 'muted' }, 'DRAM core dies with TSVs');
+  el(f1, 'rect', { x: ox + 245, y: 198, width: 170, height: 36, fill: C.compute });
+  el(f1, 'rect', { x: ox + 247, y: 207, width: 26, height: 18, fill: C.phy });
+  el(f1, 'text', { x: ox + 260, y: 220, 'font-size': 9, 'text-anchor': 'middle' }, 'PHY');
+  el(f1, 'text', Object.assign({ x: ox + 345, y: 220, 'font-size': 11, 'text-anchor': 'middle' }, white), 'GPU die');
+  el(f1, 'path', { d: `M${ox + 189} 247 L${ox + 260} 247`, stroke: C.hbm, 'stroke-width': 4, fill: 'none' });
+  el(f1, 'path', { d: `M${ox + 225} 296 L${ox + 225} 257`, stroke: C.ink3, 'stroke-width': 0.8, fill: 'none' });
+  el(f1, 'text', { x: ox + 225, y: 308, 'font-size': 11, 'text-anchor': 'middle', class: 'muted' }, 'PHY-to-PHY channel: 2–5.5 mm (Samsung s11)');
+  el(f1, 'text', { x: ox, y: 334, 'font-size': 12, class: 'muted' }, '≈32× the data wires and ≈38× the bandwidth of one DDR5-6400 channel [D]');
+
+  /* ---------- Figure 2 ---------- */
+  const f2 = document.getElementById('fig2');
+  const s = 6;
+  const x0 = 40, y0 = 50;
+  const gap = 1.5;
+  const dieX = x0 + (12.8 + gap) * s, dieY = y0;
+  el(f2, 'text', { x: 20, y: 24, 'font-weight': 600, 'font-size': 13 }, 'To scale: one reticle-limited die');
+  el(f2, 'rect', { x: dieX, y: dieY, width: 26 * s, height: 33 * s, fill: C.compute });
+  el(f2, 'text', Object.assign({ x: dieX + 13 * s, y: dieY + 16.5 * s - 4, 'font-size': 12, 'text-anchor': 'middle' }, white), 'compute die');
+  el(f2, 'text', Object.assign({ x: dieX + 13 * s, y: dieY + 16.5 * s + 12, 'font-size': 11, 'text-anchor': 'middle' }, white), '26 × 33 mm reticle');
+  for (let side = 0; side < 2; side++) {
+    for (let i = 0; i < 3; i++) {
+      const sx = side === 0 ? x0 : dieX + 26 * s + gap * s;
+      const sy = y0 + i * 11 * s;
+      el(f2, 'rect', { x: sx, y: sy + 1, width: 12.8 * s, height: 11 * s - 2, fill: C.hbm });
+      const px = side === 0 ? sx + (12.8 - 4) * s : sx;
+      el(f2, 'rect', { x: px, y: sy + 1.5 * s, width: 4 * s, height: 8 * s, fill: C.phy });
+    }
+  }
+  el(f2, 'text', { x: x0, y: y0 + 33 * s + 22, 'font-size': 11, class: 'muted' }, 'HBM4 stack 11 × 12.8 mm');
+  el(f2, 'text', { x: x0, y: y0 + 33 * s + 37, 'font-size': 11, class: 'muted' }, 'PHY 8 × 4 mm (orange)');
+  el(f2, 'text', { x: dieX + 26 * s + gap * s, y: y0 + 33 * s + 22, 'font-size': 11, class: 'muted' }, '3 × 11 mm = 33 mm');
+  el(f2, 'text', { x: dieX + 26 * s + gap * s, y: y0 + 33 * s + 37, 'font-size': 11, class: 'muted' }, 'of edge per side');
+  el(f2, 'text', { x: dieX + 13 * s, y: y0 + 33 * s + 62, 'font-size': 13, 'font-weight': 600, 'text-anchor': 'middle', fill: C.hbm, style: 'fill:' + C.hbm }, '6 stacks per die');
+  el(f2, 'line', { x1: 480, x2: 480, y1: 20, y2: 380, stroke: C.rule });
+  const die = (x, y, label) => { el(f2, 'rect', { x, y, width: 44, height: 44, rx: 3, fill: C.compute }); el(f2, 'text', Object.assign({ x: x + 22, y: y + 27, 'font-size': 10, 'text-anchor': 'middle' }, white), label); };
+  const stH = (x, y) => el(f2, 'rect', { x, y, width: 36, height: 10, rx: 2, fill: C.hbm });
+  const stV = (x, y) => el(f2, 'rect', { x, y, width: 10, height: 36, rx: 2, fill: C.hbm });
+  el(f2, 'text', { x: 500, y: 24, 'font-weight': 600, 'font-size': 13 }, 'Schematic: same four dies, three layouts');
+  el(f2, 'text', { x: 500, y: 52, 'font-size': 12 }, '(a) 1×4 row');
+  for (let i = 0; i < 4; i++) { const x = 500 + i * 54; die(x, 80, 'D' + i); stH(x + 4, 64); stH(x + 4, 130); }
+  el(f2, 'text', { x: 730, y: 108, 'font-size': 12, 'font-weight': 600, fill: C.hbm, style: 'fill:' + C.hbm }, '8 stacks');
+  el(f2, 'text', { x: 500, y: 172, 'font-size': 12 }, '(b) 2×2, outer edges');
+  const bx = 515, by = 184;
+  die(bx + 16, by, 'D0'); die(bx + 66, by, 'D1'); die(bx + 16, by + 50, 'D2'); die(bx + 66, by + 50, 'D3');
+  stV(bx, by + 4); stV(bx, by + 54); stV(bx + 116, by + 4); stV(bx + 116, by + 54);
+  el(f2, 'text', { x: bx + 10, y: by + 116, 'font-size': 12, 'font-weight': 600, fill: C.hbm, style: 'fill:' + C.hbm }, '4 stacks');
+  el(f2, 'text', { x: 710, y: 172, 'font-size': 12 }, '(c) 2×2 + interstitial');
+  const cx = 715, cy = 184;
+  die(cx + 16, cy, 'D0'); die(cx + 82, cy, 'D1'); die(cx + 16, cy + 50, 'D2'); die(cx + 82, cy + 50, 'D3');
+  stV(cx, cy + 4); stV(cx, cy + 54); stV(cx + 132, cy + 4); stV(cx + 132, cy + 54); stV(cx + 66, cy + 4); stV(cx + 66, cy + 54);
+  el(f2, 'text', { x: cx + 10, y: cy + 116, 'font-size': 12, 'font-weight': 600, fill: C.hbm, style: 'fill:' + C.hbm }, '6 stacks');
+  el(f2, 'text', { x: 500, y: 345, 'font-size': 11, class: 'muted' }, 'Redrawn from d-Matrix HC’26 s5. HBM uses the die edge,');
+  el(f2, 'text', { x: 500, y: 360, 'font-size': 11, class: 'muted' }, 'so layout sets the count; more dies need a bigger interposer.');
+
+  /* ---------- Figure 3 ---------- */
+  const f3 = document.getElementById('fig3');
+  const M = { l: 70, r: 180, t: 20, b: 60 }, W = 940, H = 540;
+  const pw = W - M.l - M.r, ph = H - M.t - M.b;
+  const xmin = Math.log10(0.2), xmax = Math.log10(50), ymin = Math.log10(0.005), ymax = Math.log10(300);
+  const X = v => M.l + (Math.log10(v) - xmin) / (xmax - xmin) * pw;
+  const Y = v => M.t + (1 - (Math.log10(v) - ymin) / (ymax - ymin)) * ph;
+  const defs = el(f3, 'defs', {}); const cp = el(defs, 'clipPath', { id: 'plotclip' }); el(cp, 'rect', { x: M.l, y: M.t, width: pw, height: ph });
+  [0.2, 0.5, 1, 2, 5, 10, 20, 50].forEach(v => { el(f3, 'line', { x1: X(v), x2: X(v), y1: M.t, y2: M.t + ph, stroke: C.rule }); el(f3, 'text', { x: X(v), y: M.t + ph + 18, 'font-size': 11, 'text-anchor': 'middle', class: 'muted mono' }, v); });
+  [0.01, 0.1, 1, 10, 100].forEach(v => { el(f3, 'line', { x1: M.l, x2: M.l + pw, y1: Y(v), y2: Y(v), stroke: C.rule }); el(f3, 'text', { x: M.l - 8, y: Y(v) + 4, 'font-size': 11, 'text-anchor': 'end', class: 'muted mono' }, v); });
+  el(f3, 'text', { x: M.l + pw / 2, y: H - 14, 'font-size': 12, 'text-anchor': 'middle', class: 'muted' }, 'Energy per bit (pJ/bit, log scale)');
+  el(f3, 'text', { x: 18, y: M.t + ph / 2, 'font-size': 12, 'text-anchor': 'middle', class: 'muted', transform: `rotate(-90 18 ${M.t + ph / 2})` }, 'Peak package bandwidth (TB/s, log scale)');
+  el(f3, 'rect', { x: M.l, y: M.t, width: pw, height: ph, fill: 'none', stroke: C.ink3, 'stroke-width': 0.8 });
+  const iso = [100, 300, 1000, 2000];
+  const lines = el(f3, 'g', { 'clip-path': 'url(#plotclip)' });
+  iso.forEach(P => el(lines, 'line', { x1: X(0.2), y1: Y(P / (8 * 0.2)), x2: X(50), y2: Y(P / (8 * 50)), stroke: C.ink3, 'stroke-width': 1, 'stroke-dasharray': '2 4' }));
+  iso.forEach(P => el(f3, 'text', { x: M.l + pw + 6, y: Y(P / (8 * 50)) + 4, 'font-size': 11, class: 'faint' }, (P >= 1000 ? (P / 1000) + ' kW' : P + ' W')));
+  const pts = [
+    { n: 'DDR3-1600', e: 38, bw: 0.011, k: 'ddr' }, { n: 'DDR4-3200', e: 31, bw: 0.026, k: 'ddr' }, { n: 'DDR5-6400', e: 26, bw: 0.055, k: 'ddr' },
+    { n: 'LPDDR5-6400', e: 8.0, bw: 0.052, k: 'ddr' }, { n: 'GDDR6 (384-bit)', e: 14, bw: 1.1, k: 'ddr' },
+    { n: 'HBM1', e: 6.8, bw: 1.0, k: 'hbm' }, { n: 'HBM2', e: 5.6, bw: 2.4, k: 'hbm' }, { n: 'HBM3', e: 4.2, bw: 6.5, k: 'hbm' },
+    { n: 'HBM3E', e: 3.7, bw: 9.8, k: 'hbm' }, { n: 'HBM4 (proj.)', e: 2.4, bw: 18, k: 'hbm' },
+    { n: 'Raptor 3D (I/O only)', e: 0.37, bw: 100, k: 'd3', src: 'd-Matrix s6/s23 [V]' },
+    { n: 'zHBM 3D (Samsung proj.)', e: 0.47, bw: 31.8, k: 'd3', src: 'derived from Samsung s23 [D from V]' }
+  ];
+  const hb = pts.filter(p => p.k === 'hbm');
+  el(f3, 'polyline', { points: hb.map(p => `${X(p.e)},${Y(p.bw)}`).join(' '), fill: 'none', stroke: C.hbm, 'stroke-width': 2, opacity: 0.5 });
+  el(f3, 'line', { x1: X(2.4), y1: Y(18), x2: X(2.4), y2: Y(100), stroke: C.hbm, 'stroke-width': 1.5, 'stroke-dasharray': '4 3' });
+  el(f3, 'line', { x1: X(2.4), y1: Y(18), x2: X(1.44), y2: Y(100), stroke: C.hbm, 'stroke-width': 1.5, 'stroke-dasharray': '1 3' });
+  const hol = (e, bw, lab, dx, dy, anchor, extra) => {
+    el(f3, 'circle', { cx: X(e), cy: Y(bw), r: 5, fill: C.bg, stroke: C.hbm, 'stroke-width': 2 });
+    el(f3, 'text', { x: X(e) + dx, y: Y(bw) + dy, 'font-size': 11, 'text-anchor': anchor, class: 'halo', fill: C.hbm, style: 'fill:' + C.hbm, 'font-weight': 600 }, lab);
+    const h = el(f3, 'circle', { cx: X(e), cy: Y(bw), r: 13, fill: 'transparent' });
+    h.addEventListener('mouseenter', ev => showTip(ev, extra)); h.addEventListener('mousemove', moveTip); h.addEventListener('mouseleave', hideTip);
+  };
+  hol(2.4, 100, '2.4 pJ/b → 1.92 kW', 9, -8, 'start', '<b>100 TB/s at HBM4’s 2.4 pJ/bit</b><br>1.92 kW for memory alone [V: d-Matrix s6]');
+  hol(1.44, 100, 'trend ~1.4 pJ/b → ~1.15 kW', -9, -8, 'end', '<b>100 TB/s if the HBM trend continues</b><br>log-log fit of HBM1–HBM4 gives ~1.44 pJ/bit, ~1.15 kW [D]');
+  pts.forEach(p => {
+    const col = C[p.k], cxp = X(p.e), cyp = Y(p.bw);
+    if (p.k === 'ddr') el(f3, 'rect', { x: cxp - 5, y: cyp - 5, width: 10, height: 10, fill: col, stroke: C.bg, 'stroke-width': 2 });
+    else if (p.k === 'd3') el(f3, 'path', { d: `M${cxp} ${cyp - 7} L${cxp + 7} ${cyp} L${cxp} ${cyp + 7} L${cxp - 7} ${cyp} Z`, fill: col, stroke: C.bg, 'stroke-width': 2 });
+    else el(f3, 'circle', { cx: cxp, cy: cyp, r: 6, fill: col, stroke: C.bg, 'stroke-width': 2 });
+    const watts = p.bw * 8 * p.e;
+    const hit = el(f3, 'circle', { cx: cxp, cy: cyp, r: 14, fill: 'transparent' });
+    const html = `<b>${p.n}</b><br>${p.e} pJ/bit · ${p.bw} TB/s<br>implied memory power ≈ ${watts < 10 ? watts.toFixed(1) : Math.round(watts)} W [D]<br><span style="opacity:.8">${p.src || 'read from d-Matrix s6 [V, ±5%]'}</span>`;
+    hit.addEventListener('mouseenter', ev => showTip(ev, html)); hit.addEventListener('mousemove', moveTip); hit.addEventListener('mouseleave', hideTip);
+    const lab = { 'HBM1': [10, 4], 'HBM2': [10, 4], 'HBM3': [10, 12], 'HBM3E': [10, 2], 'HBM4 (proj.)': [-10, 16, 'end'], 'DDR5-6400': [-8, -10, 'end'], 'DDR3-1600': [-8, 4, 'end'], 'DDR4-3200': [-8, 4, 'end'], 'GDDR6 (384-bit)': [10, 4], 'LPDDR5-6400': [-9, 4, 'end'], 'Raptor 3D (I/O only)': [10, 20], 'zHBM 3D (Samsung proj.)': [0, 24, 'middle'] }[p.n];
+    if (lab) el(f3, 'text', { x: cxp + lab[0], y: cyp + lab[1], 'font-size': 11, 'text-anchor': lab[2] || 'start', class: 'muted halo' }, p.n);
+  });
+  const lx0 = M.l + pw + 52; let ly0 = M.t + 16;
+  el(f3, 'text', { x: lx0, y: ly0, 'font-size': 12, 'font-weight': 600 }, 'Legend'); ly0 += 20;
+  el(f3, 'circle', { cx: lx0 + 5, cy: ly0 - 4, r: 5, fill: C.hbm }); el(f3, 'text', { x: lx0 + 16, y: ly0, 'font-size': 11 }, 'HBM, 8-stack'); ly0 += 18;
+  el(f3, 'rect', { x: lx0, y: ly0 - 9, width: 10, height: 10, fill: C.ddr }); el(f3, 'text', { x: lx0 + 16, y: ly0, 'font-size': 11 }, 'DDR/LPDDR/GDDR'); ly0 += 18;
+  el(f3, 'path', { d: `M${lx0 + 5} ${ly0 - 10} L${lx0 + 11} ${ly0 - 4} L${lx0 + 5} ${ly0 + 2} L${lx0 - 1} ${ly0 - 4} Z`, fill: C.d3 }); el(f3, 'text', { x: lx0 + 16, y: ly0, 'font-size': 11 }, '3D stacking'); ly0 += 18;
+  el(f3, 'circle', { cx: lx0 + 5, cy: ly0 - 4, r: 4.5, fill: C.bg, stroke: C.hbm, 'stroke-width': 2 }); el(f3, 'text', { x: lx0 + 16, y: ly0, 'font-size': 11 }, '100 TB/s via HBM'); ly0 += 13;
+  el(f3, 'text', { x: lx0 + 16, y: ly0, 'font-size': 10, class: 'muted' }, '(extrapolations)'); ly0 += 20;
+  el(f3, 'line', { x1: lx0, x2: lx0 + 12, y1: ly0 - 4, y2: ly0 - 4, stroke: C.ink3, 'stroke-dasharray': '2 4' }); el(f3, 'text', { x: lx0 + 16, y: ly0, 'font-size': 11 }, 'constant power'); ly0 += 13;
+  el(f3, 'text', { x: lx0 + 16, y: ly0, 'font-size': 10, class: 'muted' }, 'P = BW × 8 × E');
+})();
+</script>

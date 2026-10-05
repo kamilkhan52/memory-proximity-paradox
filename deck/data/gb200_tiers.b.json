@@ -1,0 +1,27 @@
+{
+  "id": "gb200_tiers",
+  "version": 1,
+  "slides": ["s08"],
+  "title": "GB200 NVL72 two-tier memory: HBM3E vs LPDDR5X behind NVLink-C2C (rack level)",
+  "units": {"capacity_tb": "TB (decimal, as printed)", "bandwidth_tbps": "TB/s (as printed; aggregate peak across rack)", "gbps_per_gb": "GB/s per GB (= bandwidth_tbps / capacity_tb, TB cancels)"},
+  "conventions": "Rack-level column of NVIDIA's GB200 NVL72 spec table (72 GPUs, 36 Grace CPUs). Decimal units: 1 TB = 1000 GB. Bandwidths are vendor peak specs. gbps_per_gb = (bandwidth_tbps*1000)/(capacity_tb*1000).",
+  "sources": {
+    "nvidia_spec": {"cite": "NVIDIA, GB200 NVL72 product page, Specifications table", "path": "fulltext/gb200-nvl72-nvidia.html (URL https://www.nvidia.com/en-us/data-center/gb200-nvl72/)", "locator": "Specifications table, rows 'GPU Memory | Bandwidth' and 'CPU Memory | Bandwidth', column GB200 NVL72 (rack)", "tag": "V"}
+  },
+  "rows": [
+    {"tier": "HBM3E", "role": "near", "capacity_tb": 13.4, "bandwidth_tbps": 576, "gbps_per_gb": 43.0, "attach": "On-package GPU HBM3E (72 Blackwell GPUs)", "src": "nvidia_spec", "loc": "Specs table, 'GPU Memory | Bandwidth': '13.4 TB HBM3E | 576 TB/s' (NVL72 column)", "tag": "V", "unc": "capacity and bandwidth: exact (vendor spec, printed); gbps_per_gb derived: 576/13.4 = 42.99", "note": "Per-superchip-side column on same page: 372 GB HBM3E | 16 TB/s (16000/372 = 43.0 GB/s per GB, consistent)."},
+    {"tier": "LPDDR5X", "role": "far (capacity tier by role)", "capacity_tb": 17, "bandwidth_tbps": 14, "gbps_per_gb": 0.82, "attach": "Grace CPU LPDDR5X, reached from GPUs over NVLink-C2C (CPU memory)", "src": "nvidia_spec", "loc": "Specs table, 'CPU Memory | Bandwidth': '17 TB LPDDR5X | 14 TB/s' (NVL72 column)", "tag": "V", "unc": "capacity and bandwidth: exact (vendor spec, printed); gbps_per_gb derived: 14/17 = 0.8235", "note": "Per-superchip column on same page: 'Up to 480 GB LPDDR5X | Up to 512 GB/s' (512/480 = 1.07 GB/s per GB). This differs from the rack figure (14 TB/s / 36 CPUs = ~389 GB/s each; 17 TB / 36 = ~472 GB each), so the 0.82 depends on using the rack-level row; the page does not reconcile the two."}
+  ],
+  "derived": {
+    "hbm_over_lpddr_bandwidth_ratio": {"value": 41.1, "unc": "derived: 576/14 = 41.14"},
+    "hbm_over_lpddr_gbps_per_gb_ratio": {"value": 52.2, "unc": "derived: 42.99/0.8235 = 52.2"},
+    "lpddr_over_hbm_capacity_ratio": {"value": 1.27, "unc": "derived: 17/13.4 = 1.269"}
+  },
+  "extraction": {"agent_a": "see gb200_tiers.json (not opened)", "agent_b": "extractor B, blind", "method": "Parsed saved HTML fulltext/gb200-nvl72-nvidia.html (tags stripped) and read spec table text directly; arithmetic by hand/python. Notes not consulted.", "cross_check": {"max_disagreement": "pending comparison with agent A", "resolved": "pending"}},
+  "caveats": [
+    "Vendor spec, peak bandwidth, not measured.",
+    "LPDDR5X is a capacity tier by role, not 'far away'; GPU access goes via NVLink-C2C, whose per-GPU link speed is not given in this table.",
+    "Rack-level LPDDR5X (14 TB/s, 17 TB) and per-superchip (512 GB/s, 480 GB) rows are not perfectly consistent when divided by 36; the ratio 0.82 uses rack numbers as printed.",
+    "Page footnote: some compute rows are sparse specs; memory rows carry no footnote."
+  ]
+}

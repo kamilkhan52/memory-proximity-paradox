@@ -1,0 +1,244 @@
+{
+ "id": "hbm_bw_energy",
+ "version": 1,
+ "slides": [
+  "s03"
+ ],
+ "title": "Package peak bandwidth vs energy per bit (d-Matrix HC'26 s6 replot) + die-edge geometry",
+ "units": {
+  "pj_per_bit": "pJ/bit",
+  "tbps": "TB/s",
+  "implied_watts": "W (= TB/s x 8 x pJ/bit)"
+ },
+ "conventions": "Log-log; HBM points are 8-stack packages; DDR/LPDDR one 64-bit channel; GDDR6 one 384-bit bus. Constant-power lines P[W]=BW[TB/s]*8*E[pJ/bit].",
+ "sources": {
+  "dmatrix_s6": {
+   "cite": "d-Matrix (S. Bhoja), Hot Chips 2026 tutorial",
+   "path": "fulltext/hotchips26/lightrag_server/slide_assets_vision/source-tutorials-hc2026-dmatrix-sudeepbhoja-v3-0-2fb8d890/slide-006.jpg",
+   "locator": "slide 6",
+   "tag": "V"
+  },
+  "dmatrix_s23": {
+   "cite": "d-Matrix HC'26",
+   "path": "fulltext/hotchips26/decks_text/hc2026.dmatrix.SudeepBhoja.v3.0.pdf.md",
+   "locator": "slide 23 (100 TB/s x 0.37 pJ/bit = 296 W)",
+   "tag": "V"
+  },
+  "samsung_s23": {
+   "cite": "Samsung (S. Han), HC'26 HBM Base Die tutorial",
+   "path": "fulltext/hotchips26/decks_text/HC2026.HBMBaseDie.SangwookHan.v20.pdf.md",
+   "locator": "slide 23; GPU power assumption 1,200 W",
+   "tag": "V"
+  },
+  "samsung_s9_s11": {
+   "cite": "Samsung HC'26",
+   "path": "same",
+   "locator": "s9 (6 HBM per 26x33 mm xPU), s10-11 (sHBM4 11x12.8 mm, PHY 8x4 mm, inset ~1 mm)",
+   "tag": "V"
+  }
+ },
+ "points": [
+  {
+   "name": "DDR3-1600",
+   "pj_per_bit": 38,
+   "tbps": 0.011,
+   "kind": "ddr",
+   "src": "dmatrix_s6",
+   "loc": "slide 6",
+   "tag": "V",
+   "unc": "\u00b15% (log-log pixel read, review_r1 #21)",
+   "scope_note": "d-Matrix 'data-movement energy'; DDR/LPDDR point = one 64-bit channel, GDDR6 = one 384-bit bus",
+   "implied_watts": 3.3
+  },
+  {
+   "name": "DDR4-3200",
+   "pj_per_bit": 31,
+   "tbps": 0.026,
+   "kind": "ddr",
+   "src": "dmatrix_s6",
+   "loc": "slide 6",
+   "tag": "V",
+   "unc": "\u00b15% (log-log pixel read, review_r1 #21)",
+   "scope_note": "d-Matrix 'data-movement energy'; DDR/LPDDR point = one 64-bit channel, GDDR6 = one 384-bit bus",
+   "implied_watts": 6.4
+  },
+  {
+   "name": "DDR5-6400",
+   "pj_per_bit": 26,
+   "tbps": 0.055,
+   "kind": "ddr",
+   "src": "dmatrix_s6",
+   "loc": "slide 6",
+   "tag": "V",
+   "unc": "\u00b15% (log-log pixel read, review_r1 #21)",
+   "scope_note": "d-Matrix 'data-movement energy'; DDR/LPDDR point = one 64-bit channel, GDDR6 = one 384-bit bus",
+   "implied_watts": 11.4
+  },
+  {
+   "name": "LPDDR5-6400",
+   "pj_per_bit": 8.0,
+   "tbps": 0.052,
+   "kind": "ddr",
+   "src": "dmatrix_s6",
+   "loc": "slide 6",
+   "tag": "V",
+   "unc": "\u00b15% (log-log pixel read, review_r1 #21)",
+   "scope_note": "d-Matrix 'data-movement energy'; DDR/LPDDR point = one 64-bit channel, GDDR6 = one 384-bit bus",
+   "implied_watts": 3.3
+  },
+  {
+   "name": "GDDR6 (384-bit)",
+   "pj_per_bit": 14,
+   "tbps": 1.1,
+   "kind": "ddr",
+   "src": "dmatrix_s6",
+   "loc": "slide 6",
+   "tag": "V",
+   "unc": "\u00b15% (log-log pixel read, review_r1 #21)",
+   "scope_note": "d-Matrix 'data-movement energy'; DDR/LPDDR point = one 64-bit channel, GDDR6 = one 384-bit bus",
+   "implied_watts": 123.2
+  },
+  {
+   "name": "HBM1",
+   "pj_per_bit": 6.8,
+   "tbps": 1.0,
+   "kind": "hbm",
+   "src": "dmatrix_s6",
+   "loc": "slide 6",
+   "tag": "V",
+   "unc": "\u00b15% (log-log pixel read, review_r1 #21)",
+   "scope_note": "d-Matrix 'data-movement energy' (scope inconsistent across deck: I/O s17 / data-movement s6 / system s8); 8-stack package",
+   "implied_watts": 54.4
+  },
+  {
+   "name": "HBM2",
+   "pj_per_bit": 5.6,
+   "tbps": 2.4,
+   "kind": "hbm",
+   "src": "dmatrix_s6",
+   "loc": "slide 6",
+   "tag": "V",
+   "unc": "\u00b15% (log-log pixel read, review_r1 #21)",
+   "scope_note": "d-Matrix 'data-movement energy' (scope inconsistent across deck: I/O s17 / data-movement s6 / system s8); 8-stack package",
+   "implied_watts": 107.5
+  },
+  {
+   "name": "HBM3",
+   "pj_per_bit": 4.2,
+   "tbps": 6.5,
+   "kind": "hbm",
+   "src": "dmatrix_s6",
+   "loc": "slide 6",
+   "tag": "V",
+   "unc": "\u00b15% (log-log pixel read, review_r1 #21)",
+   "scope_note": "d-Matrix 'data-movement energy' (scope inconsistent across deck: I/O s17 / data-movement s6 / system s8); 8-stack package",
+   "implied_watts": 218.4
+  },
+  {
+   "name": "HBM3E",
+   "pj_per_bit": 3.7,
+   "tbps": 9.8,
+   "kind": "hbm",
+   "src": "dmatrix_s6",
+   "loc": "slide 6",
+   "tag": "V",
+   "unc": "\u00b15% (log-log pixel read, review_r1 #21)",
+   "scope_note": "d-Matrix 'data-movement energy' (scope inconsistent across deck: I/O s17 / data-movement s6 / system s8); 8-stack package",
+   "implied_watts": 290.1
+  },
+  {
+   "name": "HBM4 (proj.)",
+   "pj_per_bit": 2.4,
+   "tbps": 18,
+   "kind": "hbm",
+   "src": "dmatrix_s6",
+   "loc": "slide 6",
+   "tag": "V",
+   "unc": "\u00b15% (log-log pixel read, review_r1 #21)",
+   "scope_note": "d-Matrix 'data-movement energy' (scope inconsistent across deck: I/O s17 / data-movement s6 / system s8); 8-stack package",
+   "implied_watts": 345.6
+  },
+  {
+   "name": "Raptor 3D (I/O only)",
+   "pj_per_bit": 0.37,
+   "tbps": 100,
+   "kind": "d3",
+   "src": "dmatrix_s23",
+   "loc": "slide 23",
+   "tag": "V",
+   "unc": "exact (printed)",
+   "scope_note": "Raptor: measured I/O only; zHBM: DRAM power / peak BW from Samsung chart",
+   "implied_watts": 296.0
+  },
+  {
+   "name": "zHBM 3D (Samsung proj.)",
+   "pj_per_bit": 0.49,
+   "tbps": 31.8,
+   "kind": "d3",
+   "src": "samsung_s23",
+   "loc": "slide 23 chart (13.9\u219231.8 TB/s; 218\u2192124 W)",
+   "tag": "D from V",
+   "unc": "derived from chart axes \u00b15%",
+   "scope_note": "Raptor: measured I/O only; zHBM: DRAM power / peak BW from Samsung chart",
+   "implied_watts": 124.7
+  }
+ ],
+ "extrapolations": [
+  {
+   "label": "100 TB/s at HBM4's 2.4 pJ/bit",
+   "pj_per_bit": 2.4,
+   "tbps": 100,
+   "watts": 1920,
+   "tag": "V",
+   "src": "dmatrix_s6"
+  },
+  {
+   "label": "100 TB/s on HBM trend (log-log fit HBM1-HBM4; regression-direction range)",
+   "pj_per_bit": 1.44,
+   "pj_per_bit_hi": 1.54,
+   "tbps": 100,
+   "watts": 1152,
+   "watts_hi": 1232,
+   "tag": "D"
+  }
+ ],
+ "iso_power_w": [
+  100,
+  300,
+  1000,
+  2000
+ ],
+ "die_geometry": {
+  "reticle_mm": [
+   26,
+   33
+  ],
+  "stack_mm": [
+   11,
+   12.8
+  ],
+  "stacks_per_long_edge": 3,
+  "phy_mm": [
+   8,
+   4
+  ],
+  "phy_inset_mm": 1,
+  "px_per_mm": 6,
+  "src": "samsung_s9_s11",
+  "note": "3 x 11 mm = 33 mm with zero spacing: a ceiling, not typical. MI455X: 12 stacks on 2 fabric/cache dies (6 per die) [V: AMD HC'26]."
+ },
+ "extraction": {
+  "agent_a": "copied verbatim from explainers/hbm-beachfront-power.html (triple-reviewed)",
+  "agent_b": "pending spot-check of 3 points vs slide image",
+  "method": "log-log pixel read",
+  "cross_check": {
+   "max_disagreement": "\u00b15% (review_r1 #21 independent read)",
+   "resolved": "n/a"
+  }
+ },
+ "caveats": [
+  "d-Matrix energy scope inconsistent across its deck (s6/s8/s17)",
+  "Vendor chart; \u00b15% read",
+  "DDR points are per channel, HBM per 8-stack package"
+ ]
+}

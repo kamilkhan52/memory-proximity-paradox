@@ -1,0 +1,22 @@
+# Orchestrator notes (current canonical values; supersede earlier notes)
+- CXL first-hop adder: "+~100–280 ns measured" (production-type controllers +100–160; +280 FPGA device, Melody). 214–394 ns range: 394 from an FPGA device.
+- Switch adder: ≥220 ns [V: XConn via Octopus]; derived +284–305 ns [D from P: PolarCXLMem].
+- Production tiering share: production moves ~20–25% of DRAM to CHEAPER TIERS (zswap compressed DRAM, TMTS's Optane, Vistara's CXL) — never say 'off DDR'; TPP 33% in EMULATION (FPGA CXL only for functional validation); local DRAM keeps 50–75%.
+- Pond 7–9% DRAM saving: simulated. Vistara 0.225 GB/s per GB: spec (Table V).
+- Latency: DDR5 ~100–150 ns measured; NVMe 10–40 µs typical (TPP Fig. 2 technology figure — NOT a measurement); RDMA ~3.5–5.6 µs (64 B read to 4 KB page; PolarCXLMem 4 KB = 5.58 µs).
+- HBM4E >4:1: Micron Mar-2025 p.6 only. A64FX 31.25 GB/s per GB.
+- Terminology: "3D DRAM–logic stacking" (Raptor logic on top).
+- SYNTHESIS current: v2.1 (v1.6 cited in deck footers is fine; v1.7 only fixes report-flagged details).
+- CXL sustained bandwidth 9.8–80.3% of local DRAM peak: Wang et al. arXiv 2405.14209 full text now in fulltext/wang-cxl-2405.14209.pdf [P].
+- HBM4E >4:1 is Micron's EXPECTATION (Mar-2025 p.6).
+- B wording: 'cheaper, extended or shared GB'.
+- Interface energy 2–4×: Raptor 0.37 pJ/bit [V, measured I/O] vs HBM 0.80 (HBM2 I/O at 50% toggle) to ~1.5 (HBM1-era incl. PHY) [P] -> tag [D from V/P].
+- $/bit decline: ~33–37%/yr before ~2010 (AI Impacts whole-series averages; our nominal 1990–2010 fit −37%) -> ~12–15%/yr since; slowdown ~2.5–3× (percent ratio 2.4–2.75; log-rate ratio 2.7–3.1).
+- Interface energy: HBM interface is already 0.3 (HBM2 real toggle) to 0.8 (50% toggle) to ~1.5 pJ/bit (HBM1-era incl. PHY); Raptor 0.37 measured I/O [V] -> do NOT claim a blanket 2–4× cut; the point is that interface energy is already small and core energy dominates.
+- Mooncake +75%: trace replay (deployed at Kimi, but the +75% is not a production measurement).
+- Measured CXL first hop +100–160 ns on production controllers; +50–70 ns per serial hop is a spec estimate.
+- Recycled DDR4 CXL tier cost: 0.13x is Vistara's Table V nominal; all-in incl. two controllers per 256 GB and DDR4 resale value ~0.4–0.9x [D] (report r2 M5).
+- Wang 9.8–80.3%: denominator undefined; do not interpret as channel-count or per-GB penalty.
+- Deployed B1 latency adder: +100–160 ns (production controllers); +280 is FPGA.
+- Das Sharma 170/250 ns are estimates (Table 2 'Estimated latency').
+- GPU→HBM 330 ns is H100 PCIe (HBM2e); GH200 <300 ns.

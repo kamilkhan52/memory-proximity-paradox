@@ -1,0 +1,318 @@
+{
+ "id": "compute_bw_growth",
+ "version": 1,
+ "slides": [
+  "s03"
+ ],
+ "title": "Peak hardware FLOPS vs DRAM and interconnect bandwidth growth (Gholami et al.)",
+ "units": {
+  "rate_per_2yr": "x per 2 years",
+  "total_20yr_stated": "x over 20 years",
+  "value_norm": "x relative to R10000 (1998 per the paper's caption; plotted at ~1997 on the x axis)",
+  "year": "calendar year (linear axis)"
+ },
+ "conventions": "Rates and 20-yr totals are printed values. Points are read from Fig. 1 (log y, linear x), normalised so R10000 = 1; both compute and bandwidth series share that normalisation. Only labelled dots are listed.",
+ "sources": {
+  "gholami": {
+   "cite": "Gholami, Yao, Kim, Hooper, Mahoney, Keutzer, 'AI and Memory Wall', IEEE Micro 2024 (arXiv 2403.14123v1)",
+   "path": "fulltext/gholami-ai-memory-wall-2403.14123.pdf",
+   "locator": "p.1 Fig. 1 and abstract; p.2 Sec. I text ('60,000x ... 100x ... 30x')",
+   "tag": "P"
+  }
+ },
+ "series": [
+  {
+   "name": "compute (peak server HW FLOPS)",
+   "rate_per_2yr": 3.0,
+   "total_20yr_stated": 60000,
+   "src": "gholami",
+   "loc": "Fig. 1 legend p.1; abstract; Sec. I p.2",
+   "tag": "P",
+   "unc": "exact (stated)",
+   "note": "fitted rate as printed in Fig. 1 legend and text"
+  },
+  {
+   "name": "DRAM bandwidth",
+   "rate_per_2yr": 1.6,
+   "total_20yr_stated": 100,
+   "src": "gholami",
+   "loc": "Fig. 1 legend p.1; abstract; Sec. I p.2",
+   "tag": "P",
+   "unc": "exact (stated)",
+   "note": "fitted rate as printed in Fig. 1 legend and text"
+  },
+  {
+   "name": "interconnect bandwidth",
+   "rate_per_2yr": 1.4,
+   "total_20yr_stated": 30,
+   "src": "gholami",
+   "loc": "Fig. 1 legend p.1; abstract; Sec. I p.2",
+   "tag": "P",
+   "unc": "exact (stated)",
+   "note": "fitted rate as printed in Fig. 1 legend and text"
+  }
+ ],
+ "points": [
+  {
+   "device": "R10000",
+   "year": 1997.1,
+   "series": "compute",
+   "value_norm": 1.0,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": " (normalisation point, 1 by definition)",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  },
+  {
+   "device": "Pentium II Xeon",
+   "year": 1998.0,
+   "series": "compute",
+   "value_norm": 0.7,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": "P",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  },
+  {
+   "device": "Itanium 2",
+   "year": 2002.4,
+   "series": "compute",
+   "value_norm": 38,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": "P",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  },
+  {
+   "device": "GTX 580",
+   "year": 2010.9,
+   "series": "compute",
+   "value_norm": 4700,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": "P",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  },
+  {
+   "device": "K40",
+   "year": 2014.0,
+   "series": "compute",
+   "value_norm": 16000,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": "P",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  },
+  {
+   "device": "KNL",
+   "year": 2016.0,
+   "series": "compute",
+   "value_norm": 47000,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": " (label sits above topmost of three dots at 2016)",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  },
+  {
+   "device": "TPUv3",
+   "year": 2018.4,
+   "series": "compute",
+   "value_norm": 370000,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": "P",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  },
+  {
+   "device": "A100",
+   "year": 2020.4,
+   "series": "compute",
+   "value_norm": 920000,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": "P",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  },
+  {
+   "device": "TPUv4",
+   "year": 2022.4,
+   "series": "compute",
+   "value_norm": 820000,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": "P",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  },
+  {
+   "device": "H100",
+   "year": 2022.7,
+   "series": "compute",
+   "value_norm": 2970000,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": " (dot at top edge; measured in full-page render)",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  },
+  {
+   "device": "GDDR3",
+   "year": 2003.8,
+   "series": "dram_bw",
+   "value_norm": 1.0,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": " (overlaps PCIe 1.0a dot; y=1 gridline)",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  },
+  {
+   "device": "GDDR4",
+   "year": 2006.8,
+   "series": "dram_bw",
+   "value_norm": 4.2,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": "P",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  },
+  {
+   "device": "GDDR5",
+   "year": 2008.5,
+   "series": "dram_bw",
+   "value_norm": 7.6,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": "P",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  },
+  {
+   "device": "HBM",
+   "year": 2015.5,
+   "series": "dram_bw",
+   "value_norm": 33,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": "P",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  },
+  {
+   "device": "HBM2",
+   "year": 2017.5,
+   "series": "dram_bw",
+   "value_norm": 60,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": "P",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  },
+  {
+   "device": "HBM2E",
+   "year": 2022.2,
+   "series": "dram_bw",
+   "value_norm": 135,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": "P",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  },
+  {
+   "device": "PCIe 1.0a",
+   "year": 2003.0,
+   "series": "interconnect",
+   "value_norm": 1.0,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": "P",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  },
+  {
+   "device": "PCIe 2.0",
+   "year": 2007.0,
+   "series": "interconnect",
+   "value_norm": 2.0,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": "P",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  },
+  {
+   "device": "PCIe 3.0",
+   "year": 2010.8,
+   "series": "interconnect",
+   "value_norm": 3.2,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": "P",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  },
+  {
+   "device": "NVLink 1.0",
+   "year": 2016.3,
+   "series": "interconnect",
+   "value_norm": 8.0,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": "P",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  },
+  {
+   "device": "PCIe 5.0",
+   "year": 2019.4,
+   "series": "interconnect",
+   "value_norm": 12.8,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": "P",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  },
+  {
+   "device": "NVLink 4.0",
+   "year": 2022.7,
+   "series": "interconnect",
+   "value_norm": 40,
+   "src": "gholami",
+   "loc": "Fig. 1, p.1",
+   "tag": "P",
+   "unc": "\u00b110% (log-axis pixel read; 400 dpi render, \u00b13 px = \u00b10.04 dex); year \u00b10.1",
+   "note": "labelled dot in Fig. 1"
+  }
+ ],
+ "points_verified": false,
+ "rows": [],
+ "extraction": {
+  "agent_a": "see compute_bw_growth.json (not read)",
+  "agent_b": "extractor B, blind",
+  "method": "Rendered p.1 at 400 dpi; calibrated y from horizontal gridlines (1 at row 449, 100 at 308, 1e4 at 168, 1e6 at 27 in crop; 70.35 px/decade) and x from annual vertical gridlines (45.65 px/yr, 1997 at col 187, 2023 at col 1374); dot centroids from colour segmentation. Not yet cross-checked, so points_verified stays false until compared with agent A.",
+  "cross_check": {
+   "max_disagreement": "pending",
+   "resolved": "pending"
+  }
+ },
+ "caveats": [
+  "Rates exactly as stated; 3.0^10=59,049, 1.6^10=110, 1.4^10=28.9 [D] vs stated 60,000/100/30 (rounded).",
+  "Gholami does not say which DRAM products form the 1.6x line; the DRAM series mixes GDDR3-5 and HBM generations in the plot.",
+  "Caption says normalised to R10000 'as used to report cost of training LeNet-5' (1998); the R10000 dot sits at ~1997 on the x axis.",
+  "Paper's 20-year window: x axis 1996-2023 shown; fit lines span roughly 1997-2022.",
+  "Unlabelled dots (about 20 compute, 5 DRAM, 3 interconnect) omitted.",
+  "Fitted-line endpoints not read; slide draws lines from stated totals."
+ ]
+}

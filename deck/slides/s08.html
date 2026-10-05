@@ -1,0 +1,154 @@
+<section class="slide" id="s08" data-title="Coupling">
+  <style>
+    #s08 .s08-cols { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 28px; height: 100%; align-items: start; }
+    #s08 .s08-h { font-size: 17px; font-weight: 700; margin: 0 0 8px; line-height: 1.3; white-space: nowrap; }
+    #s08 .s08-fig { height: 286px; }
+    #s08 .s08-cap { margin: 4px 0 8px; line-height: 1.35; }
+    #s08 .s08-txt { font-size: 16px; line-height: 1.4; margin: 0; }
+    #s08 .s08-note { font-family: var(--font-mono); font-size: 14px; font-weight: 600; color: var(--ink); margin: 6px 0 0; }
+    #s08 .s08-box { margin-top: 2px; box-sizing: border-box; padding: 14px 18px; }
+    #s08 .s08-fig3 { margin-top: 8px; height: 146px; }
+    #s08 .s08-box ul { margin: 0 0 12px; padding-left: 18px; font-size: 17px; line-height: 1.45; }
+    #s08 .s08-box .small { font-size: 16px; margin: 0; padding-top: 10px; border-top: 1px solid var(--far); }
+  </style>
+  <script type="application/json" id="s08-data">
+  {
+    "tiers": [
+      {"tier": "HBM3E", "capacity_tb": 13.4, "bandwidth_tbps": 576, "gbps_per_gb": 43.0},
+      {"tier": "LPDDR5X", "capacity_tb": 17, "bandwidth_tbps": 14, "gbps_per_gb": 0.82}
+    ],
+    "xlink_note": "our arithmetic [D]: DDR5 controller ~3x, CXL-PNM ~17x its link",
+    "xlink": [{"label": "CXL link", "x": 1}, {"label": "DDR5 controller, channel-level", "x": 3}, {"label": "LPDDR5X CXL-PNM, channel-level (sim.)", "x": 17}],
+    "shares": [
+      {"year": 2025, "wafer_share_pct": 18, "bit_share_pct": 8, "forecast": false},
+      {"year": 2026, "wafer_share_pct": 22, "bit_share_pct": 9, "forecast": false},
+      {"year": 2027, "wafer_share_pct": 30, "bit_share_pct": 13, "forecast": true}
+    ]
+  }
+  </script>
+  <header class="slide-head">
+    <div class="kicker">08 · Coupling</div>
+    <h2>The directions are coupled: A needs capacity tiers and competes for wafers; B pulls compute outward.</h2>
+  </header>
+  <div class="slide-body">
+    <div class="s08-cols">
+      <div>
+        <div class="s08-h"><span class="label-near">A</span> → <span class="label-far">capacity tiers</span></div>
+        <div class="s08-fig"><svg id="s08-svg1" role="img" aria-label="Two horizontal bar panels for the GB200 NVL72 rack. Capacity: HBM3E 13.4 TB, LPDDR5X 17 TB. Bandwidth: HBM3E 576 TB/s, LPDDR5X 14 TB/s." viewBox="0 0 368 254" width="368" height="254"></svg>
+        <div class="s08-note" id="s08-note1">≈43 vs ≈0.82 GB/s per GB [D]</div></div>
+        <div class="tiny s08-cap">GB200 NVL72 rack, NVIDIA spec [V] (colour = role: capacity tier)</div>
+        <p class="s08-txt">Closer trades capacity for bandwidth, so a capacity tier follows.</p>
+      </div>
+      <div>
+        <div class="s08-h"><span class="label-near">A</span> ↔ <span class="label-far">B</span> share wafers</div>
+        <div class="s08-fig" style="height:266px"><svg id="s08-svg2" role="img" aria-label="Grouped vertical bars of HBM share of DRAM, top-3 suppliers. Wafer input versus bit output: 2025 18 and 8 percent, 2026 22 and 9 percent, 2027 forecast 30 and 13 percent." viewBox="0 0 368 262" width="368" height="262"></svg></div>
+        <div class="tiny s08-cap">TrendForce, 2 June 2026 press release [S]: end-of-year wafer share; 2026 est. (June 2026), 2027 forecast.</div>
+        <p class="s08-txt">HBM3E takes ~3× the wafer per bit (HBM4E expected &gt;4:1), a named 2026-shortage driver. New-DRAM B tiers pay more; wafer-free B (recycled DDR4, compression) gains. The shortage did not cause B.</p>
+      </div>
+      <div>
+        <div class="s08-h"><span class="label-far">B → compute at the far (capacity) tier</span></div>
+        <div class="box far s08-box">
+          <ul>
+            <li>Deployed only in training (optimizer at the capacity tier: ZeRO, MemoryX).</li>
+            <li>Elsewhere: simulations (CXL-PNM, BEACON) or vendor claims (XCENA<sup class="tag">V</sup>).</li>
+          </ul>
+          <p class="small">Catch: a CXL controller sees channel-level, not bank-level, bandwidth.</p>
+        </div>
+        <div class="s08-fig3"><svg id="s08-svg3" role="img" aria-label="Horizontal bars, in multiples of the CXL link bandwidth: the link is 1, a DDR5 controller sees about 3, and LPDDR5X CXL-PNM (simulated) about 17. Bank-level bandwidth is not visible to the controller." viewBox="0 0 368 146" width="368" height="146"></svg></div>
+        <div class="tiny s08-cap">Channel-level bandwidth seen by a CXL controller, × its link [D]; CXL-PNM sim.</div>
+      </div>
+    </div>
+  </div>
+  <footer class="slide-foot">
+    <div class="sources">GB200 NVL72 spec, nvidia.com [V]; ZeRO-Offload ATC'21 [P]; ZeRO-Infinity SC'21 [P]; Cerebras MemoryX [V]. Shares: TrendForce 2026-06-02 [S]. Wafer ratio: ~3× Micron FQ2-25 remarks p.6, FQ1-26 p.5; &gt;4:1 (HBM4E) FQ2-25 p.6 only [P/V]; shortage drivers: Handy HC'26 s4 [S]. CXL-PNM HPCA'24 [P, sim.]; BEACON MICRO'22 [P, sim.]; XCENA HC'26 s9, s13 [V]; Bars: ~3× Structera A, 4× DDR5 (~200 GB/s) vs 64 GB/s link [D from V]; ~17× CXL-PNM ~1.1 TB/s vs 64 GB/s [D, assumes x16 Gen5].</div>
+    <div class="pageno">08 / 10</div>
+  </footer>
+  <script>
+  (function () {
+    var root = document.getElementById('s08');
+    var D = JSON.parse(root.querySelector('#s08-data').textContent);
+    var NS = 'http://www.w3.org/2000/svg';
+    function el(p, n, a, t) { var e = document.createElementNS(NS, n); for (var k in a) e.setAttribute(k, a[k]); if (t != null) e.textContent = t; p.appendChild(e); return e; }
+
+    /* ---- Col 1: two bar panels ---- */
+    var s1 = root.querySelector('#s08-svg1');
+    var X0 = 122, W = 196; // plot x range
+    var colors = ['var(--near)', 'var(--far)'];
+    var rowLbl = [['HBM3E'], ['LPDDR5X', 'behind NVLink-C2C']];
+    var panels = [
+      {title: 'Capacity (TB)', key: 'capacity_tb', max: 20, ticks: [0, 5, 10, 15, 20], y: 0, fmt: function (v) { return v + ' TB'; }},
+      {title: 'Bandwidth (TB/s)', key: 'bandwidth_tbps', max: 600, ticks: [0, 200, 400, 600], y: 128, fmt: function (v) { return v + ' TB/s'; }}
+    ];
+    panels.forEach(function (p) {
+      el(s1, 'text', {x: 0, y: p.y + 12, 'class': 'lbl', style: 'font-weight:600'}, p.title);
+      p.ticks.forEach(function (t) {
+        var x = X0 + W * t / p.max;
+        el(s1, 'line', {x1: x, x2: x, y1: p.y + 22, y2: p.y + 100, style: 'stroke:var(--rule);stroke-width:1'});
+        el(s1, 'text', {x: x, y: p.y + 116, 'class': 'axis', 'text-anchor': 'middle'}, t);
+      });
+      D.tiers.forEach(function (r, i) {
+        var by = p.y + 28 + i * 36, h = 26, v = r[p.key];
+        var w = W * v / p.max;
+        el(s1, 'rect', {x: X0, y: by, width: w, height: h, style: 'fill:' + colors[i]});
+        var lines = rowLbl[i];
+        lines.forEach(function (ln, j) {
+          el(s1, 'text', {x: X0 - 8, y: by + (lines.length === 1 ? 17 : 10 + j * 13), 'class': 'lbl', 'text-anchor': 'end', style: (j ? 'font-size:11px;' : 'font-weight:600;') + 'fill:' + colors[i]}, ln);
+        });
+        var inside = p.key === 'bandwidth_tbps' && w > 150;
+        var lab = el(s1, 'text', {x: inside ? X0 + w - 6 : X0 + w + 6, y: by + 18, 'class': 'lbl num', 'text-anchor': inside ? 'end' : 'start', style: inside ? 'fill:#fff;font-weight:600' : 'font-weight:600'}, p.fmt(v));
+      });
+    });
+
+    /* ---- Col 3: link multiples ---- */
+    var s3 = root.querySelector('#s08-svg3');
+    var Q0 = 12, QW = 330, QM = 20;
+    [0, 5, 10, 15, 20].forEach(function (t) {
+      var x = Q0 + QW * t / QM;
+      el(s3, 'line', {x1: x, x2: x, y1: 4, y2: 104, style: 'stroke:var(--rule);stroke-width:1'});
+      el(s3, 'text', {x: x, y: 120, 'class': 'axis', 'text-anchor': 'middle'}, t + (t === 20 ? '×' : ''));
+    });
+    el(s3, 'text', {x: Q0 + QW / 2, y: 140, 'class': 'lbl', 'text-anchor': 'middle', style: 'font-size:12px'}, 'Bandwidth seen, × CXL link');
+    D.xlink.forEach(function (r, i) {
+      var y = 22 + i * 30, w = QW * r.x / QM;
+      el(s3, 'text', {x: Q0, y: y - 4, 'class': 'lbl halo', style: 'font-size:12px'}, r.label);
+      el(s3, 'rect', {x: Q0, y: y, width: w, height: 14, style: 'fill:' + (i ? 'var(--far)' : 'var(--mid)')});
+      el(s3, 'text', {x: Q0 + w + 6, y: y + 12, 'class': 'lbl num', style: 'font-weight:600'}, i ? '~' + r.x + '×' : '1×');
+    });
+
+    /* ---- Col 2: grouped vertical bars ---- */
+    var s2 = root.querySelector('#s08-svg2');
+    var defs = el(s2, 'defs', {});
+    var pat = el(defs, 'pattern', {id: 's08-hatch', width: 6, height: 6, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)'});
+    el(pat, 'rect', {width: 6, height: 6, style: 'fill:var(--near)'});
+    el(pat, 'line', {x1: 0, y1: 0, x2: 0, y2: 6, style: 'stroke:#fff;stroke-width:2.5'});
+    var pat2 = el(defs, 'pattern', {id: 's08-hatch2', width: 6, height: 6, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)'});
+    el(pat2, 'rect', {width: 6, height: 6, style: 'fill:var(--near-soft)'});
+    el(pat2, 'line', {x1: 0, y1: 0, x2: 0, y2: 6, style: 'stroke:var(--near);stroke-width:1.2'});
+    var PX0 = 46, PX1 = 362, PY0 = 16, PY1 = 220, YMAX = 35;
+    function yy(v) { return PY1 - (PY1 - PY0) * v / YMAX; }
+    [0, 10, 20, 30].forEach(function (t) {
+      el(s2, 'line', {x1: PX0, x2: PX1, y1: yy(t), y2: yy(t), style: 'stroke:var(--rule);stroke-width:1'});
+      el(s2, 'text', {x: PX0 - 6, y: yy(t) + 4, 'class': 'axis', 'text-anchor': 'end'}, t);
+    });
+    el(s2, 'text', {transform: 'translate(11,' + ((PY0 + PY1) / 2) + ') rotate(-90)', 'class': 'lbl', 'text-anchor': 'middle', style: 'font-size:11.5px'}, 'Share of DRAM, top-3 suppliers (%)');
+    var gw = (PX1 - PX0) / 3, bw = 36;
+    D.shares.forEach(function (r, i) {
+      var cx = PX0 + gw * (i + 0.5);
+      var xa = cx - bw - 2, xb = cx + 2;
+      el(s2, 'rect', {x: xa, y: yy(r.wafer_share_pct), width: bw, height: PY1 - yy(r.wafer_share_pct), style: r.forecast ? 'fill:url(#s08-hatch)' : 'fill:var(--near)'});
+      el(s2, 'rect', {x: xb, y: yy(r.bit_share_pct), width: bw, height: PY1 - yy(r.bit_share_pct), style: (r.forecast ? 'fill:url(#s08-hatch2)' : 'fill:var(--near-soft)') + ';stroke:var(--near);stroke-width:1.2'});
+      el(s2, 'text', {x: xa + bw / 2, y: yy(r.wafer_share_pct) - 5, 'class': 'lbl num', 'text-anchor': 'middle', style: 'font-weight:600'}, r.wafer_share_pct);
+      el(s2, 'text', {x: xb + bw / 2, y: yy(r.bit_share_pct) - 5, 'class': 'lbl num', 'text-anchor': 'middle', style: 'font-weight:600'}, r.bit_share_pct);
+      el(s2, 'text', {x: cx, y: PY1 + 17, 'class': 'axis', 'text-anchor': 'middle'}, r.year + (r.forecast ? ' forecast' : (r.year === 2026 ? ' est.' : '')));
+    });
+    el(s2, 'line', {x1: PX0, x2: PX1, y1: PY1, y2: PY1, style: 'stroke:var(--ink-3);stroke-width:1'});
+    // direct labels (upper left, clear of the 2025 bars)
+    el(s2, 'rect', {x: PX0 + 10, y: PY0 + 6, width: 11, height: 11, style: 'fill:var(--near)'});
+    el(s2, 'text', {x: PX0 + 27, y: PY0 + 16, 'class': 'lbl'}, 'wafer input');
+    el(s2, 'rect', {x: PX0 + 10, y: PY0 + 26, width: 11, height: 11, style: 'fill:var(--near-soft);stroke:var(--near);stroke-width:1.2'});
+    el(s2, 'text', {x: PX0 + 27, y: PY0 + 36, 'class': 'lbl'}, 'bit output');
+    el(s2, 'rect', {x: PX0 + 10, y: PY0 + 46, width: 11, height: 11, style: 'fill:url(#s08-hatch)'});
+    el(s2, 'text', {x: PX0 + 27, y: PY0 + 56, 'class': 'lbl'}, 'hatched = 2027 forecast');
+  })();
+  </script>
+</section>

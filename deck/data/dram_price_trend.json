@@ -1,0 +1,513 @@
+{
+ "id": "dram_price_trend",
+ "version": 1,
+ "slides": [
+  "s09"
+ ],
+ "title": "DRAM retail price per GB (nominal), 1990-2024: annual series, AI Impacts' published rates, and our nominal fits",
+ "units": {
+  "usd_per_gb": "nominal US$ per GB",
+  "usd_per_gb_2020usd": "US$ per GB in 2020 dollars (CPI-adjusted by AI Impacts)",
+  "rate_pct_per_yr": "% change per year (negative = price falls)"
+ },
+ "conventions": "Series = annual geometric mean of McCallum's dated retail price points (his '$/Mbyte' column x1000 = $/GB), calendar year = floor(date); 1990-2017 from the AI Impacts spreadsheet copy, 2018-2024 from a 2024 Wayback capture of McCallum's table (single extraction; 2024 partial year). Plot on log y, linear x. McCallum's data are retail/street prices of memory modules, not DRAM contract or spot prices. Two kinds of rate: 'fits' = AI Impacts' published rates (2020 dollars; the -36/-33 values are whole-series averages, the -15/-12 values are 'from 2010 onwards'); 'our_nominal_fits' = our OLS fits to the plotted nominal annual series (what the s09 chart draws).",
+ "series_available": true,
+ "series_end_year": 2024,
+ "break_year": "2010-2011",
+ "sources": {
+  "mccallum_via_aiimpacts": {
+   "cite": "John C. McCallum, 'Historical Memory Prices 1957+' (jcmit.net/memoryprice.htm), as copied in the AI Impacts spreadsheet, tab 'McCallum Data' (nominal $/GB = col C; 2020$ = col D)",
+   "path": "fulltext/aiimpacts-dram-sheet.xlsx (export of https://docs.google.com/spreadsheets/d/1qF5vJ2-jkRygMQQIk3fj6G-WEW0ScDiKjyGseovFGqc)",
+   "locator": "tab 'McCallum Data', rows dated 1990.0-2017.92",
+   "tag": "S"
+  },
+  "aiimpacts2020": {
+   "cite": "Asya Bergal, 'Trends in DRAM price per gigabyte', AI Impacts, 2020",
+   "path": "fulltext/aiimpacts-dram-price.html (https://aiimpacts.org/trends-in-dram-price-per-gigabyte/)",
+   "locator": "Analysis section, paragraphs 1-2",
+   "tag": "S"
+  },
+  "mccallum_wayback": {
+   "cite": "J. C. McCallum, Memory Prices (Wayback capture 2024)",
+   "path": "fulltext/mccallum-jcmit-memoryprice-wayback2024.html",
+   "locator": "price table",
+   "tag": "S"
+  }
+ },
+ "rows": [
+  {
+   "year": 1990,
+   "usd_per_gb": 75509.69,
+   "usd_per_gb_2020usd": 152898.82,
+   "n_obs": 10,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 1991,
+   "usd_per_gb": 43599.81,
+   "usd_per_gb_2020usd": 83562.31,
+   "n_obs": 12,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 1992,
+   "usd_per_gb": 31176.39,
+   "usd_per_gb_2020usd": 58237.54,
+   "n_obs": 12,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 1993,
+   "usd_per_gb": 30996.27,
+   "usd_per_gb_2020usd": 56073.9,
+   "n_obs": 12,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 1994,
+   "usd_per_gb": 35534.39,
+   "usd_per_gb_2020usd": 62700.7,
+   "n_obs": 12,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 1995,
+   "usd_per_gb": 31622.9,
+   "usd_per_gb_2020usd": 54276.73,
+   "n_obs": 12,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 1996,
+   "usd_per_gb": 13165.06,
+   "usd_per_gb_2020usd": 21996.14,
+   "n_obs": 12,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 1997,
+   "usd_per_gb": 3402.05,
+   "usd_per_gb_2020usd": 5516.22,
+   "n_obs": 12,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 1998,
+   "usd_per_gb": 1074.12,
+   "usd_per_gb_2020usd": 1714.67,
+   "n_obs": 11,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 1999,
+   "usd_per_gb": 1137.05,
+   "usd_per_gb_2020usd": 1785.3,
+   "n_obs": 10,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 2000,
+   "usd_per_gb": 1002.55,
+   "usd_per_gb_2020usd": 1532.16,
+   "n_obs": 12,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 2001,
+   "usd_per_gb": 304.41,
+   "usd_per_gb_2020usd": 448.47,
+   "n_obs": 12,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 2002,
+   "usd_per_gb": 199.78,
+   "usd_per_gb_2020usd": 291.0,
+   "n_obs": 7,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 2003,
+   "usd_per_gb": 134.02,
+   "usd_per_gb_2020usd": 190.28,
+   "n_obs": 10,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 2004,
+   "usd_per_gb": 166.04,
+   "usd_per_gb_2020usd": 231.28,
+   "n_obs": 6,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 2005,
+   "usd_per_gb": 155.95,
+   "usd_per_gb_2020usd": 210.97,
+   "n_obs": 4,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 2006,
+   "usd_per_gb": 87.36,
+   "usd_per_gb_2020usd": 113.65,
+   "n_obs": 7,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 2007,
+   "usd_per_gb": 43.06,
+   "usd_per_gb_2020usd": 54.88,
+   "n_obs": 9,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 2008,
+   "usd_per_gb": 16.83,
+   "usd_per_gb_2020usd": 20.57,
+   "n_obs": 8,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 2009,
+   "usd_per_gb": 12.67,
+   "usd_per_gb_2020usd": 15.48,
+   "n_obs": 8,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 2010,
+   "usd_per_gb": 18.51,
+   "usd_per_gb_2020usd": 22.03,
+   "n_obs": 9,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 2011,
+   "usd_per_gb": 7.89,
+   "usd_per_gb_2020usd": 9.24,
+   "n_obs": 6,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 2012,
+   "usd_per_gb": 4.57,
+   "usd_per_gb_2020usd": 5.2,
+   "n_obs": 7,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 2013,
+   "usd_per_gb": 6.63,
+   "usd_per_gb_2020usd": 7.43,
+   "n_obs": 9,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 2014,
+   "usd_per_gb": 8.28,
+   "usd_per_gb_2020usd": 9.13,
+   "n_obs": 7,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 2015,
+   "usd_per_gb": 5.05,
+   "usd_per_gb_2020usd": 5.58,
+   "n_obs": 10,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 2016,
+   "usd_per_gb": 3.42,
+   "usd_per_gb_2020usd": 3.73,
+   "n_obs": 9,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 2017,
+   "usd_per_gb": 5.89,
+   "usd_per_gb_2020usd": 6.26,
+   "n_obs": 8,
+   "src": "mccallum_via_aiimpacts",
+   "loc": "sheet 'McCallum Data', cols B-D (rows with date in year)",
+   "tag": "S",
+   "unc": "derived: geometric mean of the n_obs published price points dated within the calendar year",
+   "note": "annual aggregation is ours [D]; underlying points are McCallum's"
+  },
+  {
+   "year": 2018,
+   "usd_per_gb": 6.065,
+   "usd_per_gb_2020usd": null,
+   "n_obs": null,
+   "src": "mccallum_wayback",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 9 entries dated 2018.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 9 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": "from extractor B (McCallum table via Wayback capture, fulltext/mccallum-jcmit-memoryprice-wayback2024.html); single extraction; nominal only; 2024 partial year"
+  },
+  {
+   "year": 2019,
+   "usd_per_gb": 3.335,
+   "usd_per_gb_2020usd": null,
+   "n_obs": null,
+   "src": "mccallum_wayback",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 12 entries dated 2019.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 12 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": "from extractor B (McCallum table via Wayback capture, fulltext/mccallum-jcmit-memoryprice-wayback2024.html); single extraction; nominal only; 2024 partial year"
+  },
+  {
+   "year": 2020,
+   "usd_per_gb": 3.045,
+   "usd_per_gb_2020usd": null,
+   "n_obs": null,
+   "src": "mccallum_wayback",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 12 entries dated 2020.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 12 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": "from extractor B (McCallum table via Wayback capture, fulltext/mccallum-jcmit-memoryprice-wayback2024.html); single extraction; nominal only; 2024 partial year"
+  },
+  {
+   "year": 2021,
+   "usd_per_gb": 3.383,
+   "usd_per_gb_2020usd": null,
+   "n_obs": null,
+   "src": "mccallum_wayback",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 8 entries dated 2021.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 8 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": "from extractor B (McCallum table via Wayback capture, fulltext/mccallum-jcmit-memoryprice-wayback2024.html); single extraction; nominal only; 2024 partial year"
+  },
+  {
+   "year": 2022,
+   "usd_per_gb": 2.528,
+   "usd_per_gb_2020usd": null,
+   "n_obs": null,
+   "src": "mccallum_wayback",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 11 entries dated 2022.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 11 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": "from extractor B (McCallum table via Wayback capture, fulltext/mccallum-jcmit-memoryprice-wayback2024.html); single extraction; nominal only; 2024 partial year"
+  },
+  {
+   "year": 2023,
+   "usd_per_gb": 1.539,
+   "usd_per_gb_2020usd": null,
+   "n_obs": null,
+   "src": "mccallum_wayback",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 9 entries dated 2023.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 9 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": "from extractor B (McCallum table via Wayback capture, fulltext/mccallum-jcmit-memoryprice-wayback2024.html); single extraction; nominal only; 2024 partial year"
+  },
+  {
+   "year": 2024,
+   "usd_per_gb": 1.585,
+   "usd_per_gb_2020usd": null,
+   "n_obs": null,
+   "src": "mccallum_wayback",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 5 entries dated 2024.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 5 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": "from extractor B (McCallum table via Wayback capture, fulltext/mccallum-jcmit-memoryprice-wayback2024.html); single extraction; nominal only; 2024 partial year"
+  }
+ ],
+ "fits": [
+  {
+   "period": "whole series (McCallum from 1957; Objective Analysis 1991-2019)",
+   "rate_pct_per_yr": -36,
+   "dataset": "McCallum",
+   "decade_factor": "10x every 5.1 yr",
+   "src": "aiimpacts2020",
+   "loc": "Analysis para 1",
+   "tag": "S",
+   "unc": "[S] as published",
+   "note": "'falling at around 36% per year' (whole McCallum series from 1957 as I read the text; period start not stated explicitly) | Published as an average over the whole series, not as a pre-2010 fit."
+  },
+  {
+   "period": "2010 onwards",
+   "rate_pct_per_yr": -15,
+   "dataset": "McCallum",
+   "decade_factor": "10x every 14 yr",
+   "src": "aiimpacts2020",
+   "loc": "Analysis para 2",
+   "tag": "S",
+   "unc": "[S] as published",
+   "note": "'From 2010 onwards ... only 15% a year'"
+  },
+  {
+   "period": "whole series (McCallum from 1957; Objective Analysis 1991-2019)",
+   "rate_pct_per_yr": -33,
+   "dataset": "Objective Analysis",
+   "decade_factor": "10x every 5.8 yr",
+   "src": "aiimpacts2020",
+   "loc": "Analysis para 1",
+   "tag": "S",
+   "unc": "[S] as published",
+   "note": "OA series covers 1991-2019, digitised by AI Impacts from a Jim Handy graph (WebPlotDigitizer); provenance of OA data unchecked by AI Impacts | Published as an average over the whole series, not as a pre-2010 fit."
+  },
+  {
+   "period": "2010 onwards",
+   "rate_pct_per_yr": -12,
+   "dataset": "Objective Analysis",
+   "decade_factor": "10x every 18.5 yr",
+   "src": "aiimpacts2020",
+   "loc": "Analysis para 2",
+   "tag": "S",
+   "unc": "[S] as published",
+   "note": ""
+  }
+ ],
+ "cross_check": {
+  "own_refit_mccallum_nominal_1990_2010_pct_per_yr": -39.7,
+  "own_refit_mccallum_nominal_2010_2019_pct_per_yr": -15.2,
+  "tag": "D",
+  "unc": "derived: OLS slope of ln($/GB) vs date over raw points, rate = exp(slope)-1; irregular sampling, not time-weighted",
+  "note": "post-2010 matches AI Impacts (-15). Pre-2010 over 1990-2010 gives about -40 vs published -36 (AI Impacts fit window not stated). Deck uses the published -36."
+ },
+ "extraction": {
+  "agent_a": "extractor A, 2026-10-03",
+  "agent_b": "independent blind extraction (dram_price_trend.b.json; McCallum via Wayback, 1990-2024)",
+  "method": "Table values (no chart read). jcmit.net/memoryprice.htm is not retrievable: the live domain currently serves an unrelated Swedish casino page (saved text discarded); Wayback snapshot (20250718164932) returned HTTP 429 on repeated tries. The same McCallum table was taken from the AI Impacts spreadsheet. Annual values are geometric means (our aggregation).",
+  "cross_check": {
+   "max_disagreement": "3.1% on nominal $/GB over 28 overlapping years (1990-2017)",
+   "resolved": "A (AI Impacts sheet, nominal + 2020$) used for 1990-2017; B nominal values appended for 2018-2024 (single extraction). Published fits are CPI-adjusted (2020$); plotted series is nominal -> caption must say so. Neither includes the 2025-26 spike."
+  },
+  "metadata_revision": "2026-10-04 (report review R2): title, conventions, fit labels and series-end caveat updated to match the data; values unchanged."
+ },
+ "caveats": [
+  "Series covers 1990-2024: 1990-2017 from the AI Impacts copy (last point 2017.92), 2018-2024 from the Wayback capture (single extraction, 2024 partial year). Nothing covers the 2025-26 price spike; do not extend the line.",
+  "McCallum prices are retail module prices (mostly Newegg-type listings after 2005), not DRAM contract prices; annual means over 4-12 irregular points, so single-year bumps (e.g. 2010, 2013, 2017) are partly sampling noise.",
+  "Values come via AI Impacts' spreadsheet copy, not directly from jcmit.net; footer should say 'McCallum data via AI Impacts'. Tag [S] as approved by Kamil.",
+  "Series is nominal $/GB; AI Impacts fits use 2020 dollars. Both given; nominal and 2020$ post-2010 slopes both near -15%.",
+  "Fits are the two datasets' published rates; the Objective Analysis series itself is not included (no numbers beyond the graph digitisation). Our own nominal fits are in our_nominal_fits.",
+  "Break at 2010-2011 matches Handy (thememoryguy.com 2019-11-20) '2011 or so' (via notes/q3 section 1, not re-fetched).",
+  "Fallback not needed (series_available true), but fits alone suffice for the fallback panel."
+ ],
+ "our_nominal_fits": [
+  {
+   "period": "1990-2010",
+   "rate_pct_per_yr": -37.1,
+   "data": "rows (nominal annual geometric means)",
+   "method": "OLS of ln($/GB) on year, rate = exp(slope)-1",
+   "tag": "D"
+  },
+  {
+   "period": "2010-2024",
+   "rate_pct_per_yr": -12.0,
+   "data": "rows (nominal annual geometric means)",
+   "method": "OLS of ln($/GB) on year, rate = exp(slope)-1",
+   "tag": "D",
+   "note": "sensitive to break year: 2011-2024 gives about -10, 2010-2017 about -13"
+  }
+ ]
+}

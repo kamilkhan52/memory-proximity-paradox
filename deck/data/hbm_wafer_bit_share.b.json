@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "slides": [
+    "s08"
+  ],
+  "title": "HBM share of DRAM wafer input vs bit supply, top-3 suppliers (TrendForce) and Micron wafer-intensity ratio",
+  "units": {
+    "wafer_share_pct": "% of total DRAM wafer input, top-3 suppliers",
+    "bit_share_pct": "% of total DRAM bit supply, top-3 suppliers"
+  },
+  "conventions": "Values are printed in the TrendForce press release text (rounded, 'approximately'). 2027 is a forecast; 2025 and 2026 are also TrendForce estimates (release dated 2026-06-02), the wafer figures stated 'by the end of' each year. The release says bit supply 'during the same period' without stating end-of-year vs annual.",
+  "sources": {
+    "trendforce": {
+      "cite": "TrendForce press release 2026-06-02, 'Tight DRAM Supply Gives Suppliers Greater Pricing Power in HBM, with HBM Contract Prices Expected to Surge Multiples Higher in 2027'",
+      "path": "fulltext/trendforce-20260602-13074.html (https://www.trendforce.com/presscenter/news/20260602-13074.html)",
+      "locator": "paragraph beginning 'TrendForce estimates that HBM wafer input among the top three suppliers...'",
+      "tag": "S"
+    },
+    "micron_mar2025": {
+      "cite": "Micron FQ2-25 earnings call prepared remarks",
+      "path": "fulltext/21-micron-mar2025.pdf",
+      "locator": "p.6",
+      "tag": "P/V"
+    },
+    "micron_dec2025": {
+      "cite": "Micron FQ1-26 earnings call prepared remarks",
+      "path": "fulltext/21-micron-dec2025.pdf",
+      "locator": "p.5",
+      "tag": "P/V"
+    }
+  },
+  "rows": [
+    {
+      "year": 2025,
+      "wafer_share_pct": 18,
+      "bit_share_pct": 8,
+      "basis": "end of year",
+      "src": "trendforce",
+      "loc": "press release body, HBM share paragraph",
+      "tag": "S",
+      "unc": "exact (as published, 'approximately')",
+      "note": "Quote: 'approximately 18%, 22%, and 30% of total DRAM wafer input by the end of 2025, 2026, and 2027'; 'approximately 8%, 9%, and 13% of total DRAM bit supply during the same period'."
+    },
+    {
+      "year": 2026,
+      "wafer_share_pct": 22,
+      "bit_share_pct": 9,
+      "basis": "end of year",
+      "src": "trendforce",
+      "loc": "press release body, HBM share paragraph",
+      "tag": "S",
+      "unc": "exact (as published, 'approximately')",
+      "note": "Estimate as of June 2026, so the year is not complete."
+    },
+    {
+      "year": 2027,
+      "wafer_share_pct": 30,
+      "bit_share_pct": 13,
+      "basis": "forecast",
+      "src": "trendforce",
+      "loc": "press release body, HBM share paragraph",
+      "tag": "S",
+      "unc": "exact (as published, 'approximately'); forecast",
+      "note": "Forecast. Implied wafer-per-bit ratio (computed from these shares, not independent of Micron's 3:1): 2025 (92/82)/(8/18)=2.52; 2026 (91/78)/(9/22)=2.85; 2027 (87/70)/(13/30)=2.87."
+    }
+  ],
+  "micron_ratio": {
+    "hbm3e": 3,
+    "hbm4e": ">4",
+    "locators": {
+      "hbm3e": "21-micron-mar2025.pdf p.6: 'HBM3E consumes three times the amount of silicon compared to D5 to produce the same number of bits.' Also 21-micron-dec2025.pdf p.5: '3-to-1 trade ratio with DDR5'.",
+      "hbm4e": "21-micron-mar2025.pdf p.6: 'we expect the trade ratio to increase with HBM4 and then again with HBM4E when we expect it to exceed 4 to 1.'"
+    },
+    "src": [
+      "micron_mar2025",
+      "micron_dec2025"
+    ],
+    "tag": "P/V",
+    "unc": "exact (as stated by management)"
+  },
+  "extraction": {
+    "agent_a": "not read",
+    "agent_b": "B: fetched press release HTML with curl and read the text; read Micron PDFs via pdftotext",
+    "method": "printed numbers only, no chart reads",
+    "cross_check": {
+      "max_disagreement": "pending comparison with A",
+      "resolved": ""
+    }
+  },
+  "caveats": [
+    "Circularity: the 2.5-2.9 wafer-per-bit ratio implied by the shares is computed from them and is not independent confirmation of Micron's 3:1.",
+    "Wafer shares are end-of-year; the release does not state whether bit shares are end-of-year or annual ('during the same period').",
+    "Shares cover the top three suppliers only; the 2025 and 2026 values are also estimates dated 2026-06-02."
+  ]
+}

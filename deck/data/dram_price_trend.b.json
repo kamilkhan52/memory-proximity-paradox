@@ -1,0 +1,405 @@
+{
+ "id": "dram_price_trend",
+ "version": 1,
+ "slides": [
+  "s09"
+ ],
+ "title": "DRAM price per GB, 1990-2024, with AI Impacts fitted decline rates",
+ "units": {
+  "usd_per_gb": "nominal US$ per GB (McCallum $/Mbyte x 1000)",
+  "rate_pct_per_yr": "% per year (negative = price falls)"
+ },
+ "conventions": "McCallum table lists $/Mbyte at irregular (monthly-ish) dates. Annual value = geometric mean of that calendar year's entries, x1000 to $/GB. Nominal dollars (McCallum's table); AI Impacts fitted CPI-adjusted 2020 dollars, so fitted rates are not recomputed from this series. Table values are printed, so no chart read.",
+ "sources": {
+  "mccallum": {
+   "cite": "John C. McCallum, 'Historical Memory Prices 1957-2024' (jcmit.net/memoryprice.htm)",
+   "path": "fulltext/mccallum-jcmit-memoryprice-wayback2024.html",
+   "locator": "data table (Wayback capture, 2024; data to 2024.50)",
+   "tag": "S"
+  },
+  "aiimpacts": {
+   "cite": "A. Bergal, AI Impacts 2020, 'Trends in DRAM price per gigabyte'",
+   "path": "fulltext/aiimpacts-dram.html (https://aiimpacts.org/trends-in-dram-price-per-gigabyte/)",
+   "locator": "Analysis section",
+   "tag": "S"
+  }
+ },
+ "series_available": true,
+ "series": [
+  {
+   "year": 1990,
+   "usd_per_gb": 75650.0,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 10 entries dated 1990.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 10 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 1991,
+   "usd_per_gb": 43700.0,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 12 entries dated 1991.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 12 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 1992,
+   "usd_per_gb": 31200.0,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 12 entries dated 1992.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 12 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 1993,
+   "usd_per_gb": 31000.0,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 12 entries dated 1993.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 12 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 1994,
+   "usd_per_gb": 35530.0,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 12 entries dated 1994.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 12 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 1995,
+   "usd_per_gb": 31620.0,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 12 entries dated 1995.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 12 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 1996,
+   "usd_per_gb": 13160.0,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 12 entries dated 1996.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 12 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 1997,
+   "usd_per_gb": 3402.0,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 12 entries dated 1997.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 12 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 1998,
+   "usd_per_gb": 1074.0,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 11 entries dated 1998.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 11 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 1999,
+   "usd_per_gb": 1137.0,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 10 entries dated 1999.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 10 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2000,
+   "usd_per_gb": 1003.0,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 12 entries dated 2000.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 12 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2001,
+   "usd_per_gb": 303.6,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 12 entries dated 2001.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 12 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2002,
+   "usd_per_gb": 198.9,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 7 entries dated 2002.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 7 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2003,
+   "usd_per_gb": 138.3,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 7 entries dated 2003.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 7 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2004,
+   "usd_per_gb": 166.0,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 6 entries dated 2004.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 6 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2005,
+   "usd_per_gb": 156.0,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 4 entries dated 2005.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 4 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2006,
+   "usd_per_gb": 86.71,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 7 entries dated 2006.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 7 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2007,
+   "usd_per_gb": 42.86,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 9 entries dated 2007.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 9 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2008,
+   "usd_per_gb": 16.99,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 8 entries dated 2008.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 8 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2009,
+   "usd_per_gb": 12.7,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 8 entries dated 2009.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 8 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2010,
+   "usd_per_gb": 18.51,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 9 entries dated 2010.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 9 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2011,
+   "usd_per_gb": 7.889,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 6 entries dated 2011.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 6 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2012,
+   "usd_per_gb": 4.572,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 7 entries dated 2012.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 7 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2013,
+   "usd_per_gb": 6.631,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 9 entries dated 2013.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 9 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2014,
+   "usd_per_gb": 8.275,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 7 entries dated 2014.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 7 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2015,
+   "usd_per_gb": 5.055,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 10 entries dated 2015.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 10 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2016,
+   "usd_per_gb": 3.424,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 9 entries dated 2016.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 9 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2017,
+   "usd_per_gb": 5.889,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 8 entries dated 2017.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 8 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2018,
+   "usd_per_gb": 6.065,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 9 entries dated 2018.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 9 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2019,
+   "usd_per_gb": 3.335,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 12 entries dated 2019.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 12 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2020,
+   "usd_per_gb": 3.045,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 12 entries dated 2020.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 12 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2021,
+   "usd_per_gb": 3.383,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 8 entries dated 2021.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 8 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2022,
+   "usd_per_gb": 2.528,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 11 entries dated 2022.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 11 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2023,
+   "usd_per_gb": 1.539,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 9 entries dated 2023.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 9 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": ""
+  },
+  {
+   "year": 2024,
+   "usd_per_gb": 1.585,
+   "src": "mccallum",
+   "loc": "jcmit memoryprice table, col 'date (X)'/'$/Mbyte (Y)', 5 entries dated 2024.xx",
+   "tag": "S",
+   "unc": "derived: geometric mean of 5 dated entries x 1000 MB/GB (nominal USD, not CPI-adjusted)",
+   "note": "partial year (data to 2024.50)"
+  }
+ ],
+ "fits": [
+  {
+   "period": "pre-2010 (full-history fit)",
+   "rate_pct_per_yr": -36,
+   "dataset": "McCallum",
+   "src": "aiimpacts",
+   "loc": "Analysis para 1",
+   "tag": "S",
+   "unc": "exact (as published)",
+   "note": "10x every 5.1 yr; CPI-adjusted 2020 USD"
+  },
+  {
+   "period": "2010 onwards",
+   "rate_pct_per_yr": -15,
+   "dataset": "McCallum",
+   "src": "aiimpacts",
+   "loc": "Analysis para 3",
+   "tag": "S",
+   "unc": "exact (as published)",
+   "note": "10x every 14 yr"
+  },
+  {
+   "period": "pre-2010 (full-history fit)",
+   "rate_pct_per_yr": -33,
+   "dataset": "Objective Analysis",
+   "src": "aiimpacts",
+   "loc": "Analysis para 1",
+   "tag": "S",
+   "unc": "exact (as published)",
+   "note": "10x every 5.8 yr; data digitised by AI Impacts from a Jim Handy graph (WebPlotDigitizer)"
+  },
+  {
+   "period": "2010 onwards",
+   "rate_pct_per_yr": -12,
+   "dataset": "Objective Analysis",
+   "src": "aiimpacts",
+   "loc": "Analysis para 3",
+   "tag": "S",
+   "unc": "exact (as published)",
+   "note": "10x every 18.5 yr"
+  }
+ ],
+ "break_year": "2010-2011",
+ "break_note": "AI Impacts splits at 2010; Handy (Memory Guy, 2019-11-20) says 'about 2011 or so' (via notes/q3, not re-read).",
+ "extraction": {
+  "agent_a": "n/a",
+  "agent_b": "extractor B, blind; parsed McCallum table from Wayback HTML",
+  "method": "table parse, no chart reads",
+  "cross_check": {
+   "max_disagreement": "pending",
+   "resolved": "pending"
+  }
+ },
+ "caveats": [
+  "Live jcmit.net returned an unrelated (casino spam) page to curl on 2026-10-03; series taken from a Wayback capture of the genuine page, which ends mid-2024. No 2025-2026 points, so the 2026 price spike is not shown.",
+  "Series is nominal USD; AI Impacts fits are on CPI-adjusted 2020 USD. Our own OLS on the individual dated entries (nominal, log-linear): {\"1991-2009\": -38.4, \"2010-2024.5\": -12.3, \"1991-2024.5\": -28.6} %/yr, shown only as a sanity check, not for the slide; they differ from the published fits (different fit window/deflator).",
+  "The 2010+ series is non-monotonic (rise 2012-2014, 2016-2018, 2021) and the post-2010 fits are averages.",
+  "Objective Analysis data are not independently available; AI Impacts notes they may share sources with McCallum.",
+  "$/GB uses 1000 MB/GB; 1024 would raise every value 2.4%."
+ ]
+}
