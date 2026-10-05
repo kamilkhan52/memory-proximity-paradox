@@ -33,4 +33,4 @@ The source PDFs, vendor decks and saved articles used for the study are **not** 
 
 ## How it was made
 
-Produced with Claude Code using an orchestrator plus sub-agents per sub-question, followed by adversarial review rounds until the synthesis survived; the deck and report were built one slide per agent with independent accuracy, narrative and visual reviewers. Content reflects sources available as of October 2026.
+Produced with Claude Code and the skills in [claude-research-skills](https://github.com/kamilkhan52/claude-research-skills), using an orchestrator plus sub-agents per sub-question, followed by adversarial review rounds until the synthesis survived; the deck and report were built one slide per agent with independent accuracy, narrative and visual reviewers. Content reflects sources available as of October 2026.
